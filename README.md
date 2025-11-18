@@ -8,5 +8,5 @@ python3 /workspaces/maxsold/scrapers/maxsold_bid_history.py "https://maxsold.com
 
 
 ```
-python3 /workspaces/maxsold/scrapers/maxsold_auction_metadata.py "https://maxsold.com/auction/103482/date-times"
+python3 /workspaces/maxsold/scrapers/maxsold_auction_metadata.py "https://maxsold.com/auction/103482/date-times" ./auction_103482.json
 ```
