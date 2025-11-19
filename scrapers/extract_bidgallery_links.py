@@ -1,6 +1,7 @@
 import re
 import json
 import os
+import csv
 from typing import List
 from urllib.parse import urljoin, urlparse
 
@@ -38,6 +39,32 @@ def save_links(links: List[str], out_path: str) -> None:
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
+
+def extract_listing_ids(links: List[str]) -> List[str]:
+    """Return listing IDs extracted from URLs.
+
+    IDs are numeric and are expected to appear in the URL as
+    `/item/<id>` (optionally followed by query params like `?offset=`).
+    """
+    ids = []
+    for u in links:
+        m = re.search(r"/item/(\d+)", u)
+        if m:
+            ids.append(m.group(1))
+    return ids
+
+
+def save_ids(links: List[str], out_csv: str) -> None:
+    """Write listing IDs and their source URL to a CSV file."""
+    os.makedirs(os.path.dirname(out_csv) or ".", exist_ok=True)
+    with open(out_csv, "w", encoding="utf-8", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["listing_id", "url"])
+        for u in links:
+            m = re.search(r"/item/(\d+)", u)
+            if m:
+                writer.writerow([m.group(1), u])
+
 if __name__ == "__main__":
     import sys
     url = sys.argv[1] if len(sys.argv) > 1 else "https://maxsold.com/auction/103482/bidgallery"
@@ -51,5 +78,9 @@ if __name__ == "__main__":
 
     save_links(links, out_file)
     print(f"Saved {len(links)} links -> {out_file}")
+    # also write listing IDs to CSV next to the JSON file
+    csv_out = os.path.splitext(out_file)[0] + ".csv"
+    save_ids(links, csv_out)
+    print(f"Saved listing IDs -> {csv_out}")
     if len(links) != 72:
         print(f"Warning: expected 72 links but found {len(links)}")
