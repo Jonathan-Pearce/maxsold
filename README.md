@@ -39,5 +39,11 @@ TBL_BIDS
 - columns: ID, LISTING_ID, BID_ID, BID_DATE, BID_AMOUNT
 
 Other Considerations
--Currency
--
+- Currency
+
+
+
+## URLs
+
+- https://api.maxsold.com/places/address?address=toronto,+ontario,+canada
+- https://api.maxsold.com/sales/search?lat=43.653226&lng=-79.3831843&radiusMetres=201168&country=canada&pageNumber=0&limit=24&saleState=closed&days=90&total=true
