@@ -1,6 +1,7 @@
 import re
 import json
 import os
+import csv
 from typing import List
 from urllib.parse import urljoin, urlparse
 
@@ -41,6 +42,27 @@ def extract_auction_links(html: str, base_url: str) -> List[str]:
             out.append(normalized)
     return out
 
+def extract_auction_ids(links: List[str]) -> List[str]:
+    ids = []
+    seen = set()
+    for l in links:
+        m = re.search(r"/auction/(\d+)/bidgallery", l)
+        if not m:
+            continue
+        aid = m.group(1)
+        if aid not in seen:
+            seen.add(aid)
+            ids.append(aid)
+    return sorted(ids, key=lambda x: int(x))
+
+def save_csv_auction_ids(auction_ids: List[str], out_path: str) -> None:
+    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
+    with open(out_path, "w", encoding="utf-8", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["AUCTION_ID"])
+        for aid in auction_ids:
+            writer.writerow([aid])
+
 def save_json(links: List[str], out_path: str) -> None:
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
     with open(out_path, "w", encoding="utf-8") as f:
@@ -49,11 +71,12 @@ def save_json(links: List[str], out_path: str) -> None:
 if __name__ == "__main__":
     import sys
     url = sys.argv[1] if len(sys.argv) > 1 else TORONTO_PAST_URL
-    out_file = sys.argv[2] if len(sys.argv) > 2 else "toronto_past_auctions.json"
+    out_file = sys.argv[2] if len(sys.argv) > 2 else "toronto_past_auctions.csv"
     try:
         html = fetch(url)
         links = extract_auction_links(html, url)
-        save_json(links, out_file)
-        print(f"Saved {len(links)} links -> {out_file}")
+        auction_ids = extract_auction_ids(links)
+        save_csv_auction_ids(auction_ids, out_file)
+        print(f"Saved {len(auction_ids)} auction ids -> {out_file}")
     except Exception as e:
         print("Error:", e)
