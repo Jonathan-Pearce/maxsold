@@ -1,0 +1,351 @@
+{
+  "data": [
+    {
+      "saleEntityId": "sale_01jqrhc3bhez6agbfz9wsae1q9",
+      "amAuctionId": 97952,
+      "title": "Yorkville (Ontario, Canada) SELLER MANAGED Estate Sale Online Auction - Yonge Street (CONDO)",
+      "displayRegion": "GTA",
+      "distanceMeters": 29225,
+      "saleType": "sellerManaged",
+      "saleCategory": "Estate Sale",
+      "openTime": "2025-04-14T21:00:00Z",
+      "closeTime": "2025-04-24T00:45:00Z",
+      "totalBids": 4867,
+      "numberLots": 225,
+      "images": [
+        "http://images.maxsold.com/versace-medusa-green-glass-bottle-stopper-33522234.jpg",
+        "http://images.maxsold.com/mcm-eigil-petersens-danish-desk--vintage-33537347.jpeg",
+        "http://images.maxsold.com/antique-wood-chest-of-drawers-33522983.jpg",
+        "http://images.maxsold.com/eduardo-gaya-original-enamel-tile-33521475.jpg",
+        "http://images.maxsold.com/s-kingsmill-original-painting-33523129.jpg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "Toronto",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 43.673391,
+          "lng": -79.388041,
+          "Lat": 43.673391,
+          "Lng": -79.388041
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01jqcegf2pf6c8s90t8hyzpy3g",
+      "amAuctionId": 97832,
+      "title": "Whitby (Ontario, Canada) PARTNER MANAGED Downsizing Online Auction - Philips Road",
+      "displayRegion": "GTA",
+      "distanceMeters": 44196,
+      "saleType": "sellerManaged",
+      "saleCategory": "Downsizing",
+      "openTime": "2025-04-14T21:00:00Z",
+      "closeTime": "2025-04-24T00:30:00Z",
+      "totalBids": 1495,
+      "numberLots": 163,
+      "images": [
+        "http://images.maxsold.com/vintage-road-king-36-wooden-wagon-33340061.jpg",
+        "http://images.maxsold.com/mastercraft-air-powered-clipper-head-framing-nailer-in-carrying-case--33340567.jpg",
+        "http://images.maxsold.com/2-vintage-wittnauer-wrist-watch-manual-wind-33454219.jpeg",
+        "http://images.maxsold.com/antique-vintage-buck-bow-saw-27-33340057.jpg",
+        "http://images.maxsold.com/assorted-firearm-cleaning-materials-and-accessories-33340553.jpg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "Whitby",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 43.9320509,
+          "lng": -78.9945687,
+          "Lat": 43.9320509,
+          "Lng": -78.9945687
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01jnpbj3eqfrpvc3dbkr38w2aq",
+      "amAuctionId": 97327,
+      "title": "Hamilton (Ontario, Canada) SELLER MANAGED Estate Sale Online Auction - King Street East",
+      "displayRegion": "Horseshoe",
+      "distanceMeters": 63314,
+      "saleType": "sellerManaged",
+      "saleCategory": "Estate Sale",
+      "openTime": "2025-04-12T21:00:00Z",
+      "closeTime": "2025-04-24T00:30:00Z",
+      "totalBids": 1992,
+      "numberLots": 142,
+      "images": [
+        "http://images.maxsold.com/nahavand-persian-rug-33489617.jpg",
+        "http://images.maxsold.com/early-concrete-gnomes-33489539.jpg",
+        "http://images.maxsold.com/cast-iron-garden-bench-and-chair-33489529.jpg",
+        "http://images.maxsold.com/centennial-silver-quarters-33489557.jpg",
+        "http://images.maxsold.com/book-of-postage-stamps-33490264.jpg",
+        "http://images.maxsold.com/shelley-cup-and-saucer-33489633.jpg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "Dundas",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 43.26650890000001,
+          "lng": -79.9568685,
+          "Lat": 43.26650890000001,
+          "Lng": -79.9568685
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01jpmz6v04epn9w46txqr493ge",
+      "amAuctionId": 97607,
+      "title": "Hamilton (Ontario, Canada) SELLER MANAGED Moving Online Auction - Summerberry Way",
+      "displayRegion": "Horseshoe",
+      "distanceMeters": 64953,
+      "saleType": "sellerManaged",
+      "saleCategory": "Moving",
+      "openTime": "2025-04-12T21:00:00Z",
+      "closeTime": "2025-04-24T00:15:00Z",
+      "totalBids": 723,
+      "numberLots": 77,
+      "images": [
+        "http://images.maxsold.com/vintage-hand-painted-kutani-porcelain-tea-set-geisha-scene-gold-trim-33419884.jpg",
+        "http://images.maxsold.com/baby-lot-33419769.jpg",
+        "http://images.maxsold.com/dining-room-table-and-chairs-with-leaf-insert-33419722.jpg",
+        "http://images.maxsold.com/48in-sony-bravia-tv-sound-bar-speaker--33419737.jpg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "Hamilton",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 43.2075434,
+          "lng": -79.8996789,
+          "Lat": 43.2075434,
+          "Lng": -79.8996789
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01jn96e9e4fqmvvz2fmgy37r43",
+      "amAuctionId": 97211,
+      "title": "Toronto (Ontario, Canada) SELLER MANAGED Downsizing Online Auction - Weston Road",
+      "displayRegion": "GTA",
+      "distanceMeters": 7657,
+      "saleType": "sellerManaged",
+      "saleCategory": "Downsizing",
+      "openTime": "2025-04-14T21:00:00Z",
+      "closeTime": "2025-04-24T00:15:00Z",
+      "totalBids": 567,
+      "numberLots": 62,
+      "images": [
+        "http://images.maxsold.com/antique-dining-table-33528469.jpg",
+        "http://images.maxsold.com/dog-crate-and-accessories-33528592.jpg",
+        "http://images.maxsold.com/interior-design-reference-books-33528691.jpg",
+        "http://images.maxsold.com/nancy-drew-novels-33528646.jpg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "Toronto",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 43.677991,
+          "lng": -79.4717795,
+          "Lat": 43.677991,
+          "Lng": -79.4717795
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01jr6hcwvpeg2917y9grrj7gg3",
+      "amAuctionId": 98084,
+      "title": "London (Ontario, Canada) SELLER MANAGED Estate Sale Online Auction - Windsor Avenue",
+      "displayRegion": "London",
+      "distanceMeters": 168401,
+      "saleType": "sellerManaged",
+      "saleCategory": "Estate Sale",
+      "openTime": "2025-04-17T21:00:00Z",
+      "closeTime": "2025-04-24T00:00:00Z",
+      "totalBids": 1228,
+      "numberLots": 124,
+      "images": [
+        "http://images.maxsold.com/vintage-small-square-table-33574899.jpg",
+        "http://images.maxsold.com/mccoy-pottery-3-33574257.jpg",
+        "http://images.maxsold.com/husky-themed-soap-stone-carvings.--33574463.jpg",
+        "http://images.maxsold.com/niagara-falls-table-lamp-33575034.jpg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "London",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 42.9681738,
+          "lng": -81.24912979999999,
+          "Lat": 42.9681738,
+          "Lng": -81.24912979999999
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01jqvxh0xde8jb1qfnh5b7rnxy",
+      "amAuctionId": 97994,
+      "title": "Brighton (Ontario, Canada) PARTNER MANAGED Downsizing Online Auction - Fiddick Road,",
+      "displayRegion": "Peterborough",
+      "distanceMeters": 133705,
+      "saleType": "sellerManaged",
+      "saleCategory": "Downsizing",
+      "openTime": "2025-04-16T21:00:00Z",
+      "closeTime": "2025-04-24T00:00:00Z",
+      "totalBids": 2539,
+      "numberLots": 212,
+      "images": [
+        "http://images.maxsold.com/antique-dough-box-33435622.jpeg",
+        "http://images.maxsold.com/1939-buick-mclaughlin--project-car-vin-9441903762.-w3692782.-33436420.jpeg",
+        "http://images.maxsold.com/small-desk-with-hutch-33435706.jpeg",
+        "http://images.maxsold.com/collectible-roseville-bowl-pottery-33436236.jpeg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "Brighton",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 44.072799,
+          "lng": -77.737947,
+          "Lat": 44.072799,
+          "Lng": -77.737947
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01jqm6aqyyf44s4f938w1f90j2",
+      "amAuctionId": 97896,
+      "title": "Markham (Ontario, Canada) SELLER MANAGED Moving Online Auction -  Bur Oak Avenue",
+      "displayRegion": "GTA",
+      "distanceMeters": 28213,
+      "saleType": "sellerManaged",
+      "saleCategory": "Moving",
+      "openTime": "2025-04-12T21:00:00Z",
+      "closeTime": "2025-04-24T00:00:00Z",
+      "totalBids": 249,
+      "numberLots": 77,
+      "images": [
+        "http://images.maxsold.com/royal-crown-derby-chatsworth-tea-set-33300729.jpg",
+        "http://images.maxsold.com/bond-boyd-sterling-silver-pin-33463842.jpg",
+        "http://images.maxsold.com/vintage-vanity-set-needlepoint--33451709.jpg",
+        "http://images.maxsold.com/antique-capodimonte-table-lamp-33451805.jpg",
+        "http://images.maxsold.com/crotche-bag-33450081.jpg",
+        "http://images.maxsold.com/new-lego-1-aimubot-33421975.jpg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "Markham",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 43.899227,
+          "lng": -79.273304,
+          "Lat": 43.899227,
+          "Lng": -79.273304
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01jpbfxxygfxea55zd48ygjdaj",
+      "amAuctionId": 97528,
+      "title": "King (Ontario, Canada) PARTNER MANAGED Estate Sale Online Auction - Weston Road",
+      "displayRegion": "GTA",
+      "distanceMeters": 25829,
+      "saleType": "sellerManaged",
+      "saleCategory": "Estate Sale",
+      "openTime": "2025-04-12T21:00:00Z",
+      "closeTime": "2025-04-24T00:00:00Z",
+      "totalBids": 1857,
+      "numberLots": 154,
+      "images": [
+        "http://images.maxsold.com/10k-white-gold-ring-with-blue-gemstones-33455670.jpeg",
+        "http://images.maxsold.com/antique-sterling-kilt-pin-33455631.jpg",
+        "http://images.maxsold.com/blue-cut-glass-bowls-33455056.jpeg",
+        "http://images.maxsold.com/james-kent-old-foley-dubarry-1-pint-pitcher-33454917.jpg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "King",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 43.8467356,
+          "lng": -79.5610728,
+          "Lat": 43.8467356,
+          "Lng": -79.5610728
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01jkdp5w0xeprby8em8vdjpr28",
+      "amAuctionId": 96720,
+      "title": "Hamilton (Ontario, Canada) SELLER MANAGED Downsizing Online Auction - Bridgman Lane",
+      "displayRegion": "Horseshoe",
+      "distanceMeters": 53543,
+      "saleType": "sellerManaged",
+      "saleCategory": "Downsizing",
+      "openTime": "2025-04-12T21:00:00Z",
+      "closeTime": "2025-04-24T00:00:00Z",
+      "totalBids": 1207,
+      "numberLots": 120,
+      "images": [
+        "http://images.maxsold.com/antique-motion-lamp-33393055.jpg",
+        "http://images.maxsold.com/mats-jonasson-lead-crystal-elephant-33393183.jpg",
+        "http://images.maxsold.com/vintage-donald-duck-nodder-33393753.jpg",
+        "http://images.maxsold.com/vintage-tin-robot-toy-33393246.jpg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "Hamilton",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 43.2299508,
+          "lng": -79.7295647,
+          "Lat": 43.2299508,
+          "Lng": -79.7295647
+        }
+      },
+      "hasShipping": false
+    }
+  ],
+  "total": 1906
+}

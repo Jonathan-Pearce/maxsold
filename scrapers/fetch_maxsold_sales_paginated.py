@@ -14,7 +14,7 @@ HEADERS = {
 BASE_URL = (
     "https://api.maxsold.com/sales/search?"
     "lat=43.653226&lng=-79.3831843&radiusMetres=201168&country=canada"
-    "&pageNumber=0&limit=24&saleState=closed&days=90&total=true"
+    "&pageNumber=0&limit=24&saleState=closed&days=180&total=true"
 )
 
 
@@ -116,6 +116,6 @@ if __name__ == "__main__":
     
     # Allow custom URL as first argument
     url = sys.argv[1] if len(sys.argv) > 1 else BASE_URL
-    data_dir = sys.argv[2] if len(sys.argv) > 2 else "data"
+    data_dir = sys.argv[2] if len(sys.argv) > 2 else "data/auction/raw_json"
     
     scrape_sales_api(url, data_dir)
