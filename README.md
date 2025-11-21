@@ -61,4 +61,17 @@ Other Considerations
 
 ## TODOs
 
-manually backfilling data with iterative auction ID and location comparison
+manually backfilling data with iterative auction ID and location comparison 
+
+# Notes
+
+There is an API for item listings!
+https://maxsold.maxsold.com/msapi/auctions/items?auctionid=103293&limit=72&offset=72&sort=bid_count&hideclosed=0&sort_direction=descending
+
+https://maxsold.maxsold.com/msapi/auctions/items?auctionid=103293
+
+https://maxsold.maxsold.com/msapi/auctions/items?auctionid=103293&itemid=7433915
+
+https://api.maxsold.com/listings/am/7433915/enriched
+
+https://maxsold.maxsold.com/msapi/auctions/items?auctionid=103293&itemid=7433850
