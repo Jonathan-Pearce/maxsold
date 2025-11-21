@@ -47,3 +47,18 @@ Other Considerations
 
 - https://api.maxsold.com/places/address?address=toronto,+ontario,+canada
 - https://api.maxsold.com/sales/search?lat=43.653226&lng=-79.3831843&radiusMetres=201168&country=canada&pageNumber=0&limit=24&saleState=closed&days=90&total=true
+
+
+## Old Auctions
+
+- https://maxsold.com/auction/100070/bidgallery?offset=144
+- link works as of Thursday November 20 2025
+
+- https://maxsold.com/auction/99395/bidgallery
+- link works as of Thursday November 20 2025
+
+
+
+## TODOs
+
+manually backfilling data with iterative auction ID and location comparison
