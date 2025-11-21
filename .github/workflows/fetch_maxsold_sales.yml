@@ -1,5 +1,9 @@
 name: Fetch MaxSold Sales Data
 
+# grant the workflow permission to write files (allows GITHUB_TOKEN to push)
+permissions:
+  contents: write
+
 on:
   schedule:
     # Run on the 1st day of every 3 months (Jan 1, Apr 1, Jul 1, Oct 1) at 2:00 AM UTC
