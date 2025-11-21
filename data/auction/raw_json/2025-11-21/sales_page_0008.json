@@ -1,0 +1,821 @@
+{
+  "data": [
+    {
+      "saleEntityId": "sale_01k7tnxmqwekkspxrjxme280d1",
+      "amAuctionId": 102894,
+      "title": "Toronto (Ontario, Canada) PARTNER MANAGED Reseller Online Auction - Railside Road",
+      "displayRegion": "GTA",
+      "distanceMeters": 10874,
+      "saleType": "sellerManaged",
+      "saleCategory": "Reseller",
+      "openTime": "2025-10-29T21:00:00Z",
+      "closeTime": "2025-11-07T00:20:00Z",
+      "totalBids": 1236,
+      "numberLots": 87,
+      "images": [
+        "http://images.maxsold.com/dramatic-antique-cast-iron-stag-elk-reindeer-doorstop-sculpture-11-tall-37311339.jpeg",
+        "http://images.maxsold.com/standing-nude-lady-art-deco-style-table-lamp-stained-glass-shade-works-fine-13-tall-37311369.jpeg",
+        "http://images.maxsold.com/vintage-cased-jupiter-trumpet-7c-mouthpiece-37311536.jpeg",
+        "http://images.maxsold.com/lovely-art-deco-style-sleeping-lady-oil-painting-on-canvas-artist-signed-20-37311438.jpeg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "Toronto",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 43.7332536,
+          "lng": -79.3183887,
+          "Lat": 43.7332536,
+          "Lng": -79.3183887
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01k63pykdmfqdazmykv2xngsdb",
+      "amAuctionId": 102332,
+      "title": "Toronto (Ontario, Canada) SELLER MANAGED Downsizing Online Auction - Scrivener Square (CONDO)",
+      "displayRegion": "GTA",
+      "distanceMeters": 3151,
+      "saleType": "sellerManaged",
+      "saleCategory": "Downsizing",
+      "openTime": "2025-10-28T21:00:00Z",
+      "closeTime": "2025-11-07T00:15:00Z",
+      "totalBids": 2871,
+      "numberLots": 129,
+      "images": [
+        "http://images.maxsold.com/antique-1800s-mahogany-wellington-captains-secretaire-chest--7-drawer--37293315.jpg",
+        "http://images.maxsold.com/original-oil-on-board-signed-fraser-thomson-brother-to-tom-thomson-landscape-painting--37293286.jpg",
+        "http://images.maxsold.com/vintage-large-hand-made-poss-persian-rug-carpet-12-x-8-purchased-at-liberty-of-london-rugs-carpets-london-uk-37293432.jpg",
+        "http://images.maxsold.com/antique-limoges-style-porcelain-gold-lace-trim-trinket-box-37293476.jpg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "Toronto",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 43.6840738,
+          "lng": -79.3727107,
+          "Lat": 43.6840738,
+          "Lng": -79.3727107
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01k5ms5k8fej28494bcqxrcevg",
+      "amAuctionId": 102188,
+      "title": "Newmarket (Ontario, Canada) SELLER MANAGED Downsizing Online Auction - Amberlee Court",
+      "displayRegion": "GTA",
+      "distanceMeters": 44606,
+      "saleType": "sellerManaged",
+      "saleCategory": "Downsizing",
+      "openTime": "2025-10-31T21:00:00Z",
+      "closeTime": "2025-11-07T00:15:00Z",
+      "totalBids": 2109,
+      "numberLots": 135,
+      "images": [
+        "http://images.maxsold.com/gilt-brass-rococo-style-mirror-37348571.png",
+        "http://images.maxsold.com/pair-of-gilt-brass-wall-sconces--37348575.png",
+        "http://images.maxsold.com/oil-painting--37348988.png",
+        "http://images.maxsold.com/vintage-graflex-crown-camera--37348650.png"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "Newmarket",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 44.045125,
+          "lng": -79.500127,
+          "Lat": 44.045125,
+          "Lng": -79.500127
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01k8rn882senrtkmfakxjmtzj9",
+      "amAuctionId": 103242,
+      "title": "Toronto (Ontario, Canada) SELLER MANAGED Downsizing Online Auction - Jane Street  (STORAGE)",
+      "displayRegion": "GTA",
+      "distanceMeters": 8992,
+      "saleType": "sellerManaged",
+      "saleCategory": "Downsizing",
+      "openTime": "2025-10-31T21:00:00Z",
+      "closeTime": "2025-11-07T00:00:00Z",
+      "totalBids": 407,
+      "numberLots": 39,
+      "images": [
+        "http://images.maxsold.com/6-boxes-brand-new-funko-toys--37345091.jpeg",
+        "http://images.maxsold.com/numark-party-dj-mix-brand-new-37345175.jpeg",
+        "http://images.maxsold.com/travel-suitcase-good-condition--37345177.jpeg",
+        "http://images.maxsold.com/10-boxes-of-funko-toys-brand-new--37345080.jpeg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "Toronto",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 43.6721295,
+          "lng": -79.4886679,
+          "Lat": 43.6721295,
+          "Lng": -79.4886679
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01k7za3ypre1xvxcbssa8a0n53",
+      "amAuctionId": 102930,
+      "title": "Markham (Ontario, Canada) SELLER MANAGED Downsizing Online Auction - Loring Crescent",
+      "displayRegion": "GTA",
+      "distanceMeters": 25035,
+      "saleType": "sellerManaged",
+      "saleCategory": "Downsizing",
+      "openTime": "2025-10-28T21:00:00Z",
+      "closeTime": "2025-11-07T00:00:00Z",
+      "totalBids": 2358,
+      "numberLots": 191,
+      "images": [
+        "http://images.maxsold.com/antique-10k-yellow-gold-ring-with-pearl-37279812.jpeg",
+        "http://images.maxsold.com/vintage-signed-still-life-oil-painting-37280853.jpeg",
+        "http://images.maxsold.com/heriz-handmade-wool-area-rug-37280944.jpeg",
+        "http://images.maxsold.com/swarovski-horse-figurine-in-box-37281118.jpeg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "Markham",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 43.869899,
+          "lng": -79.301763,
+          "Lat": 43.869899,
+          "Lng": -79.301763
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01k8gn4vjfeerthqc9t8rgdw89",
+      "amAuctionId": 103121,
+      "title": "Toronto (Ontario, Canada) PARTNER MANAGED Reseller Online Auction - Queen Street West",
+      "displayRegion": "GTA",
+      "distanceMeters": 5156,
+      "saleType": "sellerManaged",
+      "saleCategory": "Reseller",
+      "openTime": "2025-10-30T21:00:00Z",
+      "closeTime": "2025-11-06T02:00:00Z",
+      "totalBids": 802,
+      "numberLots": 93,
+      "images": [
+        "http://images.maxsold.com/2x-toronto-argos-cfl-table-lamps-37327557.jpeg",
+        "http://images.maxsold.com/herbie-hancock-head-hunters-12-lp-record-album-37327448.jpg",
+        "http://images.maxsold.com/toronto-blue-jays-baseball-cards-lot-dave-stieb-jimmy-key-37327067.jpeg",
+        "http://images.maxsold.com/framed-nancy-noel-print-with-embossed-paper-seal-artist-certificateprint-37327111.jpg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "Toronto",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 43.638092,
+          "lng": -79.4318103,
+          "Lat": 43.638092,
+          "Lng": -79.4318103
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01k77fc3jsfw1vqazqnvqbwvv3",
+      "amAuctionId": 102681,
+      "title": "St. Catharines (Ontario, Canada) SELLER MANAGED Estate Sale Online Auction - Drury Crescent",
+      "displayRegion": "GTA",
+      "distanceMeters": 54463,
+      "saleType": "sellerManaged",
+      "saleCategory": "Estate Sale",
+      "openTime": "2025-10-29T21:00:00Z",
+      "closeTime": "2025-11-06T02:00:00Z",
+      "totalBids": 660,
+      "numberLots": 92,
+      "images": [
+        "http://images.maxsold.com/sports-cards-37276870.jpeg",
+        "http://images.maxsold.com/playstation-3-ceche01--37276913.jpeg",
+        "http://images.maxsold.com/coin-collection-37276937.jpeg",
+        "http://images.maxsold.com/mega-pokemon-grass-type-trainer-team-building-set--37276959.jpeg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "St. Catharines",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 43.1998378,
+          "lng": -79.2169174,
+          "Lat": 43.1998378,
+          "Lng": -79.2169174
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01k8604rfpew3vbfa1smydks49",
+      "amAuctionId": 103027,
+      "title": "St. Catharines (Ontario, Canada) SELLER MANAGED Downsizing Online Auction - Woodgarden Court",
+      "displayRegion": "GTA",
+      "distanceMeters": 50321,
+      "saleType": "sellerManaged",
+      "saleCategory": "Downsizing",
+      "openTime": "2025-10-25T21:00:00Z",
+      "closeTime": "2025-11-06T01:45:00Z",
+      "totalBids": 546,
+      "numberLots": 73,
+      "images": [
+        "http://images.maxsold.com/antique-singer-sewing-machine-g5112111-with-cast-iron-treadle-table-37230743.jpg",
+        "http://images.maxsold.com/massive-lot-of-over-200-vintage-sewing-patterns-from-1940s-to-1980s-37230695.jpeg",
+        "http://images.maxsold.com/10-vintage-glass-and-porcelain-insulators-37230651.jpeg",
+        "http://images.maxsold.com/iphones-mac-keyboards-other-apple-accessories-37230818.jpg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "St. Catharines",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 43.21685730000001,
+          "lng": -79.2197376,
+          "Lat": 43.21685730000001,
+          "Lng": -79.2197376
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01k80n216wf1csr5rhybakc14d",
+      "amAuctionId": 102942,
+      "title": "Whitchurch-Stouffville (Ontario, Canada) PARTNER MANAGED Moving Online Auction - Flint Crescent",
+      "displayRegion": "GTA",
+      "distanceMeters": 37172,
+      "saleType": "sellerManaged",
+      "saleCategory": "Moving",
+      "openTime": "2025-10-26T21:00:00Z",
+      "closeTime": "2025-11-06T01:30:00Z",
+      "totalBids": 594,
+      "numberLots": 72,
+      "images": [
+        "http://images.maxsold.com/gas-mower-37205265.jpg",
+        "http://images.maxsold.com/decorative-mirror-37205002.jpeg",
+        "http://images.maxsold.com/pine-dresser-37204930.jpg",
+        "http://images.maxsold.com/vintage-royal-doulton-dish-set-37204909.jpeg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "Whitchurch-Stouffville",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 43.970268,
+          "lng": -79.232879,
+          "Lat": 43.970268,
+          "Lng": -79.232879
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01k46r9v5behesdcxfxm4kxkcv",
+      "amAuctionId": 101694,
+      "title": "North Middlesex (Ontario, Canada) SELLER MANAGED Downsizing Online Auction - Parkhill Richmond Street",
+      "displayRegion": "London",
+      "distanceMeters": 194099,
+      "saleType": "sellerManaged",
+      "saleCategory": "Downsizing",
+      "openTime": "2025-10-31T21:00:00Z",
+      "closeTime": "2025-11-06T01:30:00Z",
+      "totalBids": 310,
+      "numberLots": 75,
+      "images": [
+        "http://images.maxsold.com/mcm-hollywood-regency-wall-clock-gold-gilded--37350399.jpeg",
+        "http://images.maxsold.com/vintage-costume-jewelry-fragrances-padded-hangers-purse-curling-irons-bandanas-37351079.jpeg",
+        "http://images.maxsold.com/vintage-large-mahogany-leather-top-drum-table-wbrass-claw-feet-circa-1940s-37350452.jpeg",
+        "http://images.maxsold.com/vintage-polaroid-canon-powershot-a570-digital-camera-coolpix-nikon--37350365.jpg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "North Middlesex",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 43.197067,
+          "lng": -81.60608,
+          "Lat": 43.197067,
+          "Lng": -81.60608
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01k896jswvfmrv7ereqy31ztfm",
+      "amAuctionId": 103058,
+      "title": "Hamilton (Ontario, Canada) SELLER MANAGED Moving Online Auction - Moffat Road",
+      "displayRegion": "Horseshoe",
+      "distanceMeters": 60436,
+      "saleType": "sellerManaged",
+      "saleCategory": "Moving",
+      "openTime": "2025-10-29T21:00:00Z",
+      "closeTime": "2025-11-06T01:15:00Z",
+      "totalBids": 3100,
+      "numberLots": 443,
+      "images": [
+        "http://images.maxsold.com/kenneth-cole-mens-dress-shoes-10.5-37297863.jpeg",
+        "http://images.maxsold.com/lot-of-pokemon-cards-37297195.jpeg",
+        "http://images.maxsold.com/new-light-up-house-statue-37296954.jpeg",
+        "http://images.maxsold.com/fifth-avenue-heart-earrings-37297312.jpeg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "Hamilton",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 43.26650890000001,
+          "lng": -79.9568685,
+          "Lat": 43.26650890000001,
+          "Lng": -79.9568685
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01k865tx10f47sxjyhfmfbwbex",
+      "amAuctionId": 103034,
+      "title": "Grey Highlands (Ontario, Canada) SELLER MANAGED Reseller Online Auction -   Pellisier Street",
+      "displayRegion": "Barrie",
+      "distanceMeters": 117057,
+      "saleType": "sellerManaged",
+      "saleCategory": "Reseller",
+      "openTime": "2025-10-28T21:00:00Z",
+      "closeTime": "2025-11-06T01:15:00Z",
+      "totalBids": 120,
+      "numberLots": 48,
+      "images": [
+        "http://images.maxsold.com/framed-lithograph-of-canada-goose-16-x-20-in-37267537.jpeg",
+        "http://images.maxsold.com/framed-original-portrait-painting-of-a-woman-24-x-20-in-37267522.jpeg",
+        "http://images.maxsold.com/framed-covered-bridge-landscape-by-i.-mickolwin-ornate-gilt-frame-37267555.jpeg",
+        "http://images.maxsold.com/swarovski-butterfly-jewelry-set-pendant-stud-earrings-37267524.jpeg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "Grey Highlands",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 44.262075,
+          "lng": -80.550363,
+          "Lat": 44.262075,
+          "Lng": -80.550363
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01k7y8bb51ff2r8nhyswawaft7",
+      "amAuctionId": 102913,
+      "title": "London (Ontario, Canada) PARTNER MANAGED Downsizing Online Auction - Jack Nash Drive",
+      "displayRegion": "London",
+      "distanceMeters": 176642,
+      "saleType": "sellerManaged",
+      "saleCategory": "Downsizing",
+      "openTime": "2025-10-29T21:00:00Z",
+      "closeTime": "2025-11-06T01:15:00Z",
+      "totalBids": 1699,
+      "numberLots": 149,
+      "images": [
+        "http://images.maxsold.com/dresser-d-37299084.jpg",
+        "http://images.maxsold.com/royal-crown-derby-37299565.jpeg",
+        "http://images.maxsold.com/mahogany-sideboard-37299611.jpeg",
+        "http://images.maxsold.com/lazy-boy-otdoor-sofa-and-table-37300124.jpeg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "London",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 42.9717418,
+          "lng": -81.3591907,
+          "Lat": 42.9717418,
+          "Lng": -81.3591907
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01k7hft8zae5d9c8bknyjfmn1q",
+      "amAuctionId": 102772,
+      "title": "Vaughan (Ontario, Canada) PARTNER MANAGED Estate Sale Online Auction - Highway 27",
+      "displayRegion": "GTA",
+      "distanceMeters": 27110,
+      "saleType": "sellerManaged",
+      "saleCategory": "Estate Sale",
+      "openTime": "2025-10-24T21:00:00Z",
+      "closeTime": "2025-11-06T01:15:00Z",
+      "totalBids": 3467,
+      "numberLots": 215,
+      "images": [
+        "http://images.maxsold.com/mcm-teak-huber-scoop-swivel-chair-37196355.jpg",
+        "http://images.maxsold.com/amazing-mcm-teak-credenza-and-hutch-37197441.jpeg",
+        "http://images.maxsold.com/skilsaw-3310-portable-table-saw-on-stand-10-in-blade-120v-37197451.jpeg",
+        "http://images.maxsold.com/two-cdd-180-18v-ni-cd-cordless-drills-with-battery-packs-37197559.jpg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "Vaughan",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 43.8180106,
+          "lng": -79.6308978,
+          "Lat": 43.8180106,
+          "Lng": -79.6308978
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01k8phztwvftvs4v81j0j5yjg2",
+      "amAuctionId": 103216,
+      "title": "Toronto (Ontario, Canada) SELLER MANAGED Estate Sale Online Auction - Milner Avenue (STORAGE)",
+      "displayRegion": "GTA",
+      "distanceMeters": 21864,
+      "saleType": "sellerManaged",
+      "saleCategory": "Estate Sale",
+      "openTime": "2025-10-31T21:00:00Z",
+      "closeTime": "2025-11-06T01:00:00Z",
+      "totalBids": 97,
+      "numberLots": 34,
+      "images": [
+        "http://images.maxsold.com/ikea-desk-37365404.jpeg",
+        "http://images.maxsold.com/luggage-b-37365494.jpeg",
+        "http://images.maxsold.com/womens-shoes-b-37365441.jpeg",
+        "http://images.maxsold.com/antique-oak-entry-table-37365346.jpeg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "Toronto",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 43.8105092,
+          "lng": -79.2139045,
+          "Lat": 43.8105092,
+          "Lng": -79.2139045
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01k7mxnh4dfqjagg0j47zjzav1",
+      "amAuctionId": 102830,
+      "title": "Burlington (Ontario, Canada) SELLER MANAGED Estate Sale Online Auction - Sandringham Drive",
+      "displayRegion": "Horseshoe",
+      "distanceMeters": 48028,
+      "saleType": "sellerManaged",
+      "saleCategory": "Estate Sale",
+      "openTime": "2025-10-25T21:00:00Z",
+      "closeTime": "2025-11-06T01:00:00Z",
+      "totalBids": 968,
+      "numberLots": 104,
+      "images": [
+        "http://images.maxsold.com/book-circa-1700-37233434.jpeg",
+        "http://images.maxsold.com/antique-kronheim-oldenbusch-bookends-dante-soldier-circa-1925-35-37233346.jpeg",
+        "http://images.maxsold.com/1991-1992-upper-deck-hockey-cards--unopened-packages--37233699.jpeg",
+        "http://images.maxsold.com/gene-thomas-carved-soapstone-eagle-head--37233894.jpeg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "Burlington",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 43.3685759,
+          "lng": -79.8308288,
+          "Lat": 43.3685759,
+          "Lng": -79.8308288
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01k7cwdw0veb6rmmsefdndsdaq",
+      "amAuctionId": 102730,
+      "title": "Shelburne (Ontario, Canada) SELLER MANAGED Downsizing Online Auction - Main Street",
+      "displayRegion": "Barrie",
+      "distanceMeters": 81055,
+      "saleType": "sellerManaged",
+      "saleCategory": "Downsizing",
+      "openTime": "2025-10-25T21:00:00Z",
+      "closeTime": "2025-11-06T01:00:00Z",
+      "totalBids": 1435,
+      "numberLots": 154,
+      "images": [
+        "http://images.maxsold.com/925-sterling-silver-amethyst-bracelet-37225687.jpg",
+        "http://images.maxsold.com/moonstone-garnet-and-amethyst-925-sterling-silver-on-925-snake-chain-37225429.jpg",
+        "http://images.maxsold.com/vintage-j.w.-huges-cornflower-glassware-collection-37224982.jpg",
+        "http://images.maxsold.com/lot-of-colourful-ceramics-most-hand-made-mexico-37225703.jpeg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "Shelburne",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 44.0775186,
+          "lng": -80.2085527,
+          "Lat": 44.0775186,
+          "Lng": -80.2085527
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01k75pdgn7e4f87s957sgqemfj",
+      "amAuctionId": 102669,
+      "title": "Newmarket (Ontario, Canada) PARTNER MANAGED Reseller Online Auction - Walter Avenue",
+      "displayRegion": "GTA",
+      "distanceMeters": 45466,
+      "saleType": "sellerManaged",
+      "saleCategory": "Reseller",
+      "openTime": "2025-10-24T21:00:00Z",
+      "closeTime": "2025-11-06T01:00:00Z",
+      "totalBids": 1134,
+      "numberLots": 180,
+      "images": [
+        "http://images.maxsold.com/1972-cdn.-5-dollars-paper-banknote--37181274.jpg",
+        "http://images.maxsold.com/1999-topps-assort-pokmon-movie-collectible-trading-cards-lot-7--37181232.jpg",
+        "http://images.maxsold.com/1978-cdn.-silver-proof-rcm-double-dollar-coin-set--37181189.jpg",
+        "http://images.maxsold.com/ninetales-break-xy-evolutions-pokmon-collectible-trading-card--37181169.jpg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "Newmarket",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 44.0568849,
+          "lng": -79.4744689,
+          "Lat": 44.0568849,
+          "Lng": -79.4744689
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01k4z1bcmwe4nbphqf7qa2gt63",
+      "amAuctionId": 101961,
+      "title": "London (Ontario, Canada) PARTNER MANAGED Downsizing Online Auction - Trillium Crescent",
+      "displayRegion": "London",
+      "distanceMeters": 164306,
+      "saleType": "sellerManaged",
+      "saleCategory": "Downsizing",
+      "openTime": "2025-10-24T21:00:00Z",
+      "closeTime": "2025-11-06T01:00:00Z",
+      "totalBids": 1675,
+      "numberLots": 225,
+      "images": [
+        "http://images.maxsold.com/signed-dr.-jane-goodall-thank-you-framed-photo-print-by-michael-neugebau-37204359.jpg",
+        "http://images.maxsold.com/vintage-victorian-style-green-wooden-bird-cage-folk-art-display-piece-37203677.jpeg",
+        "http://images.maxsold.com/handmade-wooden-rocking-horse-with-yarn-mane-painted-details-37202311.jpeg",
+        "http://images.maxsold.com/tootsie-roll-pop-weighted-plush-cherry-2.5-lbs-in-original-box-37202668.jpeg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "London",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 43.023061,
+          "lng": -81.204742,
+          "Lat": 43.023061,
+          "Lng": -81.204742
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01k8gsppacf07sdtsct255p160",
+      "amAuctionId": 103127,
+      "title": "Toronto (Ontario, Canada) PARTNER MANAGED Estate Sale Online Auction - Dufferin Street (STORAGE)",
+      "displayRegion": "GTA",
+      "distanceMeters": 14717,
+      "saleType": "sellerManaged",
+      "saleCategory": "Estate Sale",
+      "openTime": "2025-10-29T21:00:00Z",
+      "closeTime": "2025-11-06T00:30:00Z",
+      "totalBids": 4501,
+      "numberLots": 320,
+      "images": [
+        "http://images.maxsold.com/rare-vintage-hazel-atlas-cloverleaf-black-depression-glass-indiana-tiara-tumblers-37301950.jpeg",
+        "http://images.maxsold.com/mcm-framed-needlepoint-art-pieces-37302365.jpg",
+        "http://images.maxsold.com/mcm-vintage-italian-hand-painted-ceramic-birdcage-37303083.jpeg",
+        "http://images.maxsold.com/costume-jewelry-and-box-37303386.jpg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "Toronto",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 43.7665624,
+          "lng": -79.47731089999999,
+          "Lat": 43.7665624,
+          "Lng": -79.47731089999999
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01k8ba24p5e9yr4xfm03jkjg5b",
+      "amAuctionId": 103073,
+      "title": "Toronto (Ontario, Canada) SELLER MANAGED Commercial Liquidation Online Auction - Queen Street East",
+      "displayRegion": "GTA",
+      "distanceMeters": 431,
+      "saleType": "sellerManaged",
+      "saleCategory": "Commercial Liquidation",
+      "openTime": "2025-10-29T21:00:00Z",
+      "closeTime": "2025-11-05T02:00:00Z",
+      "totalBids": 394,
+      "numberLots": 27,
+      "images": [
+        "http://images.maxsold.com/juicy-natural-oval-peridot-gemstone-1.90ct-37304661.jpeg",
+        "http://images.maxsold.com/-diamond-studs-pair-of-sterling-silver-natural-diamond-studs-0.21ctw-37304659.jpeg",
+        "http://images.maxsold.com/beautiful-pure-un-heated-pigeon-sparkling-blood-rubies-matching-set--37304584.jpeg",
+        "http://images.maxsold.com/valuable-pair-of-natural-sapphires-with-nice-blue-colour-1.05ctw-37304651.jpeg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "Toronto",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 43.6548376,
+          "lng": -79.3764326,
+          "Lat": 43.6548376,
+          "Lng": -79.3764326
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01k8f01wjyex7a1mvxwzrbbmvq",
+      "amAuctionId": 103109,
+      "title": "Toronto (Ontario, Canada) PARTNER MANAGED Reseller Online Auction - Queen Street West",
+      "displayRegion": "GTA",
+      "distanceMeters": 5156,
+      "saleType": "sellerManaged",
+      "saleCategory": "Reseller",
+      "openTime": "2025-10-29T21:00:00Z",
+      "closeTime": "2025-11-05T01:45:00Z",
+      "totalBids": 974,
+      "numberLots": 90,
+      "images": [
+        "http://images.maxsold.com/vintage-framed-narrow-cn-tower-print-1976-cn-tower-n.i.c.-37304332.jpeg",
+        "http://images.maxsold.com/-925-sterling-silver-14k-gold-choker-collar-necklace--marked--37304439.jpeg",
+        "http://images.maxsold.com/modernist-glass-mushroom-table-lamp-in-working-condition--37304144.jpg",
+        "http://images.maxsold.com/2-preloved-tag-heuer-swiss-made-watches--37304467.jpeg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "Toronto",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 43.638092,
+          "lng": -79.4318103,
+          "Lat": 43.638092,
+          "Lng": -79.4318103
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01k6nv4pkveh9azsz665cwpwz8",
+      "amAuctionId": 102522,
+      "title": "Toronto (Ontario, Canada) SELLER MANAGED Reseller Online Auction -  Queen Street West",
+      "displayRegion": "GTA",
+      "distanceMeters": 5156,
+      "saleType": "sellerManaged",
+      "saleCategory": "Reseller",
+      "openTime": "2025-10-28T21:00:00Z",
+      "closeTime": "2025-11-05T01:30:00Z",
+      "totalBids": 1710,
+      "numberLots": 113,
+      "images": [
+        "http://images.maxsold.com/vintage-pair-of-blue-and-white-ceramic-elephant-garden-stools-pedestals-37276160.jpg",
+        "http://images.maxsold.com/vintage-shelley-dainty-blue-cup-saucer-and-plates-set-37275535.jpeg",
+        "http://images.maxsold.com/vintage-nina-ricci-paris-18k-gold-plated-cufflinks--37276033.jpg",
+        "http://images.maxsold.com/kate-spade-browning-lane-kathrina-pink-leather-satchel-shoulder-handbag--37275658.jpeg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "Toronto",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 43.638092,
+          "lng": -79.4318103,
+          "Lat": 43.638092,
+          "Lng": -79.4318103
+        }
+      },
+      "hasShipping": false
+    },
+    {
+      "saleEntityId": "sale_01k59td7yje1h8spx0zd9000pt",
+      "amAuctionId": 102074,
+      "title": "Toronto (Ontario, Canada) SELLER MANAGED Downsizing Online Auction -  James Street",
+      "displayRegion": "GTA",
+      "distanceMeters": 14360,
+      "saleType": "sellerManaged",
+      "saleCategory": "Downsizing",
+      "openTime": "2025-10-25T21:00:00Z",
+      "closeTime": "2025-11-05T01:15:00Z",
+      "totalBids": 1123,
+      "numberLots": 96,
+      "images": [
+        "http://images.maxsold.com/silver-dollars-37229260.jpeg",
+        "http://images.maxsold.com/val-st-lambert-vase-37229180.jpeg",
+        "http://images.maxsold.com/sheffield-37229033.jpeg",
+        "http://images.maxsold.com/breaking-bad-37229006.jpeg"
+      ],
+      "appendImgURL": false,
+      "address": {
+        "city": "Toronto",
+        "region": "Ontario",
+        "regionCode": "on",
+        "countryCode": "ca",
+        "country": "Canada",
+        "latLng": {
+          "lat": 43.5933961,
+          "lng": -79.5382607,
+          "Lat": 43.5933961,
+          "Lng": -79.5382607
+        }
+      },
+      "hasShipping": false
+    }
+  ],
+  "total": 1906
+}
