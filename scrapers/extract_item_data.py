@@ -1,9 +1,11 @@
 import csv
 import sys
+import time
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlencode
 import requests
 import os
+from pathlib import Path
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
@@ -12,7 +14,7 @@ HEADERS = {
 API_TEMPLATE = "https://maxsold.maxsold.com/msapi/auctions/items?{query}"
 
 OUT_DIR_DEFAULT = "/workspaces/maxsold/data/auction"
-OUT_CSV_DEFAULT = os.path.join(OUT_DIR_DEFAULT, "items_103293.csv")
+OUT_CSV_DEFAULT = os.path.join(OUT_DIR_DEFAULT, "items_all_2025-11-21.csv")
 
 
 def fetch_json_for_auction(auctionid: str, timeout: int = 15) -> Any:
@@ -49,7 +51,6 @@ def to_str(v):
     return str(v)
 
 
-# ...existing code...
 def extract_items_from_json(data: Any) -> List[Dict[str, Any]]:
     """
     Locate the auction object in the JSON and extract its items array,
@@ -61,14 +62,12 @@ def extract_items_from_json(data: Any) -> List[Dict[str, Any]]:
         if isinstance(data.get("auction"), dict):
             auction = data["auction"]
         else:
-            # common alternatives: 'auctions' (list), 'results', or nested 'data'
             for k in ("auctions", "results", "data"):
                 v = data.get(k)
                 if isinstance(v, dict):
                     auction = v
                     break
                 if isinstance(v, list) and v and isinstance(v[0], dict):
-                    # take first auction if list provided
                     auction = v[0]
                     break
 
@@ -114,12 +113,13 @@ def extract_items_from_json(data: Any) -> List[Dict[str, Any]]:
     return extracted
 
 
-def write_items_csv(path: str, rows: List[Dict[str, Any]]):
+def write_items_csv_append(path: str, rows: List[Dict[str, Any]]):
     os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
     header = [
         "id",
         "auction_id",
         "title",
+        "description",
         "viewed",
         "minimum_bid",
         "starting_bid",
@@ -130,35 +130,80 @@ def write_items_csv(path: str, rows: List[Dict[str, Any]]):
         "lot_number",
         "bid_count",
         "bidding_extended",
-        "description",
-
     ]
-    with open(path, "w", newline="", encoding="utf-8") as f:
+    file_exists = Path(path).exists()
+    with open(path, "a", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=header)
-        w.writeheader()
+        if not file_exists:
+            w.writeheader()
         for r in rows:
-            # coerce values to serializable types/strings
-            out = {k: (r[k] if r[k] is not None else "") for k in header}
+            out = {k: (r.get(k, "") if r.get(k, "") is not None else "") for k in header}
             w.writerow(out)
 
 
-def main(auctionid: str = "103293", out_csv: Optional[str] = None):
-    out_csv = out_csv or OUT_CSV_DEFAULT
+def read_auction_ids_from_sales(csv_path: str) -> List[str]:
+    ids: List[str] = []
     try:
-        data = fetch_json_for_auction(auctionid)
-    except Exception as e:
-        print(f"error fetching auction {auctionid}: {e}", file=sys.stderr)
-        raise SystemExit(1)
+        with open(csv_path, newline="", encoding="utf-8") as f:
+            rdr = csv.reader(f)
+            for row in rdr:
+                if not row:
+                    continue
+                val = row[0].strip()
+                if not val:
+                    continue
+                ids.append(val)
+    except FileNotFoundError:
+        print(f"sales CSV not found: {csv_path}", file=sys.stderr)
+    # dedupe while preserving order
+    seen = set()
+    out = []
+    for v in ids:
+        if v not in seen:
+            seen.add(v)
+            out.append(v)
+    return out
 
-    items = extract_items_from_json(data)
-    if not items:
-        print("no items found in API response", file=sys.stderr)
-    write_items_csv(out_csv, items)
-    print(f"wrote {len(items)} items to {out_csv}")
+
+def main(sales_csv: Optional[str] = None, out_csv: Optional[str] = None, delay: float = 0.5):
+    sales_csv = sales_csv or "/workspaces/maxsold/data/auction/clean/sales_2025-11-21.csv"
+    out_csv = out_csv or OUT_CSV_DEFAULT
+
+    auction_ids = read_auction_ids_from_sales(sales_csv)
+    if not auction_ids:
+        print("no auction ids found; exiting", file=sys.stderr)
+        return
+
+    total_written = 0
+    for i, aid in enumerate(auction_ids, 1):
+        print(f"[{i}/{len(auction_ids)}] fetching auction {aid}...")
+        try:
+            data = fetch_json_for_auction(aid)
+        except Exception as e:
+            print(f"  error fetching {aid}: {e}", file=sys.stderr)
+            time.sleep(delay)
+            continue
+
+        items = extract_items_from_json(data)
+        # ensure auction_id present on each item
+        for it in items:
+            if not it.get("auction_id"):
+                it["auction_id"] = aid
+
+        if items:
+            write_items_csv_append(out_csv, items)
+            total_written += len(items)
+            print(f"  wrote {len(items)} items for auction {aid}")
+        else:
+            print(f"  no items found for auction {aid}")
+
+        time.sleep(delay)
+
+    print(f"done. total items written: {total_written} -> {out_csv}")
 
 
 if __name__ == "__main__":
-    import sys
-    aid = sys.argv[1] if len(sys.argv) > 1 else "103293"
-    out = sys.argv[2] if len(sys.argv) > 2 else None
-    main(aid, out)
+    sales_csv_arg = sys.argv[1] if len(sys.argv) > 1 else None
+    out_csv_arg = sys.argv[2] if len(sys.argv) > 2 else None
+    delay_arg = float(sys.argv[3]) if len(sys.argv) > 3 else 0.5
+    main(sales_csv_arg, out_csv_arg, delay_arg)
