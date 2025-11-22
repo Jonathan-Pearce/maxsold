@@ -1,0 +1,43 @@
+name: Run MaxSold Bid History Extractor
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  extract-bids:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: ''
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Run bid history extractor
+        run: |
+          python3 scrapers/extract_bid_history_item.py \
+            data/auction/items_all_2025-11-21.csv \
+            data/auction/bid_history_all_2025-11-21.csv \
+            0.3
+
+      - name: Upload bid history artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bid-history-{{ github.run_number }}
+          path: data/auction/bid_history_all_2025-11-21.csv
+          retention-days: 90

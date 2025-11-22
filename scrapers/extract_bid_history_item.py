@@ -169,7 +169,8 @@ def main(items_csv: Optional[str] = None, out_csv: Optional[str] = None, delay: 
         print("no items to process", file=sys.stderr)
         return
 
-    header = ["auction_id", "item_id", "time_of_bid", "amount", "isproxy"]
+    # include bid_number column
+    header = ["auction_id", "item_id", "bid_number", "time_of_bid", "amount", "isproxy"]
     total_written = 0
     for i, rec in enumerate(rows, 1):
         auction_id = rec.get("auction_id")
@@ -220,10 +221,12 @@ def main(items_csv: Optional[str] = None, out_csv: Optional[str] = None, delay: 
             continue
 
         out_rows = []
-        for b in bids:
+        # add bid_number sequentially per item (1 = first in bid_list)
+        for bn, b in enumerate(bids, start=1):
             out_rows.append({
                 "auction_id": auction_id,
                 "item_id": item_id,
+                "bid_number": bn,
                 "time_of_bid": b["time_of_bid"],
                 "amount": b["amount"],
                 "isproxy": b["isproxy"],
