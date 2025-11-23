@@ -1,10 +1,9 @@
 name: Run MaxSold Bid History Extractor
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
+  schedule:
+    # Run on the 1st day of every 3 months (Jan 1, Apr 1, Jul 1, Oct 1) at 2:00 AM UTC
+    - cron: '0 2 1 1,4,7,10 *'
 
 permissions:
   contents: write
