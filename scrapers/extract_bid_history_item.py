@@ -6,12 +6,17 @@ import requests
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlencode
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import threading
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
 }
 
 API_TEMPLATE = "https://maxsold.maxsold.com/msapi/auctions/items?{query}"
+
+# Thread-safe lock for CSV writing
+csv_lock = threading.Lock()
 
 
 def fetch_json(auctionid: str, itemid: Optional[str] = None, timeout: int = 15) -> Any:
@@ -102,15 +107,17 @@ def extract_bid_entries(item_obj: Dict[str, Any]) -> List[Dict[str, Any]]:
     return out
 
 
-def write_csv(path: str, rows: List[Dict[str, Any]], header: List[str]):
+def write_csv_threadsafe(path: str, rows: List[Dict[str, Any]], header: List[str]):
+    """Thread-safe CSV writing"""
     os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
-    write_header = not os.path.exists(path)
-    with open(path, "a", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=header)
-        if write_header:
-            w.writeheader()
-        for r in rows:
-            w.writerow(r)
+    with csv_lock:
+        write_header = not os.path.exists(path)
+        with open(path, "a", newline="", encoding="utf-8") as f:
+            w = csv.DictWriter(f, fieldnames=header)
+            if write_header:
+                w.writeheader()
+            for r in rows:
+                w.writerow(r)
 
 
 def read_items_csv(path: str) -> List[Dict[str, str]]:
@@ -160,7 +167,75 @@ def read_items_csv(path: str) -> List[Dict[str, str]]:
     return out
 
 
-def main(items_csv: Optional[str] = None, out_csv: Optional[str] = None, delay: float = 0.3):
+def process_single_item(rec: Dict[str, str], out_csv: str, header: List[str], delay: float) -> int:
+    """Process a single auction item and return number of bids written"""
+    auction_id = rec.get("auction_id")
+    item_id = rec.get("item_id")
+    
+    if not auction_id or not item_id:
+        return 0
+    
+    try:
+        data = fetch_json(auction_id, item_id)
+    except Exception as e:
+        print(f"  fetch error for {auction_id}/{item_id}: {e}", file=sys.stderr)
+        time.sleep(delay)
+        return 0
+
+    auction = locate_auction(data)
+    # find items array
+    items = None
+    if isinstance(auction, dict):
+        for k in ("items", "Items", "auctionItems", "itemsList", "results"):
+            if k in auction and isinstance(auction[k], list):
+                items = auction[k]
+                break
+    if items is None and isinstance(data, dict):
+        for k in ("items", "Items", "data", "results"):
+            if k in data and isinstance(data[k], list):
+                items = data[k]
+                break
+
+    target_item = None
+    if items:
+        target_item = find_item_by_id(items, item_id)
+    else:
+        # sometimes API returns single item dict instead of list
+        if isinstance(auction, dict):
+            # try treating auction as item wrapper
+            if str(first_present(auction, ["id", "itemId", "item_id"]) or "") == str(item_id):
+                target_item = auction
+
+    if not target_item:
+        print(f"  item {item_id} not found in response", file=sys.stderr)
+        time.sleep(delay)
+        return 0
+
+    bids = extract_bid_entries(target_item)
+    if not bids:
+        print(f"  no bids for {auction_id}/{item_id}")
+        time.sleep(delay)
+        return 0
+
+    out_rows = []
+    # add bid_number sequentially per item (1 = first in bid_list)
+    for bn, b in enumerate(bids, start=1):
+        out_rows.append({
+            "auction_id": auction_id,
+            "item_id": item_id,
+            "bid_number": bn,
+            "time_of_bid": b["time_of_bid"],
+            "amount": b["amount"],
+            "isproxy": b["isproxy"],
+        })
+
+    write_csv_threadsafe(out_csv, out_rows, header)
+    print(f"  wrote {len(out_rows)} bids for {auction_id}/{item_id}")
+    time.sleep(delay)
+    return len(out_rows)
+
+
+def main(items_csv: Optional[str] = None, out_csv: Optional[str] = None, delay: float = 0.3, workers: int = 10):
     items_csv = items_csv or "/workspaces/maxsold/data/auction/items_all_2025-11-21.csv"
     out_csv = out_csv or "/workspaces/maxsold/data/auction/bid_history_all_2025-11-21.csv"
 
@@ -172,70 +247,25 @@ def main(items_csv: Optional[str] = None, out_csv: Optional[str] = None, delay: 
     # include bid_number column
     header = ["auction_id", "item_id", "bid_number", "time_of_bid", "amount", "isproxy"]
     total_written = 0
-    for i, rec in enumerate(rows, 1):
-        auction_id = rec.get("auction_id")
-        item_id = rec.get("item_id")
-        if not auction_id or not item_id:
-            continue
-        print(f"[{i}/{len(rows)}] fetching bids for auction={auction_id} item={item_id}...")
-        try:
-            data = fetch_json(auction_id, item_id)
-        except Exception as e:
-            print(f"  fetch error for {auction_id}/{item_id}: {e}", file=sys.stderr)
-            time.sleep(delay)
-            continue
-
-        auction = locate_auction(data)
-        # find items array
-        items = None
-        if isinstance(auction, dict):
-            for k in ("items", "Items", "auctionItems", "itemsList", "results"):
-                if k in auction and isinstance(auction[k], list):
-                    items = auction[k]
-                    break
-        if items is None and isinstance(data, dict):
-            for k in ("items", "Items", "data", "results"):
-                if k in data and isinstance(data[k], list):
-                    items = data[k]
-                    break
-
-        target_item = None
-        if items:
-            target_item = find_item_by_id(items, item_id)
-        else:
-            # sometimes API returns single item dict instead of list
-            if isinstance(auction, dict):
-                # try treating auction as item wrapper
-                if str(first_present(auction, ["id", "itemId", "item_id"]) or "") == str(item_id):
-                    target_item = auction
-
-        if not target_item:
-            print(f"  item {item_id} not found in response", file=sys.stderr)
-            time.sleep(delay)
-            continue
-
-        bids = extract_bid_entries(target_item)
-        if not bids:
-            print(f"  no bids for {auction_id}/{item_id}")
-            time.sleep(delay)
-            continue
-
-        out_rows = []
-        # add bid_number sequentially per item (1 = first in bid_list)
-        for bn, b in enumerate(bids, start=1):
-            out_rows.append({
-                "auction_id": auction_id,
-                "item_id": item_id,
-                "bid_number": bn,
-                "time_of_bid": b["time_of_bid"],
-                "amount": b["amount"],
-                "isproxy": b["isproxy"],
-            })
-
-        write_csv(out_csv, out_rows, header)
-        total_written += len(out_rows)
-        print(f"  wrote {len(out_rows)} bids for {auction_id}/{item_id}")
-        time.sleep(delay)
+    
+    print(f"Processing {len(rows)} items with {workers} parallel workers...")
+    
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        # Submit all tasks
+        futures = {
+            executor.submit(process_single_item, rec, out_csv, header, delay): i 
+            for i, rec in enumerate(rows, 1)
+        }
+        
+        # Process completed tasks
+        for future in as_completed(futures):
+            idx = futures[future]
+            try:
+                num_bids = future.result()
+                total_written += num_bids
+                print(f"[{idx}/{len(rows)}] completed")
+            except Exception as e:
+                print(f"[{idx}/{len(rows)}] error: {e}", file=sys.stderr)
 
     print(f"done. total bid rows written: {total_written} -> {out_csv}")
 
@@ -244,4 +274,5 @@ if __name__ == "__main__":
     items_csv_arg = sys.argv[1] if len(sys.argv) > 1 else None
     out_csv_arg = sys.argv[2] if len(sys.argv) > 2 else None
     delay_arg = float(sys.argv[3]) if len(sys.argv) > 3 else 0.3
-    main(items_csv_arg, out_csv_arg, delay_arg)
+    workers_arg = int(sys.argv[4]) if len(sys.argv) > 4 else 10
+    main(items_csv_arg, out_csv_arg, delay_arg, workers_arg)
