@@ -75,3 +75,24 @@ https://maxsold.maxsold.com/msapi/auctions/items?auctionid=103293&itemid=7433915
 https://api.maxsold.com/listings/am/7433915/enriched
 
 https://maxsold.maxsold.com/msapi/auctions/items?auctionid=103293&itemid=7433850
+
+
+## Design Plan
+
+- clean up code
+- - exports should be parquet (make sure data types are roughly correct)
+- - no code required to export jsons
+- - code should be saved to /data/bid list, auctions, items, bids/{date}_{filename}
+- - add URLs to data save
+- - Schedule code files (3 or 4 of them) to run via Github Actions every 3 months (?)
+- - create aggregation script(s) and figure out how to publish to Hugging Face for data hosting
+
+- Item price model/EDA
+- - Average cost per item
+- - geography, day of week, size of auction vs average cost per item
+- - How to factor in views
+- - NLP feature engineering
+
+- Bidding modelling
+- - RL agent to simulating bidding
+- - 
