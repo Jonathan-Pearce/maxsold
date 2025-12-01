@@ -1,0 +1,112 @@
+name: Fetch MaxSold Bid History
+
+permissions:
+  contents: write
+
+on:
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      workers:
+        description: 'Number of parallel workers'
+        required: false
+        default: '10'
+        type: string
+      limit:
+        description: 'Limit number of items to process (optional)'
+        required: false
+        type: string
+      input_parquet:
+        description: 'Path to input parquet file (optional)'
+        required: false
+        type: string
+
+jobs:
+  fetch-bids:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas pyarrow requests
+      
+      - name: Download input parquet file (if not exists locally)
+        id: download-input
+        run: |
+          INPUT_PATH="${{ github.event.inputs.input_parquet || 'data/item_details/items_details_20251201.parquet' }}"
+          
+          if [ ! -f "$INPUT_PATH" ]; then
+            echo "Input file not found locally: $INPUT_PATH"
+            echo "You may need to add artifact download or upload items parquet to the repo"
+            echo "For now, using default path"
+          fi
+          
+          echo "input_path=$INPUT_PATH" >> $GITHUB_OUTPUT
+      
+      - name: Run bid history scraper
+        id: scrape
+        run: |
+          WORKERS="${{ github.event.inputs.workers || '10' }}"
+          LIMIT="${{ github.event.inputs.limit }}"
+          INPUT_PARQUET="${{ steps.download-input.outputs.input_path }}"
+          
+          # Build command
+          CMD="python3 scrapers/04_extract_bid_history.py -w $WORKERS"
+          
+          if [ -f "$INPUT_PARQUET" ]; then
+            CMD="$CMD -p $INPUT_PARQUAT"
+          fi
+          
+          if [ -n "$LIMIT" ]; then
+            CMD="$CMD -l $LIMIT"
+          fi
+          
+          # Run scraper
+          echo "Running: $CMD"
+          $CMD
+          
+          # Find output file
+          OUTPUT_FILE=$(ls -t data/bid_history/bid_history_*.parquet 2>/dev/null | head -n1)
+          echo "output_file=$OUTPUT_FILE" >> $GITHUB_OUTPUT
+      
+      - name: Upload bid history artifact
+        uses: actions/upload-artifact@v4
+        if: steps.scrape.outputs.output_file != ''
+        with:
+          name: bid-history-${{ github.run_number }}
+          path: ${{ steps.scrape.outputs.output_file }}
+          retention-days: 30
+      
+      - name: Upload all bid history files
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bid-history-all-${{ github.run_number }}
+          path: data/bid_history/
+          retention-days: 30
+      
+      - name: Commit and push results (optional)
+        if: steps.scrape.outputs.output_file != ''
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          git add data/bid_history/*.parquet
+          
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: update bid history data [skip ci]"
+            git push
+          fi
+        continue-on-error: true
