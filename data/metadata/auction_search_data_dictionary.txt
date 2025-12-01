@@ -1,0 +1,18 @@
+Output columns:
+
+amAuctionId - Auction ID
+title - Sale title
+displayRegion - Display region
+distanceMeters - Distance in meters (numeric)
+saleType - Type of sale
+saleCategory - Sale category
+openTime - Opening time (datetime)
+closeTime - Closing time (datetime)
+totalBids - Total bids (numeric)
+numberLots - Number of lots (numeric)
+hasShipping - Has shipping (boolean)
+city - City from address
+region - Region from address
+country - Country from address
+lat - Latitude (numeric)
+lng - Longitude (numeric)

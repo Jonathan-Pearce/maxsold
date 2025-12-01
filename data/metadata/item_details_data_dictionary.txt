@@ -1,0 +1,19 @@
+Output columns:
+
+id - Item ID
+auction_id - Auction ID
+title - Item title
+description - Item description (text)
+taxable - Is taxable (boolean)
+viewed - View count (numeric)
+minimum_bid - Minimum bid (numeric)
+starting_bid - Starting bid (numeric)
+current_bid - Current bid (numeric)
+proxy_bid - Proxy bid (numeric)
+start_time - Start time (datetime)
+end_time - End time (datetime)
+lot_number - Lot number
+bid_count - Number of bids (numeric)
+bidding_extended - Bidding extended (boolean)
+buyer_premium - Buyer premium (numeric)
+timezone - Timezone
