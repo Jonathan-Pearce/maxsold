@@ -24,19 +24,24 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Set timestamp
+        id: set_timestamp
+        run: |
+          echo "timestamp=$(date +%Y%m%d)" >> $GITHUB_OUTPUT
+
       - name: Run Auction Search Extractor
         id: auction_search
         run: |
-          TIMESTAMP=$(date +%Y%m%d)
-          OUTPUT_FILE="data/auction_search_${TIMESTAMP}.parquet"
+          TIMESTAMP=${{ steps.set_timestamp.outputs.timestamp }}
+          OUTPUT_FILE="data/auction_search/auction_search_${TIMESTAMP}.parquet"
           python scrapers/01_extract_auction_search.py --output "$OUTPUT_FILE"
           echo "auction_search_file=$OUTPUT_FILE" >> $GITHUB_OUTPUT
 
       - name: Run Auction Details Extractor
         id: auction_details
         run: |
-          TIMESTAMP=$(date +%Y%m%d)
-          OUTPUT_FILE="data/auction_details_${TIMESTAMP}.parquet"
+          TIMESTAMP=${{ steps.set_timestamp.outputs.timestamp }}
+          OUTPUT_FILE="data/auction_details/auction_details_${TIMESTAMP}.parquet"
           python scrapers/02_extract_auction_details.py \
             --input-parquet "${{ steps.auction_search.outputs.auction_search_file }}" \
             --output "$OUTPUT_FILE"
@@ -45,8 +50,8 @@ jobs:
       - name: Run Items Details Extractor
         id: items_details
         run: |
-          TIMESTAMP=$(date +%Y%m%d)
-          OUTPUT_FILE="data/items_details_${TIMESTAMP}.parquet"
+          TIMESTAMP=${{ steps.set_timestamp.outputs.timestamp }}
+          OUTPUT_FILE="data/items_details/items_details_${TIMESTAMP}.parquet"
           python scrapers/03_extract_items_details.py \
             --input-parquet "${{ steps.auction_search.outputs.auction_search_file }}" \
             --output "$OUTPUT_FILE"
@@ -54,8 +59,8 @@ jobs:
 
       - name: Run Bid History Extractor
         run: |
-          TIMESTAMP=$(date +%Y%m%d)
-          OUTPUT_FILE="data/bid_history_${TIMESTAMP}.parquet"
+          TIMESTAMP=${{ steps.set_timestamp.outputs.timestamp }}
+          OUTPUT_FILE="data/bid_history/bid_history_${TIMESTAMP}.parquet"
           python scrapers/04_extract_bid_history.py \
             --input-parquet "${{ steps.items_details.outputs.items_details_file }}" \
             --output "$OUTPUT_FILE" \
@@ -84,6 +89,10 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: scraper-outputs-${{ github.run_number }}
-          path: data/outputs/
+          name: scraper-outputs-${{ steps.set_timestamp.outputs.timestamp }}
+          path: |
+            data/auction_search/*${{ steps.set_timestamp.outputs.timestamp }}*.parquet
+            data/auction_details/*${{ steps.set_timestamp.outputs.timestamp }}*.parquet
+            data/items_details/*${{ steps.set_timestamp.outputs.timestamp }}*.parquet
+            data/bid_history/*${{ steps.set_timestamp.outputs.timestamp }}*.parquet
           retention-days: 30
