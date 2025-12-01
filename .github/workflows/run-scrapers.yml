@@ -64,7 +64,6 @@ jobs:
           python scrapers/04_extract_bid_history.py \
             --input-parquet "${{ steps.items_details.outputs.items_details_file }}" \
             --output "$OUTPUT_FILE" \
-            --limit 1000
 
       - name: Commit and push results
         if: always()
