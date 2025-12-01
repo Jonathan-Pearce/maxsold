@@ -1,0 +1,68 @@
+name: Run Scrapers
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  run-scrapers:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Auction Search Extractor
+        id: auction_search
+        run: |
+          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          OUTPUT_FILE="data/auction_search_${TIMESTAMP}.parquet"
+          python scrapers/01_extract_auction_search.py --output "$OUTPUT_FILE"
+          echo "auction_search_file=$OUTPUT_FILE" >> $GITHUB_OUTPUT
+
+      - name: Run Auction Details Extractor
+        id: auction_details
+        run: |
+          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          OUTPUT_FILE="data/auction_details_${TIMESTAMP}.parquet"
+          python scrapers/02_extract_auction_details.py \
+            --input-parquet "${{ steps.auction_search.outputs.auction_search_file }}" \
+            --output "$OUTPUT_FILE"
+          echo "auction_details_file=$OUTPUT_FILE" >> $GITHUB_OUTPUT
+
+      - name: Run Items Details Extractor
+        id: items_details
+        run: |
+          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          OUTPUT_FILE="data/items_details_${TIMESTAMP}.parquet"
+          python scrapers/03_extract_items_details.py \
+            --input-parquet "${{ steps.auction_details.outputs.auction_details_file }}" \
+            --output "$OUTPUT_FILE"
+          echo "items_details_file=$OUTPUT_FILE" >> $GITHUB_OUTPUT
+
+      - name: Run Bid History Extractor
+        run: |
+          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          OUTPUT_FILE="data/outputs/bid_history_${TIMESTAMP}.parquet"
+          python scrapers/04_extract_bid_history.py \
+            --input-parquet "${{ steps.items_details.outputs.items_details_file }}" \
+            --output "$OUTPUT_FILE"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: scraper-outputs-${{ github.run_number }}
+          path: data/outputs/
+          retention-days: 30

@@ -11,8 +11,8 @@ HEADERS = {
 
 API_URL = "https://maxsold.maxsold.com/msapi/auctions/items"
 
-OUT_DIR_DEFAULT = "/workspaces/maxsold/data/item_details"
-AUCTION_SEARCH_DEFAULT = "/workspaces/maxsold/data/auction_search/auction_search_20251201.parquet"
+OUT_DIR_DEFAULT = "data/item_details"
+AUCTION_SEARCH_DEFAULT = f"data/auction_search/auction_search_{datetime.now().strftime('%Y%m%d')}.parquet"
 
 
 def fetch_auction_items(auction_id: str, timeout: int = 30) -> Any:
