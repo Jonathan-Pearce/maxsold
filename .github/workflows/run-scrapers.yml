@@ -27,7 +27,7 @@ jobs:
       - name: Run Auction Search Extractor
         id: auction_search
         run: |
-          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          TIMESTAMP=$(date +%Y%m%d)
           OUTPUT_FILE="data/auction_search_${TIMESTAMP}.parquet"
           python scrapers/01_extract_auction_search.py --output "$OUTPUT_FILE"
           echo "auction_search_file=$OUTPUT_FILE" >> $GITHUB_OUTPUT
@@ -35,7 +35,7 @@ jobs:
       - name: Run Auction Details Extractor
         id: auction_details
         run: |
-          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          TIMESTAMP=$(date +%Y%m%d)
           OUTPUT_FILE="data/auction_details_${TIMESTAMP}.parquet"
           python scrapers/02_extract_auction_details.py \
             --input-parquet "${{ steps.auction_search.outputs.auction_search_file }}" \
@@ -45,7 +45,7 @@ jobs:
       - name: Run Items Details Extractor
         id: items_details
         run: |
-          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          TIMESTAMP=$(date +%Y%m%d)
           OUTPUT_FILE="data/items_details_${TIMESTAMP}.parquet"
           python scrapers/03_extract_items_details.py \
             --input-parquet "${{ steps.auction_details.outputs.auction_details_file }}" \
@@ -54,8 +54,8 @@ jobs:
 
       - name: Run Bid History Extractor
         run: |
-          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-          OUTPUT_FILE="data/outputs/bid_history_${TIMESTAMP}.parquet"
+          TIMESTAMP=$(date +%Y%m%d)
+          OUTPUT_FILE="data/bid_history_${TIMESTAMP}.parquet"
           python scrapers/04_extract_bid_history.py \
             --input-parquet "${{ steps.items_details.outputs.items_details_file }}" \
             --output "$OUTPUT_FILE"
