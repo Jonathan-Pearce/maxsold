@@ -48,7 +48,7 @@ jobs:
           TIMESTAMP=$(date +%Y%m%d)
           OUTPUT_FILE="data/items_details_${TIMESTAMP}.parquet"
           python scrapers/03_extract_items_details.py \
-            --input-parquet "${{ steps.auction_details.outputs.auction_details_file }}" \
+            --input-parquet "${{ steps.auction_search.outputs.auction_search_file }}" \
             --output "$OUTPUT_FILE"
           echo "items_details_file=$OUTPUT_FILE" >> $GITHUB_OUTPUT
 
