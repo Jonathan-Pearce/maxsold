@@ -10,7 +10,7 @@ HEADERS = {
 
 API_URL = "https://api.maxsold.com/sales/search"
 
-OUT_DIR_DEFAULT = "/workspaces/maxsold/data/auction_search"
+OUT_DIR_DEFAULT = "data/auction_search"
 
 
 def fetch_sales_search(
