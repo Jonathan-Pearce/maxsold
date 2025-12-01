@@ -76,7 +76,10 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           # add generated files
-          git add data/*.parquet
+          git add data/auction_search/*.parquet
+          git add data/auction_details/*.parquet
+          git add data/items_details/*.parquet
+          git add data/bid_history/*.parquet
 
           # commit if there are changes
           git commit -m "chore: add scraper outputs (run $GITHUB_RUN_NUMBER)" || echo "No changes to commit"
