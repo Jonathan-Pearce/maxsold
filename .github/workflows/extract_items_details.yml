@@ -63,7 +63,7 @@ jobs:
           CMD="python3 scrapers/04_extract_bid_history.py -w $WORKERS"
           
           if [ -f "$INPUT_PARQUET" ]; then
-            CMD="$CMD -p $INPUT_PARQUAT"
+            CMD="$CMD -p $INPUT_PARQUET"
           fi
           
           if [ -n "$LIMIT" ]; then
