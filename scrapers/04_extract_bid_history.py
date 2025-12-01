@@ -13,8 +13,8 @@ HEADERS = {
 
 API_URL = "https://maxsold.maxsold.com/msapi/auctions/items"
 
-OUT_DIR_DEFAULT = "/workspaces/maxsold/data/bid_history"
-ITEMS_PARQUET_DEFAULT = "/workspaces/maxsold/data/item_details/items_details_20251201.parquet"
+OUT_DIR_DEFAULT = "/data/bid_history"
+ITEMS_PARQUET_DEFAULT = "data/item_details/items_details_20251201.parquet"
 
 # Thread-safe lock for printing
 print_lock = threading.Lock()
