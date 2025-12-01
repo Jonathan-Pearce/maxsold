@@ -1,5 +1,0 @@
-# Build and run
-docker build -t maxsold-dashboard -f dashboard/Dockerfile .
-docker run -p 8501:8501 maxsold-dashboard
-
-"$BROWSER" http://localhost:8501
