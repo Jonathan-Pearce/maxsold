@@ -58,7 +58,28 @@ jobs:
           OUTPUT_FILE="data/bid_history_${TIMESTAMP}.parquet"
           python scrapers/04_extract_bid_history.py \
             --input-parquet "${{ steps.items_details.outputs.items_details_file }}" \
-            --output "$OUTPUT_FILE"
+            --output "$OUTPUT_FILE" \
+            --limit 1000
+
+      - name: Commit and push results
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # configure git author
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # add generated files
+          git add data/*.parquet
+
+          # commit if there are changes
+          git commit -m "chore: add scraper outputs (run $GITHUB_RUN_NUMBER)" || echo "No changes to commit"
+
+          # set authenticated remote and push to the workflow's branch
+          git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git"
+          BRANCH="${GITHUB_REF#refs/heads/}"
+          git push origin HEAD:"${BRANCH}"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
