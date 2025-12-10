@@ -241,8 +241,8 @@ def create_tfidf_embeddings(input_path, output_dir=None, n_components=128, max_f
 
 # Main execution
 if __name__ == "__main__":
-    input_file = '/workspaces/maxsold/data/items_details/items_details_20251201.parquet'
-    output_directory = '/workspaces/maxsold/data/items_details/embeddings/'
+    input_file = '/workspaces/maxsold/data/raw_data/items_details/items_details_20251201.parquet'
+    output_directory = '/workspaces/maxsold/data/engineered_data/items_details/embeddings/'
     
     # Create embeddings using TF-IDF + LSA
     df_with_embeddings = create_tfidf_embeddings(
@@ -253,7 +253,7 @@ if __name__ == "__main__":
     )
     
     # Save the full dataset with embeddings
-    output_file = '/workspaces/maxsold/data/items_details/items_details_20251201_with_embeddings.parquet'
+    output_file = '/workspaces/maxsold/data/engineered_data/items_details/items_details_20251201_with_embeddings.parquet'
     df_with_embeddings.to_parquet(output_file, index=False)
     print(f"\nFull dataset with embeddings saved to: {output_file}")
     

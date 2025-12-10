@@ -47,17 +47,17 @@ def feature_engineering(input_path):
         print(f"Created {len(region_dummies.columns)} region features")
     
     # 3. One-hot encoding for city
-    if 'city' in df_engineered.columns:
-        print(f"\nUnique city values: {df_engineered['city'].nunique()}")
-        print(f"Top 10 cities:\n{df_engineered['city'].value_counts().head(10)}")
-        
-        city_dummies = pd.get_dummies(
-            df_engineered['city'], 
-            prefix='city',
-            drop_first=False
-        )
-        df_engineered = pd.concat([df_engineered, city_dummies], axis=1)
-        print(f"Created {len(city_dummies.columns)} city features")
+    #if 'city' in df_engineered.columns:
+    #    print(f"\nUnique city values: {df_engineered['city'].nunique()}")
+    #    print(f"Top 10 cities:\n{df_engineered['city'].value_counts().head(10)}")
+    #    
+    #    city_dummies = pd.get_dummies(
+    #        df_engineered['city'], 
+    #        prefix='city',
+    #        drop_first=False
+    #    )
+    #    df_engineered = pd.concat([df_engineered, city_dummies], axis=1)
+    #    print(f"Created {len(city_dummies.columns)} city features")
     
     print(f"\nFinal dataset shape: {df_engineered.shape}")
     
