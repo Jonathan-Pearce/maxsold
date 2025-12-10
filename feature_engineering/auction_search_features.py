@@ -33,13 +33,13 @@ def feature_engineering(input_path):
         df_engineered = pd.concat([df_engineered, sale_category_dummies], axis=1)
         print(f"Created {len(sale_category_dummies.columns)} saleCategory features")
     
-    # 2. One-hot encoding for display_Region
-    if 'display_Region' in df_engineered.columns:
-        print(f"\nUnique display_Region values: {df_engineered['display_Region'].nunique()}")
-        print(f"display_Region value counts:\n{df_engineered['display_Region'].value_counts()}")
+    # 2. One-hot encoding for displayRegion
+    if 'displayRegion' in df_engineered.columns:
+        print(f"\nUnique displayRegion values: {df_engineered['displayRegion'].nunique()}")
+        print(f"displayRegion value counts:\n{df_engineered['displayRegion'].value_counts()}")
         
         region_dummies = pd.get_dummies(
-            df_engineered['display_Region'], 
+            df_engineered['displayRegion'], 
             prefix='region',
             drop_first=False
         )
@@ -66,13 +66,13 @@ def feature_engineering(input_path):
 
 # Main execution
 if __name__ == "__main__":
-    input_file = '/workspaces/maxsold/data/auction_search/auction_search_20251201.parquet'
+    input_file = '/workspaces/maxsold/data/raw_data/auction_search/auction_search_20251201.parquet'
     
     # Perform feature engineering
     df_processed = feature_engineering(input_file)
     
     # Save the processed data
-    output_file = '/workspaces/maxsold/data/auction_search/auction_search_20251201_engineered.parquet'
+    output_file = '/workspaces/maxsold/data/engineered_data/auction_search/auction_search_20251201_engineered.parquet'
     df_processed.to_parquet(output_file, index=False)
     print(f"\nProcessed data saved to: {output_file}")
     

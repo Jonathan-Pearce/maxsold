@@ -8,6 +8,7 @@ from datetime import datetime
 
 #auction_length_hours: Duration of auction in hours
 #postal_code: Extracted Canadian postal code from removal_info
+#postal_code_fsa: First 3 characters of postal code (Forward Sortation Area)
 #intro_cleaned: HTML-stripped and cleaned intro text
 #intro_length: Character length of cleaned intro
 #pickup_day_of_week: 0=Monday, 6=Sunday
@@ -48,6 +49,11 @@ def feature_engineering(df):
     
     df_engineered['postal_code'] = df_engineered['removal_info'].apply(extract_postal_code)
     
+    # 2b. Extract Forward Sortation Area (first 3 characters of postal code)
+    df_engineered['postal_code_fsa'] = df_engineered['postal_code'].apply(
+        lambda x: x[:3] if pd.notna(x) and len(str(x)) >= 3 else None
+    )
+    
     # 3. Clean and extract text from intro
     def clean_intro(text):
         if pd.isna(text):
@@ -69,17 +75,41 @@ def feature_engineering(df):
     df_engineered['pickup_is_weekend'] = df_engineered['pickup_day_of_week'].isin([5, 6]).astype(int)
     
     # 5. Boolean variable for partner_url presence
-    df_engineered['has_partner_url'] = df_engineered['partner_url'].notna().astype(int)
+    #df_engineered['has_partner_url'] = df_engineered['partner_url'].notna().astype(int)
+    df_engineered['has_partner_url'] = np.where(df_engineered['partner_url']!="", 1, 0) 
     
     return df_engineered
 
 
-# Example usage:
-# df = pd.read_csv('your_auction_data.csv')
-# df_processed = feature_engineering(df)
-# print(df_processed[['auction_length_hours', 'postal_code', 'pickup_day_name', 'has_partner_url']].head())
-
-data_path = Path('/workspaces/maxsold/data/auction_details/auction_details_20251201.parquet')
-df = pd.read_parquet(data_path)
-df_processed = feature_engineering(df)
-print(df_processed.head())
+if __name__ == "__main__":
+    # Load raw data
+    data_path = Path('/workspaces/maxsold/data/raw_data/auction_details/auction_details_20251201.parquet')
+    df = pd.read_parquet(data_path)
+    print("Original data shape:", df.shape)
+    print("\nFirst few rows of original data:")
+    print(df.head())
+    
+    # Process features
+    df_processed = feature_engineering(df)
+    print("\n" + "="*60)
+    print("Processed data shape:", df_processed.shape)
+    print("\nFirst few rows of processed data:")
+    print(df_processed.head())
+    
+    # Save to engineered data directory
+    output_dir = Path('/workspaces/maxsold/data/engineered_data/auction_details')
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    output_path = output_dir / 'auction_details_20251201_engineered.parquet'
+    df_processed.to_parquet(output_path, index=False)
+    print(f"\n{'='*60}")
+    print(f"Saved processed data to: {output_path}")
+    print(f"Output file size: {output_path.stat().st_size / 1024:.2f} KB")
+    
+    # Display new feature columns
+    new_cols = ['auction_length_hours', 'postal_code', 'postal_code_fsa', 'intro_cleaned', 'intro_length',
+                'pickup_day_of_week', 'pickup_day_name', 'pickup_is_weekend', 'has_partner_url']
+    available_new_cols = [col for col in new_cols if col in df_processed.columns]
+    print(f"\nNew features created: {available_new_cols}")
+    print("\nSample of new features:")
+    print(df_processed[available_new_cols].head())
