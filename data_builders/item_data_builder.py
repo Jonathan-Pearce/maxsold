@@ -12,7 +12,7 @@ def merge_datasets():
     """Merge three datasets on auction_id"""
     
     # Define file paths
-    items_path = Path('/workspaces/maxsold/data/engineered_data/items_details/items_details_20251201_with_embeddings.parquet')
+    items_path = Path('/workspaces/maxsold/data/engineered_data/items_details/items_details_20251201_with_embeddings_small.parquet')
     auction_details_path = Path('/workspaces/maxsold/data/engineered_data/auction_details/auction_details_20251201_engineered.parquet')
     auction_search_path = Path('/workspaces/maxsold/data/engineered_data/auction_search/auction_search_20251201_engineered.parquet')
     
@@ -37,7 +37,7 @@ def merge_datasets():
     
     # Identify auction_id column in auction_details
     auction_details_id_col = None
-    for col in ['auction_id', 'amAuctionId', 'auctionId', 'id']:
+    for col in ['auction_id', 'amAuctionId']:
         if col in df_auction_details.columns:
             auction_details_id_col = col
             break

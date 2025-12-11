@@ -1,5 +1,5 @@
 """
-XGBoost model pipeline for predicting current_bid on MaxSold auction items.
+LightGBM model pipeline for predicting current_bid on MaxSold auction items.
 Target: current_bid
 Features: All columns except current_bid, minimum_bid, and bid_count
 """
@@ -11,7 +11,7 @@ import pickle
 import json
 from datetime import datetime
 
-import xgboost as xgb
+import lightgbm as lgb
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.preprocessing import LabelEncoder
@@ -23,7 +23,7 @@ warnings.filterwarnings('ignore')
 
 
 class BidPredictionPipeline:
-    """XGBoost pipeline for bid prediction"""
+    """LightGBM pipeline for bid prediction"""
     
     def __init__(self, data_path, output_dir='model_pipeline/outputs'):
         self.data_path = Path(data_path)
@@ -34,7 +34,7 @@ class BidPredictionPipeline:
         self.label_encoders = {}
         self.feature_names = []
         self.target_col = 'current_bid'
-        self.exclude_cols = ['current_bid', 'id', 'auction_id']
+        self.exclude_cols = ['current_bid', 'minimum_bid']
         
     def load_and_prepare_data(self):
         """Load data and prepare features"""
@@ -72,7 +72,7 @@ class BidPredictionPipeline:
         return df
     
     def preprocess_features(self, df):
-        """Preprocess features for XGBoost"""
+        """Preprocess features for LightGBM"""
         print("\n" + "="*70)
         print("PREPROCESSING FEATURES")
         print("="*70)
@@ -122,7 +122,9 @@ class BidPredictionPipeline:
         numeric_cols = X.select_dtypes(include=[np.number]).columns.tolist()
         categorical_cols = X.select_dtypes(include=['object', 'category']).columns.tolist()
         
-        # Label encode categorical features
+        # LightGBM can handle categorical features natively, but we'll use label encoding
+        # to reduce memory usage for high cardinality features
+        categorical_features = []
         if categorical_cols:
             print(f"\nEncoding {len(categorical_cols)} categorical columns...")
             categorical_sample = categorical_cols[:5]
@@ -140,6 +142,9 @@ class BidPredictionPipeline:
                 X[col] = X[col].fillna('MISSING')
                 X[col] = le.fit_transform(X[col].astype(str))
                 self.label_encoders[col] = le
+                categorical_features.append(col)
+        
+        self.categorical_features = categorical_features
         
         # Handle missing values in numeric columns
         if numeric_cols:
@@ -160,6 +165,7 @@ class BidPredictionPipeline:
         
         print(f"\nFinal feature matrix shape: {X.shape}")
         print(f"Target vector shape: {y.shape}")
+        print(f"Categorical features: {len(self.categorical_features)}")
         
         return X, y
     
@@ -183,28 +189,29 @@ class BidPredictionPipeline:
         return X_train, X_test, y_train, y_test
     
     def train_model(self, X_train, y_train, X_test, y_test):
-        """Train XGBoost model"""
+        """Train LightGBM model"""
         print("\n" + "="*70)
-        print("TRAINING XGBOOST MODEL")
+        print("TRAINING LIGHTGBM MODEL")
         print("="*70)
         
-        # XGBoost parameters
+        # LightGBM parameters
         params = {
-            'objective': 'reg:squarederror',
-            'eval_metric': 'mae',
-            'max_depth': 6,
+            'objective': 'regression',
+            'metric': 'mean_absolute_error',
+            'boosting_type': 'gbdt',
+            'num_leaves': 31,
             'learning_rate': 0.05,
             'n_estimators': 100,
+            'max_depth': -1,
+            'min_child_samples': 20,
             'subsample': 0.8,
+            'subsample_freq': 1,
             'colsample_bytree': 0.8,
-            'min_child_weight': 1,
-            'gamma': 0,
             'reg_alpha': 0.0,
-            'reg_lambda': 1.0,
+            'reg_lambda': 0.0,
             'random_state': 42,
             'n_jobs': -1,
-            'tree_method': 'hist',
-            'early_stopping_rounds': 10
+            'verbose': -1
         }
         
         print(f"\nModel parameters:")
@@ -212,20 +219,17 @@ class BidPredictionPipeline:
             print(f"  {key}: {value}")
         
         # Create and train model
-        self.model = xgb.XGBRegressor(**params)
+        self.model = lgb.LGBMRegressor(**params)
         
         print(f"\nTraining model...")
         self.model.fit(
             X_train, y_train,
             eval_set=[(X_train, y_train), (X_test, y_test)],
-            verbose=False
+            eval_metric='rmse',
+            callbacks=[lgb.early_stopping(stopping_rounds=10, verbose=False)]
         )
         
-        # Check if early stopping was used
-        if hasattr(self.model, 'best_iteration') and self.model.best_iteration is not None:
-            print(f"Training complete! Best iteration: {self.model.best_iteration}")
-        else:
-            print("Training complete!")
+        print(f"Training complete! Best iteration: {self.model.best_iteration_}")
         
     def evaluate_model(self, X_train, y_train, X_test, y_test):
         """Evaluate model performance"""
@@ -260,18 +264,13 @@ class BidPredictionPipeline:
         print(f"  MAE:  ${test_metrics['mae']:,.2f}")
         print(f"  R²:   {test_metrics['r2']:.4f}")
         
-        # Get best iteration if available
-        best_iter = None
-        if hasattr(self.model, 'best_iteration') and self.model.best_iteration is not None:
-            best_iter = int(self.model.best_iteration)
-        
         # Save metrics
         metrics_path = self.output_dir / 'model_metrics.json'
         with open(metrics_path, 'w') as f:
             json.dump({
                 'train': train_metrics,
                 'test': test_metrics,
-                'best_iteration': best_iter,
+                'best_iteration': int(self.model.best_iteration_) if self.model.best_iteration_ else None,
                 'timestamp': datetime.now().isoformat()
             }, f, indent=2)
         print(f"\nMetrics saved to: {metrics_path}")
@@ -335,7 +334,7 @@ class BidPredictionPipeline:
     def plot_feature_importance(self, top_n=20):
         """Plot top feature importances"""
         importance_df = pd.DataFrame({
-            'feature': self.model.feature_names_in_,
+            'feature': self.model.feature_name_,
             'importance': self.model.feature_importances_
         }).sort_values('importance', ascending=False)
         
@@ -344,7 +343,7 @@ class BidPredictionPipeline:
         plt.barh(range(len(top_features)), top_features['importance'])
         plt.yticks(range(len(top_features)), top_features['feature'])
         plt.xlabel('Importance')
-        plt.title(f'Top {top_n} Feature Importances (XGBoost)')
+        plt.title(f'Top {top_n} Feature Importances (LightGBM)')
         plt.gca().invert_yaxis()
         plt.tight_layout()
         
@@ -364,16 +363,16 @@ class BidPredictionPipeline:
         print("SAVING MODEL")
         print("="*70)
         
-        # Save XGBoost model
-        model_path = self.output_dir / 'xgboost_model.pkl'
+        # Save LightGBM model
+        model_path = self.output_dir / 'lightgbm_model.pkl'
         with open(model_path, 'wb') as f:
             pickle.dump(self.model, f)
         print(f"\nModel saved to: {model_path}")
         
-        # Also save in XGBoost's native format
-        model_json_path = self.output_dir / 'xgboost_model.json'
-        self.model.save_model(str(model_json_path))
-        print(f"Model (JSON format) saved to: {model_json_path}")
+        # Also save as text for interpretability
+        model_txt_path = self.output_dir / 'lightgbm_model.txt'
+        self.model.booster_.save_model(str(model_txt_path))
+        print(f"Model (text format) saved to: {model_txt_path}")
         
         # Save label encoders
         encoders_path = self.output_dir / 'label_encoders.pkl'
@@ -390,7 +389,7 @@ class BidPredictionPipeline:
     def run_pipeline(self):
         """Execute full pipeline"""
         print("\n" + "="*70)
-        print("XGBOOST BID PREDICTION PIPELINE")
+        print("LIGHTGBM BID PREDICTION PIPELINE")
         print("="*70)
         print(f"Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         
