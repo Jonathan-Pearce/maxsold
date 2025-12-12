@@ -238,6 +238,13 @@ def create_text_embeddings_small(input_path, output_dir=None, n_components=64, m
     
     return df_engineered
 
+def bid_features(df):
+
+    #create binary current_bid feature <= 10 or > 10    
+    df['current_bid_le_10_binary'] = np.where(df['current_bid'] <= 10 , 1, 0)
+
+    return df
+
 
 # Main execution
 if __name__ == "__main__":
@@ -252,9 +259,12 @@ if __name__ == "__main__":
         max_features=5000     # Maximum vocabulary size
     )
 
+    # Add bid features
+    df_with_embeddings = bid_features(df_with_embeddings)
+
     # Keep only relevant columns for modeling (including all embedding columns)
     columns_to_keep = [
-        'id', 'auction_id', 'viewed', 'current_bid', 'bid_count', 'bidding_extended'
+        'id', 'auction_id', 'viewed', 'current_bid', 'bid_count', 'bidding_extended', 'current_bid_le_10_binary'
     ] + [col for col in df_with_embeddings.columns if '_emb_' in col
     ]
     df_with_embeddings_model = df_with_embeddings[columns_to_keep]

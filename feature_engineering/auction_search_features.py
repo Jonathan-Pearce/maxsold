@@ -86,7 +86,7 @@ if __name__ == "__main__":
 
     # Keep only relevant columns for modeling
     columns_to_keep = [
-        'amAuctionId', 'distanceMeters', 'totalBids', 'numberLots', 
+        'amAuctionId', 'distanceMeters', 'totalBids',
         'hasShipping', 'lat', 'lng', 'average_bids_per_lot',
         'saleCategory_Business Downsizing', 'saleCategory_Charity/Fundraising',
         'saleCategory_Commercial Liquidation', 'saleCategory_Downsizing',

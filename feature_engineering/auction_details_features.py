@@ -145,7 +145,7 @@ if __name__ == "__main__":
         'pickup_day_Saturday', 'pickup_day_Sunday', 'pickup_day_Thursday', 'pickup_day_Tuesday',
         'pickup_day_Wednesday', 'postal_code_pd_K', 'postal_code_pd_L', 'postal_code_pd_M',
         'postal_code_pd_N', 'postal_code_pd_P', 'pickup_time_hour', 'pickup_during_work_hours',
-        'is_seller_managed', 'is_partner_managed', 'is_condo_auction', 'is_storage_unit_auction'
+        'is_seller_managed', 'is_condo_auction', 'is_storage_unit_auction'
     ]
     df_processed_model = df_processed[columns_to_keep]
 

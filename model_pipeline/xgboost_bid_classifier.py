@@ -1,7 +1,7 @@
 """
-XGBoost model pipeline for predicting current_bid on MaxSold auction items.
-Target: current_bid
-Features: All columns except current_bid, minimum_bid, and bid_count
+XGBoost binary classification model pipeline for predicting if current_bid <= $10 on MaxSold auction items.
+Target: current_bid_le_10_binary (1 if current_bid <= $10, 0 otherwise)
+Features: All columns except current_bid, minimum_bid, bid_count, auction_id, id, current_bid_le_10_binary
 """
 
 import pandas as pd
@@ -13,7 +13,7 @@ from datetime import datetime
 
 import xgboost as xgb
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, classification_report, roc_curve, precision_recall_curve
 from sklearn.preprocessing import LabelEncoder
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -22,8 +22,8 @@ import warnings
 warnings.filterwarnings('ignore')
 
 
-class BidPredictionPipeline:
-    """XGBoost pipeline for bid prediction"""
+class BidClassificationPipeline:
+    """XGBoost pipeline for binary bid classification"""
     
     def __init__(self, data_path, output_dir='model_pipeline/outputs'):
         self.data_path = Path(data_path)
@@ -33,8 +33,10 @@ class BidPredictionPipeline:
         self.model = None
         self.label_encoders = {}
         self.feature_names = []
-        self.target_col = 'current_bid'
-        self.exclude_cols = ['current_bid', 'id', 'auction_id', 'current_bid_le_10_binary']
+        self.target_col = 'current_bid_le_10_binary'
+        self.exclude_cols = ['current_bid', 'id', 'auction_id', 'current_bid_le_10_binary',
+                              'minimum_bid', 'bid_count', 'totalBids', 'average_bids_per_lot',
+                              'bidding_extended', 'viewed']  # Exclude columns not to be used as features
         
     def load_and_prepare_data(self):
         """Load data and prepare features"""
@@ -183,15 +185,22 @@ class BidPredictionPipeline:
         return X_train, X_test, y_train, y_test
     
     def train_model(self, X_train, y_train, X_test, y_test):
-        """Train XGBoost model"""
+        """Train XGBoost classification model"""
         print("\n" + "="*70)
-        print("TRAINING XGBOOST MODEL")
+        print("TRAINING XGBOOST CLASSIFIER")
         print("="*70)
         
-        # XGBoost parameters
+        # Calculate class weights for imbalanced data
+        class_counts = y_train.value_counts()
+        scale_pos_weight = class_counts[0] / class_counts[1] if len(class_counts) == 2 else 1.0
+        print(f"\nClass distribution in training set:")
+        print(class_counts)
+        print(f"Scale pos weight: {scale_pos_weight:.2f}")
+        
+        # XGBoost parameters for binary classification
         params = {
-            'objective': 'reg:squarederror',
-            'eval_metric': 'mae',
+            'objective': 'binary:logistic',
+            'eval_metric': ['logloss', 'auc'],
             'max_depth': 6,
             'learning_rate': 0.05,
             'n_estimators': 100,
@@ -201,6 +210,7 @@ class BidPredictionPipeline:
             'gamma': 0,
             'reg_alpha': 0.0,
             'reg_lambda': 1.0,
+            'scale_pos_weight': scale_pos_weight,
             'random_state': 42,
             'n_jobs': -1,
             'tree_method': 'hist',
@@ -212,7 +222,7 @@ class BidPredictionPipeline:
             print(f"  {key}: {value}")
         
         # Create and train model
-        self.model = xgb.XGBRegressor(**params)
+        self.model = xgb.XGBClassifier(**params)
         
         print(f"\nTraining model...")
         self.model.fit(
@@ -228,37 +238,63 @@ class BidPredictionPipeline:
             print("Training complete!")
         
     def evaluate_model(self, X_train, y_train, X_test, y_test):
-        """Evaluate model performance"""
+        """Evaluate classification model performance"""
         print("\n" + "="*70)
         print("MODEL EVALUATION")
         print("="*70)
         
-        # Predictions
+        # Predictions (class labels)
         y_train_pred = self.model.predict(X_train)
         y_test_pred = self.model.predict(X_test)
         
+        # Prediction probabilities
+        y_train_pred_proba = self.model.predict_proba(X_train)[:, 1]
+        y_test_pred_proba = self.model.predict_proba(X_test)[:, 1]
+        
         # Calculate metrics
         train_metrics = {
-            'rmse': np.sqrt(mean_squared_error(y_train, y_train_pred)),
-            'mae': mean_absolute_error(y_train, y_train_pred),
-            'r2': r2_score(y_train, y_train_pred)
+            'accuracy': accuracy_score(y_train, y_train_pred),
+            'precision': precision_score(y_train, y_train_pred, zero_division=0),
+            'recall': recall_score(y_train, y_train_pred, zero_division=0),
+            'f1': f1_score(y_train, y_train_pred, zero_division=0),
+            'roc_auc': roc_auc_score(y_train, y_train_pred_proba)
         }
         
         test_metrics = {
-            'rmse': np.sqrt(mean_squared_error(y_test, y_test_pred)),
-            'mae': mean_absolute_error(y_test, y_test_pred),
-            'r2': r2_score(y_test, y_test_pred)
+            'accuracy': accuracy_score(y_test, y_test_pred),
+            'precision': precision_score(y_test, y_test_pred, zero_division=0),
+            'recall': recall_score(y_test, y_test_pred, zero_division=0),
+            'f1': f1_score(y_test, y_test_pred, zero_division=0),
+            'roc_auc': roc_auc_score(y_test, y_test_pred_proba)
         }
         
         print("\nTRAIN METRICS:")
-        print(f"  RMSE: ${train_metrics['rmse']:,.2f}")
-        print(f"  MAE:  ${train_metrics['mae']:,.2f}")
-        print(f"  R²:   {train_metrics['r2']:.4f}")
+        print(f"  Accuracy:  {train_metrics['accuracy']:.4f}")
+        print(f"  Precision: {train_metrics['precision']:.4f}")
+        print(f"  Recall:    {train_metrics['recall']:.4f}")
+        print(f"  F1 Score:  {train_metrics['f1']:.4f}")
+        print(f"  ROC AUC:   {train_metrics['roc_auc']:.4f}")
         
         print("\nTEST METRICS:")
-        print(f"  RMSE: ${test_metrics['rmse']:,.2f}")
-        print(f"  MAE:  ${test_metrics['mae']:,.2f}")
-        print(f"  R²:   {test_metrics['r2']:.4f}")
+        print(f"  Accuracy:  {test_metrics['accuracy']:.4f}")
+        print(f"  Precision: {test_metrics['precision']:.4f}")
+        print(f"  Recall:    {test_metrics['recall']:.4f}")
+        print(f"  F1 Score:  {test_metrics['f1']:.4f}")
+        print(f"  ROC AUC:   {test_metrics['roc_auc']:.4f}")
+        
+        # Confusion matrices
+        train_cm = confusion_matrix(y_train, y_train_pred)
+        test_cm = confusion_matrix(y_test, y_test_pred)
+        
+        print("\nTRAIN CONFUSION MATRIX:")
+        print(train_cm)
+        
+        print("\nTEST CONFUSION MATRIX:")
+        print(test_cm)
+        
+        # Classification reports
+        print("\nTEST CLASSIFICATION REPORT:")
+        print(classification_report(y_test, y_test_pred, target_names=['> $10', '<= $10']))
         
         # Get best iteration if available
         best_iter = None
@@ -271,62 +307,73 @@ class BidPredictionPipeline:
             json.dump({
                 'train': train_metrics,
                 'test': test_metrics,
+                'train_confusion_matrix': train_cm.tolist(),
+                'test_confusion_matrix': test_cm.tolist(),
                 'best_iteration': best_iter,
                 'timestamp': datetime.now().isoformat()
             }, f, indent=2)
         print(f"\nMetrics saved to: {metrics_path}")
         
-        return train_metrics, test_metrics, y_train_pred, y_test_pred
+        return train_metrics, test_metrics, y_train_pred, y_test_pred, y_train_pred_proba, y_test_pred_proba
     
-    def plot_results(self, y_train, y_train_pred, y_test, y_test_pred):
-        """Create visualization plots"""
+    def plot_results(self, y_train, y_train_pred, y_test, y_test_pred, y_train_pred_proba, y_test_pred_proba):
+        """Create visualization plots for classification"""
         print("\n" + "="*70)
         print("CREATING VISUALIZATIONS")
         print("="*70)
         
         fig, axes = plt.subplots(2, 2, figsize=(15, 12))
         
-        # Plot 1: Actual vs Predicted (Train)
-        axes[0, 0].scatter(y_train, y_train_pred, alpha=0.3, s=10)
-        axes[0, 0].plot([y_train.min(), y_train.max()], 
-                        [y_train.min(), y_train.max()], 'r--', lw=2)
-        axes[0, 0].set_xlabel('Actual Bid ($)')
-        axes[0, 0].set_ylabel('Predicted Bid ($)')
-        axes[0, 0].set_title('Train: Actual vs Predicted')
-        axes[0, 0].grid(True, alpha=0.3)
+        # Plot 1: Train Confusion Matrix
+        train_cm = confusion_matrix(y_train, y_train_pred)
+        sns.heatmap(train_cm, annot=True, fmt='d', cmap='Blues', ax=axes[0, 0])
+        axes[0, 0].set_xlabel('Predicted')
+        axes[0, 0].set_ylabel('Actual')
+        axes[0, 0].set_title('Train: Confusion Matrix')
+        axes[0, 0].set_xticklabels(['> $10', '<= $10'])
+        axes[0, 0].set_yticklabels(['> $10', '<= $10'])
         
-        # Plot 2: Actual vs Predicted (Test)
-        axes[0, 1].scatter(y_test, y_test_pred, alpha=0.3, s=10)
-        axes[0, 1].plot([y_test.min(), y_test.max()], 
-                        [y_test.min(), y_test.max()], 'r--', lw=2)
-        axes[0, 1].set_xlabel('Actual Bid ($)')
-        axes[0, 1].set_ylabel('Predicted Bid ($)')
-        axes[0, 1].set_title('Test: Actual vs Predicted')
-        axes[0, 1].grid(True, alpha=0.3)
+        # Plot 2: Test Confusion Matrix
+        test_cm = confusion_matrix(y_test, y_test_pred)
+        sns.heatmap(test_cm, annot=True, fmt='d', cmap='Blues', ax=axes[0, 1])
+        axes[0, 1].set_xlabel('Predicted')
+        axes[0, 1].set_ylabel('Actual')
+        axes[0, 1].set_title('Test: Confusion Matrix')
+        axes[0, 1].set_xticklabels(['> $10', '<= $10'])
+        axes[0, 1].set_yticklabels(['> $10', '<= $10'])
         
-        # Plot 3: Residuals (Train)
-        train_residuals = y_train - y_train_pred
-        axes[1, 0].scatter(y_train_pred, train_residuals, alpha=0.3, s=10)
-        axes[1, 0].axhline(y=0, color='r', linestyle='--', lw=2)
-        axes[1, 0].set_xlabel('Predicted Bid ($)')
-        axes[1, 0].set_ylabel('Residuals ($)')
-        axes[1, 0].set_title('Train: Residual Plot')
+        # Plot 3: ROC Curve
+        train_fpr, train_tpr, _ = roc_curve(y_train, y_train_pred_proba)
+        test_fpr, test_tpr, _ = roc_curve(y_test, y_test_pred_proba)
+        train_auc = roc_auc_score(y_train, y_train_pred_proba)
+        test_auc = roc_auc_score(y_test, y_test_pred_proba)
+        
+        axes[1, 0].plot(train_fpr, train_tpr, label=f'Train (AUC = {train_auc:.3f})', linewidth=2)
+        axes[1, 0].plot(test_fpr, test_tpr, label=f'Test (AUC = {test_auc:.3f})', linewidth=2)
+        axes[1, 0].plot([0, 1], [0, 1], 'k--', label='Random', linewidth=1)
+        axes[1, 0].set_xlabel('False Positive Rate')
+        axes[1, 0].set_ylabel('True Positive Rate')
+        axes[1, 0].set_title('ROC Curve')
+        axes[1, 0].legend()
         axes[1, 0].grid(True, alpha=0.3)
         
-        # Plot 4: Residuals (Test)
-        test_residuals = y_test - y_test_pred
-        axes[1, 1].scatter(y_test_pred, test_residuals, alpha=0.3, s=10)
-        axes[1, 1].axhline(y=0, color='r', linestyle='--', lw=2)
-        axes[1, 1].set_xlabel('Predicted Bid ($)')
-        axes[1, 1].set_ylabel('Residuals ($)')
-        axes[1, 1].set_title('Test: Residual Plot')
+        # Plot 4: Precision-Recall Curve
+        train_precision, train_recall, _ = precision_recall_curve(y_train, y_train_pred_proba)
+        test_precision, test_recall, _ = precision_recall_curve(y_test, y_test_pred_proba)
+        
+        axes[1, 1].plot(train_recall, train_precision, label='Train', linewidth=2)
+        axes[1, 1].plot(test_recall, test_precision, label='Test', linewidth=2)
+        axes[1, 1].set_xlabel('Recall')
+        axes[1, 1].set_ylabel('Precision')
+        axes[1, 1].set_title('Precision-Recall Curve')
+        axes[1, 1].legend()
         axes[1, 1].grid(True, alpha=0.3)
         
         plt.tight_layout()
         
-        plot_path = self.output_dir / 'predictions_plot.png'
+        plot_path = self.output_dir / 'classification_plots.png'
         plt.savefig(plot_path, dpi=150, bbox_inches='tight')
-        print(f"\nPredictions plot saved to: {plot_path}")
+        print(f"\nClassification plots saved to: {plot_path}")
         plt.close()
         
         # Feature importance plot
@@ -344,7 +391,7 @@ class BidPredictionPipeline:
         plt.barh(range(len(top_features)), top_features['importance'])
         plt.yticks(range(len(top_features)), top_features['feature'])
         plt.xlabel('Importance')
-        plt.title(f'Top {top_n} Feature Importances (XGBoost)')
+        plt.title(f'Top {top_n} Feature Importances (XGBoost Classifier)')
         plt.gca().invert_yaxis()
         plt.tight_layout()
         
@@ -388,9 +435,9 @@ class BidPredictionPipeline:
         print(f"Feature names saved to: {features_path}")
     
     def run_pipeline(self):
-        """Execute full pipeline"""
+        """Execute full classification pipeline"""
         print("\n" + "="*70)
-        print("XGBOOST BID PREDICTION PIPELINE")
+        print("XGBOOST BINARY CLASSIFICATION PIPELINE")
         print("="*70)
         print(f"Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         
@@ -407,12 +454,12 @@ class BidPredictionPipeline:
         self.train_model(X_train, y_train, X_test, y_test)
         
         # Evaluate
-        train_metrics, test_metrics, y_train_pred, y_test_pred = self.evaluate_model(
+        train_metrics, test_metrics, y_train_pred, y_test_pred, y_train_pred_proba, y_test_pred_proba = self.evaluate_model(
             X_train, y_train, X_test, y_test
         )
         
         # Visualize
-        self.plot_results(y_train, y_train_pred, y_test, y_test_pred)
+        self.plot_results(y_train, y_train_pred, y_test, y_test_pred, y_train_pred_proba, y_test_pred_proba)
         
         # Save model
         self.save_model()
@@ -428,9 +475,9 @@ if __name__ == "__main__":
     # Initialize and run pipeline
     data_path = '/workspaces/maxsold/data/final_data/item_details/items_merged_20251201.parquet'
     
-    pipeline = BidPredictionPipeline(
+    pipeline = BidClassificationPipeline(
         data_path=data_path,
-        output_dir='model_pipeline/outputs'
+        output_dir='model_pipeline/outputs_classifier'
     )
     
     pipeline.run_pipeline()
