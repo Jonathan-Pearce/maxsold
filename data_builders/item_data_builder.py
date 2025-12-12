@@ -1,6 +1,9 @@
 """
-Merge auction_details, auction_search, and items_details datasets using auction_id as the join key.
-Strategy: Merge auction files first, then merge onto items.
+Merge auction_details, auction_search, items_details, and item_enriched_details datasets.
+Strategy: 
+1. Merge auction files first (using auction_id)
+2. Merge combined auction data onto items (using auction_id)
+3. Merge enriched item features onto items (using item_id)
 """
 
 import pandas as pd
@@ -9,12 +12,13 @@ import sys
 import gc
 
 def merge_datasets():
-    """Merge three datasets on auction_id"""
+    """Merge four datasets: auction_details, auction_search, items_details, and item_enriched_details"""
     
     # Define file paths
     items_path = Path('/workspaces/maxsold/data/engineered_data/items_details/items_details_20251201_with_embeddings_small.parquet')
     auction_details_path = Path('/workspaces/maxsold/data/engineered_data/auction_details/auction_details_20251201_engineered.parquet')
     auction_search_path = Path('/workspaces/maxsold/data/engineered_data/auction_search/auction_search_20251201_engineered.parquet')
+    item_enriched_path = Path('/workspaces/maxsold/data/engineered_data/item_enriched_details/item_enriched_details_20251201_engineered.parquet')
     
     # Output path
     output_dir = Path('/workspaces/maxsold/data/final_data/item_details')
@@ -132,28 +136,51 @@ def merge_datasets():
     print(f"   Columns: {len(df_items.columns)}")
     
     # Identify auction_id column in items
-    items_id_col = None
+    items_auction_id_col = None
     for col in ['auction_id', 'amAuctionId', 'auctionId']:
         if col in df_items.columns:
-            items_id_col = col
+            items_auction_id_col = col
             break
     
-    if not items_id_col:
+    if not items_auction_id_col:
         print(f"   Available columns: {df_items.columns.tolist()[:10]}...")
         print("ERROR: Could not find auction_id column in items_details")
         sys.exit(1)
     
-    print(f"   Using join key: '{items_id_col}'")
-    print(f"   Data type: {df_items[items_id_col].dtype}")
-    print(f"   Unique auctions in items: {df_items[items_id_col].nunique():,}")
+    print(f"   Using join key: '{items_auction_id_col}'")
+    print(f"   Data type: {df_items[items_auction_id_col].dtype}")
+    print(f"   Unique auctions in items: {df_items[items_auction_id_col].nunique():,}")
+    
+    # Identify item_id column in items
+    items_item_id_col = None
+    for col in ['item_id', 'amLotId', 'lotId', 'id']:
+        if col in df_items.columns:
+            items_item_id_col = col
+            break
+    
+    if not items_item_id_col:
+        print(f"   WARNING: Could not find item_id column in items_details")
+        print(f"   Available columns: {df_items.columns.tolist()[:10]}...")
+    else:
+        print(f"   Item ID column: '{items_item_id_col}'")
+        print(f"   Unique items: {df_items[items_item_id_col].nunique():,}")
     
     # Rename to standardize
-    if items_id_col != auction_id_col:
-        df_items = df_items.rename(columns={items_id_col: auction_id_col})
-        print(f"   Renamed '{items_id_col}' to '{auction_id_col}'")
+    if items_auction_id_col != auction_id_col:
+        df_items = df_items.rename(columns={items_auction_id_col: auction_id_col})
+        print(f"   Renamed '{items_auction_id_col}' to '{auction_id_col}'")
+    
+    # Standardize item_id column name
+    item_id_col = 'item_id'
+    if items_item_id_col and items_item_id_col != item_id_col:
+        df_items = df_items.rename(columns={items_item_id_col: item_id_col})
+        print(f"   Renamed '{items_item_id_col}' to '{item_id_col}'")
     
     # Convert to string
     df_items[auction_id_col] = df_items[auction_id_col].astype(str)
+    if item_id_col in df_items.columns:
+        df_items[item_id_col] = df_items[item_id_col].astype(str)
+        print(f"   Converted '{item_id_col}' to string type")
     
     # Check for overlapping columns
     print("\n6. Checking for duplicate columns between items and combined auctions...")
@@ -169,17 +196,99 @@ def merge_datasets():
     
     # Merge items with combined auction data
     print(f"\n7. Merging items with combined auction data on '{auction_id_col}'...")
-    df_final = df_items.merge(
+    df_merged = df_items.merge(
         df_auctions_combined,
         on=auction_id_col,
         how='left',  # Left join to keep all items
         suffixes=('', '_auction')
     )
-    print(f"   Final shape: {df_final.shape}")
+    print(f"   Merged shape: {df_merged.shape}")
     
     # Free memory
     del df_items, df_auctions_combined
     gc.collect()
+    
+    # Load item_enriched_details
+    print(f"\n8. Loading item_enriched_details from:\n   {item_enriched_path}")
+    if not item_enriched_path.exists():
+        print(f"   WARNING: File not found: {item_enriched_path}")
+        print(f"   Skipping enriched item features. Run feature_engineering/item_enriched_features.py first.")
+        df_final = df_merged
+    else:
+        df_enriched = pd.read_parquet(item_enriched_path)
+        print(f"   Shape: {df_enriched.shape}")
+        print(f"   Columns: {len(df_enriched.columns)}")
+        
+        # Identify item_id column in enriched data
+        enriched_item_id_col = None
+        for col in ['item_id', 'amLotId', 'lotId']:
+            if col in df_enriched.columns:
+                enriched_item_id_col = col
+                break
+        
+        if not enriched_item_id_col:
+            print(f"   WARNING: Could not find item_id column in enriched data")
+            print(f"   Available columns: {df_enriched.columns.tolist()[:10]}...")
+            print(f"   Skipping enriched item features.")
+            df_final = df_merged
+        else:
+            print(f"   Using join key: '{enriched_item_id_col}'")
+            print(f"   Data type: {df_enriched[enriched_item_id_col].dtype}")
+            print(f"   Unique items in enriched: {df_enriched[enriched_item_id_col].nunique():,}")
+            
+            # Rename to standardize
+            if enriched_item_id_col != item_id_col:
+                df_enriched = df_enriched.rename(columns={enriched_item_id_col: item_id_col})
+                print(f"   Renamed '{enriched_item_id_col}' to '{item_id_col}'")
+            
+            # Convert to string
+            df_enriched[item_id_col] = df_enriched[item_id_col].astype(str)
+            print(f"   Converted enriched '{item_id_col}' to string type")
+            
+            # Check dtypes before merge
+            print(f"   Checking dtypes before merge:")
+            print(f"     df_merged['{item_id_col}']: {df_merged[item_id_col].dtype}")
+            print(f"     df_enriched['{item_id_col}']: {df_enriched[item_id_col].dtype}")
+            
+            # Check for overlapping columns
+            print("\n9. Checking for duplicate columns between items and enriched...")
+            merged_cols = set(df_merged.columns)
+            enriched_cols = set(df_enriched.columns)
+            overlap = (merged_cols & enriched_cols) - {item_id_col}
+            
+            if overlap:
+                print(f"   Overlapping columns: {overlap}")
+                print(f"   Adding '_enriched' suffix to {len(overlap)} columns in enriched data")
+                rename_dict = {col: f"{col}_enriched" for col in overlap}
+                df_enriched = df_enriched.rename(columns=rename_dict)
+            
+            # Merge enriched features onto items using item_id
+            print(f"\n10. Merging enriched item features on '{item_id_col}'...")
+            
+            if item_id_col not in df_merged.columns:
+                print(f"   ERROR: '{item_id_col}' not found in merged data. Cannot join enriched features.")
+                print(f"   Continuing without enriched features.")
+                df_final = df_merged
+            else:
+                df_final = df_merged.merge(
+                    df_enriched,
+                    on=item_id_col,
+                    how='left',  # Left join to keep all items
+                    suffixes=('', '_enriched')
+                )
+                print(f"   Final shape after enriched merge: {df_final.shape}")
+                
+                # Check how many items got enriched features
+                enriched_cols_check = [col for col in df_enriched.columns if col != item_id_col]
+                if enriched_cols_check:
+                    sample_col = enriched_cols_check[0]
+                    matched_count = df_final[sample_col].notna().sum()
+                    match_pct = (matched_count / len(df_final)) * 100
+                    print(f"   Items with enriched features: {matched_count:,} ({match_pct:.1f}%)")
+                
+                # Free memory
+                del df_enriched
+                gc.collect()
     
     # Summary statistics
     print("\n" + "="*70)
@@ -188,7 +297,8 @@ def merge_datasets():
     print(f"Final merged dataset:          {df_final.shape[0]:,} rows × {df_final.shape[1]:,} cols")
     
     # Check merge quality
-    print(f"\n8. Checking merge quality...")
+    step_num = 11 if item_enriched_path.exists() else 9
+    print(f"\n{step_num}. Checking merge quality...")
     null_counts = df_final.isnull().sum()
     cols_with_nulls = null_counts[null_counts > 0].sort_values(ascending=False)
     
@@ -200,15 +310,20 @@ def merge_datasets():
             print(f"     {col}: {count:,} ({pct:.1f}%)")
     
     # Save merged dataset
-    print(f"\n9. Saving merged dataset to:\n   {output_path}")
+    step_num += 1
+    print(f"\n{step_num}. Saving merged dataset to:\n   {output_path}")
     df_final.to_parquet(output_path, index=False, compression='snappy')
     
     file_size_mb = output_path.stat().st_size / (1024 * 1024)
     print(f"   File size: {file_size_mb:.2f} MB")
     
     # Display sample (exclude embedding columns for readability)
-    print("\n10. Sample of merged data (first 3 rows, selected columns):")
+    step_num += 1
+    print(f"\n{step_num}. Sample of merged data (first 3 rows, selected columns):")
     sample_cols = [auction_id_col]
+    if item_id_col in df_final.columns:
+        sample_cols.append(item_id_col)
+    
     for col in df_final.columns:
         if len(sample_cols) < 15:
             if col not in sample_cols and not any(col.endswith(f'_emb_{i}') for i in range(200)):
