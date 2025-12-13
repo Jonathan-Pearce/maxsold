@@ -243,6 +243,9 @@ def bid_features(df):
     #create binary current_bid feature <= 10 or > 10    
     df['current_bid_le_10_binary'] = np.where(df['current_bid'] <= 10 , 1, 0)
 
+    #create log(x+1) transformed current_bid feature
+    df['log_current_bid'] = np.log1p(df['current_bid'])
+
     return df
 
 
@@ -264,7 +267,8 @@ if __name__ == "__main__":
 
     # Keep only relevant columns for modeling (including all embedding columns)
     columns_to_keep = [
-        'id', 'auction_id', 'viewed', 'current_bid', 'bid_count', 'bidding_extended', 'current_bid_le_10_binary'
+        'id', 'auction_id', 'viewed', 'current_bid', 'bid_count', 'bidding_extended',
+          'current_bid_le_10_binary', 'log_current_bid'
     ] + [col for col in df_with_embeddings.columns if '_emb_' in col
     ]
     df_with_embeddings_model = df_with_embeddings[columns_to_keep]
