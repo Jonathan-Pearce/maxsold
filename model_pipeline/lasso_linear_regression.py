@@ -131,10 +131,17 @@ class LassoRegressionPipeline:
                 X[f'{col}_dayofweek'] = X[col].dt.dayofweek
                 X[f'{col}_timestamp'] = X[col].astype(np.int64) // 10**9  # Unix timestamp
                 X = X.drop(columns=[col])
+
+        #convert boolean columns to numeric
+        bool_cols = X.select_dtypes(include=['bool']).columns.tolist()
+        print(f"\nBoolean columns: {len(bool_cols)}")
+        for col in bool_cols:
+            X[col] = X[col].astype(int)
         
         # Identify categorical columns
         categorical_cols = X.select_dtypes(include=['object', 'category']).columns.tolist()
         print(f"\nCategorical columns: {len(categorical_cols)}")
+        print(f"Categorical columns: {categorical_cols}")
         
         # Label encode categorical columns (keep only top categories)
         for col in categorical_cols:
@@ -150,7 +157,7 @@ class LassoRegressionPipeline:
                 self.label_encoders[col] = le
         
         print(f"  Encoded {len(self.label_encoders)} categorical columns")
-        
+
         # Handle missing values in numeric columns
         numeric_cols = X.select_dtypes(include=[np.number]).columns
         print(f"\nNumeric columns: {len(numeric_cols)}")
@@ -249,7 +256,7 @@ class LassoRegressionPipeline:
             cv=5,
             scoring='neg_mean_squared_error',
             n_jobs=-1,
-            verbose=1
+            verbose=3
         )
         
         grid_search.fit(X_train_scaled, y_train)

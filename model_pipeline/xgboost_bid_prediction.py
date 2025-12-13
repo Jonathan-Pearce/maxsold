@@ -33,8 +33,16 @@ class BidPredictionPipeline:
         self.model = None
         self.label_encoders = {}
         self.feature_names = []
-        self.target_col = 'current_bid'
-        self.exclude_cols = ['current_bid', 'id', 'auction_id', 'current_bid_le_10_binary']
+        self.target_col = 'log_current_bid'
+        self.exclude_cols = [
+            'log_current_bid',
+            'current_bid',  # Don't use actual bid amount
+            'minimum_bid',  # Don't use minimum bid
+            'bid_count',    # Don't use bid count
+            'current_bid_le_10_binary',  # Drop binary target if exists
+            'id', 'auction_id', 'totalBids', 'average_bids_per_lot',
+            'bidding_extended', 'viewed'
+        ]
         
     def load_and_prepare_data(self):
         """Load data and prepare features"""
@@ -233,32 +241,82 @@ class BidPredictionPipeline:
         print("MODEL EVALUATION")
         print("="*70)
         
-        # Predictions
-        y_train_pred = self.model.predict(X_train)
-        y_test_pred = self.model.predict(X_test)
+        # Predictions on log scale
+        y_train_pred_log = self.model.predict(X_train)
+        y_test_pred_log = self.model.predict(X_test)
         
-        # Calculate metrics
-        train_metrics = {
-            'rmse': np.sqrt(mean_squared_error(y_train, y_train_pred)),
-            'mae': mean_absolute_error(y_train, y_train_pred),
-            'r2': r2_score(y_train, y_train_pred)
-        }
+        # Calculate metrics on log scale
+        train_metrics_log = {
+            'rmse': np.sqrt(mean_squared_error(y_train, y_train_pred_log)),
+            'mae': mean_absolute_error(y_train, y_train_pred_log),
+            'r2': r2_score(y_train, y_train_pred_log)
+        };
         
-        test_metrics = {
-            'rmse': np.sqrt(mean_squared_error(y_test, y_test_pred)),
-            'mae': mean_absolute_error(y_test, y_test_pred),
-            'r2': r2_score(y_test, y_test_pred)
-        }
+        test_metrics_log = {
+            'rmse': np.sqrt(mean_squared_error(y_test, y_test_pred_log)),
+            'mae': mean_absolute_error(y_test, y_test_pred_log),
+            'r2': r2_score(y_test, y_test_pred_log)
+        };
         
-        print("\nTRAIN METRICS:")
-        print(f"  RMSE: ${train_metrics['rmse']:,.2f}")
-        print(f"  MAE:  ${train_metrics['mae']:,.2f}")
-        print(f"  R²:   {train_metrics['r2']:.4f}")
+        print("\nMETRICS ON LOG SCALE:")
+        print("-" * 70)
+        print("TRAIN SET:")
+        print(f"  RMSE: {train_metrics_log['rmse']:.4f}")
+        print(f"  MAE:  {train_metrics_log['mae']:.4f}")
+        print(f"  R²:   {train_metrics_log['r2']:.4f}")
         
-        print("\nTEST METRICS:")
-        print(f"  RMSE: ${test_metrics['rmse']:,.2f}")
-        print(f"  MAE:  ${test_metrics['mae']:,.2f}")
-        print(f"  R²:   {test_metrics['r2']:.4f}")
+        print("\nTEST SET:")
+        print(f"  RMSE: {test_metrics_log['rmse']:.4f}")
+        print(f"  MAE:  {test_metrics_log['mae']:.4f}")
+        print(f"  R²:   {test_metrics_log['r2']:.4f}")
+        
+        # Transform predictions back to original scale using expm1 (inverse of log1p)
+        print("\n" + "="*70)
+        print("TRANSFORMING PREDICTIONS TO ORIGINAL SCALE")
+        print("="*70)
+        
+        y_train_pred_original = np.expm1(y_train_pred_log)
+        y_test_pred_original = np.expm1(y_test_pred_log)
+        
+        # Transform targets back to original scale
+        y_train_original = np.expm1(y_train)
+        y_test_original = np.expm1(y_test)
+        
+        # Calculate metrics on original scale
+        train_metrics_original = {
+            'rmse': np.sqrt(mean_squared_error(y_train_original, y_train_pred_original)),
+            'mae': mean_absolute_error(y_train_original, y_train_pred_original),
+            'r2': r2_score(y_train_original, y_train_pred_original)
+        };
+        
+        test_metrics_original = {
+            'rmse': np.sqrt(mean_squared_error(y_test_original, y_test_pred_original)),
+            'mae': mean_absolute_error(y_test_original, y_test_pred_original),
+            'r2': r2_score(y_test_original, y_test_pred_original)
+        };
+        
+        print("\nMETRICS ON ORIGINAL SCALE (Current Bid in $):")
+        print("=" * 70)
+        print("TRAIN SET:")
+        print(f"  RMSE: ${train_metrics_original['rmse']:,.2f}")
+        print(f"  MAE:  ${train_metrics_original['mae']:,.2f}")
+        print(f"  R²:   {train_metrics_original['r2']:.4f}")
+        
+        print("\nTEST SET:")
+        print(f"  RMSE: ${test_metrics_original['rmse']:,.2f}")
+        print(f"  MAE:  ${test_metrics_original['mae']:,.2f}")
+        print(f"  R²:   {test_metrics_original['r2']:.4f}")
+        print("=" * 70)
+        
+        # Print sample predictions
+        print("\nSample predictions (first 10 test samples):")
+        print(f"{'Actual ($)':>12} {'Predicted ($)':>15} {'Error ($)':>12}")
+        print("-" * 42)
+        for i in range(min(10, len(y_test_original))):
+            actual = y_test_original.iloc[i]
+            pred = y_test_pred_original[i]
+            error = pred - actual
+            print(f"${actual:>11.2f} ${pred:>14.2f} ${error:>11.2f}")
         
         # Get best iteration if available
         best_iter = None
@@ -269,64 +327,131 @@ class BidPredictionPipeline:
         metrics_path = self.output_dir / 'model_metrics.json'
         with open(metrics_path, 'w') as f:
             json.dump({
-                'train': train_metrics,
-                'test': test_metrics,
+                'train_log_scale': train_metrics_log,
+                'test_log_scale': test_metrics_log,
+                'train_original_scale': train_metrics_original,
+                'test_original_scale': test_metrics_original,
                 'best_iteration': best_iter,
                 'timestamp': datetime.now().isoformat()
             }, f, indent=2)
         print(f"\nMetrics saved to: {metrics_path}")
         
-        return train_metrics, test_metrics, y_train_pred, y_test_pred
+        return (train_metrics_log, test_metrics_log, train_metrics_original, test_metrics_original,
+                y_train_pred_log, y_test_pred_log, y_train_pred_original, y_test_pred_original,
+                y_train_original, y_test_original)
     
-    def plot_results(self, y_train, y_train_pred, y_test, y_test_pred):
+    def plot_results(self, y_train_original, y_train_pred_original, 
+                     y_test_original, y_test_pred_original,
+                     y_train_log, y_train_pred_log,
+                     y_test, y_test_pred_log):
         """Create visualization plots"""
         print("\n" + "="*70)
         print("CREATING VISUALIZATIONS")
         print("="*70)
         
-        fig, axes = plt.subplots(2, 2, figsize=(15, 12))
+        # 1. Actual vs Predicted (Original Scale)
+        fig, axes = plt.subplots(1, 2, figsize=(16, 6))
         
-        # Plot 1: Actual vs Predicted (Train)
-        axes[0, 0].scatter(y_train, y_train_pred, alpha=0.3, s=10)
-        axes[0, 0].plot([y_train.min(), y_train.max()], 
-                        [y_train.min(), y_train.max()], 'r--', lw=2)
-        axes[0, 0].set_xlabel('Actual Bid ($)')
-        axes[0, 0].set_ylabel('Predicted Bid ($)')
-        axes[0, 0].set_title('Train: Actual vs Predicted')
+        # Train set
+        axes[0].scatter(y_train_original, y_train_pred_original, alpha=0.3, s=10)
+        axes[0].plot([y_train_original.min(), y_train_original.max()], 
+                     [y_train_original.min(), y_train_original.max()], 
+                     'r--', lw=2, label='Perfect Prediction')
+        axes[0].set_xlabel('Actual Current Bid ($)', fontsize=12)
+        axes[0].set_ylabel('Predicted Current Bid ($)', fontsize=12)
+        axes[0].set_title('Train Set - Actual vs Predicted', fontsize=14, fontweight='bold')
+        axes[0].legend()
+        axes[0].grid(True, alpha=0.3)
+        
+        # Test set
+        axes[1].scatter(y_test_original, y_test_pred_original, alpha=0.3, s=10, color='orange')
+        axes[1].plot([y_test_original.min(), y_test_original.max()], 
+                     [y_test_original.min(), y_test_original.max()], 
+                     'r--', lw=2, label='Perfect Prediction')
+        axes[1].set_xlabel('Actual Current Bid ($)', fontsize=12)
+        axes[1].set_ylabel('Predicted Current Bid ($)', fontsize=12)
+        axes[1].set_title('Test Set - Actual vs Predicted', fontsize=14, fontweight='bold')
+        axes[1].legend()
+        axes[1].grid(True, alpha=0.3)
+        
+        plt.tight_layout()
+        pred_path = self.output_dir / 'actual_vs_predicted_original.png'
+        plt.savefig(pred_path, dpi=150, bbox_inches='tight')
+        print(f"Actual vs Predicted plot (original scale) saved to: {pred_path}")
+        plt.close()
+        
+        # 2. Residual plots (Original Scale)
+        fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+        
+        # Train residuals
+        train_residuals = y_train_pred_original - y_train_original
+        axes[0, 0].scatter(y_train_pred_original, train_residuals, alpha=0.3, s=10)
+        axes[0, 0].axhline(y=0, color='r', linestyle='--', lw=2)
+        axes[0, 0].set_xlabel('Predicted Current Bid ($)', fontsize=12)
+        axes[0, 0].set_ylabel('Residuals ($)', fontsize=12)
+        axes[0, 0].set_title('Train Set - Residual Plot', fontsize=14, fontweight='bold')
         axes[0, 0].grid(True, alpha=0.3)
         
-        # Plot 2: Actual vs Predicted (Test)
-        axes[0, 1].scatter(y_test, y_test_pred, alpha=0.3, s=10)
-        axes[0, 1].plot([y_test.min(), y_test.max()], 
-                        [y_test.min(), y_test.max()], 'r--', lw=2)
-        axes[0, 1].set_xlabel('Actual Bid ($)')
-        axes[0, 1].set_ylabel('Predicted Bid ($)')
-        axes[0, 1].set_title('Test: Actual vs Predicted')
+        # Test residuals
+        test_residuals = y_test_pred_original - y_test_original
+        axes[0, 1].scatter(y_test_pred_original, test_residuals, alpha=0.3, s=10, color='orange')
+        axes[0, 1].axhline(y=0, color='r', linestyle='--', lw=2)
+        axes[0, 1].set_xlabel('Predicted Current Bid ($)', fontsize=12)
+        axes[0, 1].set_ylabel('Residuals ($)', fontsize=12)
+        axes[0, 1].set_title('Test Set - Residual Plot', fontsize=14, fontweight='bold')
         axes[0, 1].grid(True, alpha=0.3)
         
-        # Plot 3: Residuals (Train)
-        train_residuals = y_train - y_train_pred
-        axes[1, 0].scatter(y_train_pred, train_residuals, alpha=0.3, s=10)
-        axes[1, 0].axhline(y=0, color='r', linestyle='--', lw=2)
-        axes[1, 0].set_xlabel('Predicted Bid ($)')
-        axes[1, 0].set_ylabel('Residuals ($)')
-        axes[1, 0].set_title('Train: Residual Plot')
+        # Train residual histogram
+        axes[1, 0].hist(train_residuals, bins=50, edgecolor='black', alpha=0.7)
+        axes[1, 0].axvline(x=0, color='r', linestyle='--', lw=2)
+        axes[1, 0].set_xlabel('Residuals ($)', fontsize=12)
+        axes[1, 0].set_ylabel('Frequency', fontsize=12)
+        axes[1, 0].set_title('Train Set - Residual Distribution', fontsize=14, fontweight='bold')
         axes[1, 0].grid(True, alpha=0.3)
         
-        # Plot 4: Residuals (Test)
-        test_residuals = y_test - y_test_pred
-        axes[1, 1].scatter(y_test_pred, test_residuals, alpha=0.3, s=10)
-        axes[1, 1].axhline(y=0, color='r', linestyle='--', lw=2)
-        axes[1, 1].set_xlabel('Predicted Bid ($)')
-        axes[1, 1].set_ylabel('Residuals ($)')
-        axes[1, 1].set_title('Test: Residual Plot')
+        # Test residual histogram
+        axes[1, 1].hist(test_residuals, bins=50, edgecolor='black', alpha=0.7, color='orange')
+        axes[1, 1].axvline(x=0, color='r', linestyle='--', lw=2)
+        axes[1, 1].set_xlabel('Residuals ($)', fontsize=12)
+        axes[1, 1].set_ylabel('Frequency', fontsize=12)
+        axes[1, 1].set_title('Test Set - Residual Distribution', fontsize=14, fontweight='bold')
         axes[1, 1].grid(True, alpha=0.3)
         
         plt.tight_layout()
+        residual_path = self.output_dir / 'residual_plots.png'
+        plt.savefig(residual_path, dpi=150, bbox_inches='tight')
+        print(f"Residual plots saved to: {residual_path}")
+        plt.close()
         
-        plot_path = self.output_dir / 'predictions_plot.png'
-        plt.savefig(plot_path, dpi=150, bbox_inches='tight')
-        print(f"\nPredictions plot saved to: {plot_path}")
+        # 3. Log scale predictions
+        fig, axes = plt.subplots(1, 2, figsize=(16, 6))
+        
+        # Train set (log scale)
+        axes[0].scatter(y_train_log, y_train_pred_log, alpha=0.3, s=10, color='green')
+        axes[0].plot([y_train_log.min(), y_train_log.max()], 
+                     [y_train_log.min(), y_train_log.max()], 
+                     'r--', lw=2, label='Perfect Prediction')
+        axes[0].set_xlabel('Actual Log(Current Bid + 1)', fontsize=12)
+        axes[0].set_ylabel('Predicted Log(Current Bid + 1)', fontsize=12)
+        axes[0].set_title('Train Set - Log Scale Predictions', fontsize=14, fontweight='bold')
+        axes[0].legend()
+        axes[0].grid(True, alpha=0.3)
+        
+        # Test set (log scale)
+        axes[1].scatter(y_test_log, y_test_pred_log, alpha=0.3, s=10, color='purple')
+        axes[1].plot([y_test_log.min(), y_test_log.max()], 
+                     [y_test_log.min(), y_test_log.max()], 
+                     'r--', lw=2, label='Perfect Prediction')
+        axes[1].set_xlabel('Actual Log(Current Bid + 1)', fontsize=12)
+        axes[1].set_ylabel('Predicted Log(Current Bid + 1)', fontsize=12)
+        axes[1].set_title('Test Set - Log Scale Predictions', fontsize=14, fontweight='bold')
+        axes[1].legend()
+        axes[1].grid(True, alpha=0.3)
+        
+        plt.tight_layout()
+        log_pred_path = self.output_dir / 'actual_vs_predicted_log.png'
+        plt.savefig(log_pred_path, dpi=150, bbox_inches='tight')
+        print(f"Log scale predictions plot saved to: {log_pred_path}")
         plt.close()
         
         # Feature importance plot
@@ -364,15 +489,15 @@ class BidPredictionPipeline:
         print("SAVING MODEL")
         print("="*70)
         
-        # Save XGBoost model
+        # Save XGBoost model using pickle (sklearn wrapper)
         model_path = self.output_dir / 'xgboost_model.pkl'
         with open(model_path, 'wb') as f:
             pickle.dump(self.model, f)
         print(f"\nModel saved to: {model_path}")
         
-        # Also save in XGBoost's native format
+        # Also save using XGBoost's native format (booster only)
         model_json_path = self.output_dir / 'xgboost_model.json'
-        self.model.save_model(str(model_json_path))
+        self.model.get_booster().save_model(str(model_json_path))
         print(f"Model (JSON format) saved to: {model_json_path}")
         
         # Save label encoders
@@ -407,12 +532,16 @@ class BidPredictionPipeline:
         self.train_model(X_train, y_train, X_test, y_test)
         
         # Evaluate
-        train_metrics, test_metrics, y_train_pred, y_test_pred = self.evaluate_model(
-            X_train, y_train, X_test, y_test
-        )
+        results = self.evaluate_model(X_train, y_train, X_test, y_test)
+        (train_metrics_log, test_metrics_log, train_metrics_original, test_metrics_original,
+         y_train_pred_log, y_test_pred_log, y_train_pred_original, y_test_pred_original,
+         y_train_original, y_test_original) = results
         
         # Visualize
-        self.plot_results(y_train, y_train_pred, y_test, y_test_pred)
+        self.plot_results(y_train_original, y_train_pred_original,
+                         y_test_original, y_test_pred_original,
+                         y_train, y_train_pred_log,
+                         y_test, y_test_pred_log)
         
         # Save model
         self.save_model()
