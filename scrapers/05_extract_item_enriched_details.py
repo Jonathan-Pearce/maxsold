@@ -291,7 +291,8 @@ def save_to_parquet(results: List[Dict[str, Any]], output_path: str):
             df[col] = pd.to_numeric(df[col], errors='coerce').astype('Int64')
     
     # Convert boolean columns more carefully
-    boolean_cols = ['working', 'singleKeyItem']
+    #boolean_cols = ['working', 'singleKeyItem']
+    boolean_cols = ['singleKeyItem']
     for col in boolean_cols:
         if col in df.columns:
             # Convert to boolean, handling None/NaN and various string representations
