@@ -1,5 +1,7 @@
 # Maxsold Data Projecct
 
+https://support.maxsold.com/hc/en-us/articles/203144054-How-do-bid-increments-work
+
 Example terminal commands
 
 ```
