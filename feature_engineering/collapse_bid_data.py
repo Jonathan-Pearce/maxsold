@@ -133,7 +133,7 @@ def main():
     output_path.parent.mkdir(parents=True, exist_ok=True)
     
     # Configuration
-    TIME_THRESHOLD_MINUTES = 1
+    TIME_THRESHOLD_MINUTES = 2
     MAX_ITEMS = 100  # Set to None to process all items, or specify number to limit
     
     print(f"\nConfiguration:")
@@ -269,7 +269,7 @@ def main():
     
     # Update output filename if processing limited items
     if MAX_ITEMS and MAX_ITEMS < len(all_items):
-        output_path = output_path.parent / f'bid_history_collapsed_1min_{MAX_ITEMS}items_20251201.parquet'
+        output_path = output_path.parent / f'bid_history_collapsed_{TIME_THRESHOLD_MINUTES}min_{MAX_ITEMS}items_20251201.parquet'
     
     print(f"Saving to: {output_path}")
     df_collapsed.to_parquet(output_path, index=False)

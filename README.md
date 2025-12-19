@@ -1,6 +1,8 @@
 # Maxsold Data Projecct
 
 https://support.maxsold.com/hc/en-us/articles/203144054-How-do-bid-increments-work
+https://support.maxsold.com/hc/en-us/articles/203144064-What-does-soft-close-mean
+
 
 Example terminal commands
 
