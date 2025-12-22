@@ -1,18 +1,12 @@
-import requests
-import pandas as pd
-from typing import Any, Dict, List, Optional
-from pathlib import Path
-import sys
-from datetime import datetime
+"""
+MaxSold Items Details Scraper
+This script is now a thin wrapper around the refactored pipeline.
+For reusable extraction logic, import from scrapers.extractors.item_details
+For pipeline with file I/O, import from scrapers.pipelines.item_details_pipeline
+"""
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
-}
-
-API_URL = "https://maxsold.maxsold.com/msapi/auctions/items"
-
-OUT_DIR_DEFAULT = "data/item_details"
-AUCTION_SEARCH_DEFAULT = f"data/auction_search/auction_search_{datetime.now().strftime('%Y%m%d')}.parquet"
+from typing import List, Optional
+from pipelines.item_details_pipeline import run_item_details_pipeline
 
 
 def fetch_auction_items(auction_id: str, timeout: int = 30) -> Any:
@@ -178,50 +172,16 @@ def main(
     input_parquet: Optional[str] = None
 ):
     """Main function to fetch and save items data"""
-    
-    # Determine source of auction IDs
-    if input_parquet:
-        auction_ids = load_auction_ids_from_parquet(input_parquet)
-    elif auction_ids is None or len(auction_ids) == 0:
-        # Default: load from default parquet file
-        print(f"No auction IDs provided, loading from default parquet file...")
-        auction_ids = load_auction_ids_from_parquet(AUCTION_SEARCH_DEFAULT)
-    
-    if not auction_ids:
-        print("No auction IDs to process.", file=sys.stderr)
-        return
-    
-    output_path = output_path or f"{OUT_DIR_DEFAULT}/items_details_{datetime.now().strftime('%Y%m%d')}.parquet"
-    
-    print("MaxSold Items Details Scraper")
-    print("=" * 60)
-    print(f"Auctions to fetch: {len(auction_ids)}")
-    if len(auction_ids) <= 10:
-        print(f"Auction IDs: {', '.join(auction_ids)}")
-    else:
-        print(f"Auction IDs: {', '.join(auction_ids[:10])} ... (showing first 10)")
-    print("=" * 60)
-    
-    # Fetch all items
-    items = fetch_items_for_multiple_auctions(auction_ids)
-    
-    if not items:
-        print("No items data retrieved.", file=sys.stderr)
-        return
-    
-    # Save to parquet
-    save_to_parquet(items, output_path)
-    
-    # Print sample
-    df = pd.read_parquet(output_path)
-    print("\nSample items (first 5 rows):")
-    display_cols = ['auction_id', 'id', 'title', 'current_bid', 'bid_count', 'viewed']
-    available_cols = [c for c in display_cols if c in df.columns]
-    print(df[available_cols].head(5).to_string())
+    run_item_details_pipeline(
+        auction_ids=auction_ids,
+        output_path=output_path,
+        input_parquet=input_parquet
+    )
 
 
 if __name__ == "__main__":
     import argparse
+    import sys
     
     parser = argparse.ArgumentParser(description="Scrape MaxSold items details API")
     parser.add_argument("auction_ids", nargs="*", help="Auction ID(s) to fetch (optional if using --input-parquet)")
@@ -246,8 +206,5 @@ if __name__ == "__main__":
             sys.exit(1)
     elif args.auction_ids:
         auction_ids = args.auction_ids
-    else:
-        # No arguments provided, use default parquet file
-        input_parquet = AUCTION_SEARCH_DEFAULT
     
     main(auction_ids=auction_ids, output_path=args.output, input_parquet=input_parquet)

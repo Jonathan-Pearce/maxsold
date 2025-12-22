@@ -1,196 +1,12 @@
-import requests
-import pandas as pd
-from typing import Any, Dict, List, Optional
-from pathlib import Path
-import sys
+"""
+MaxSold Auction Search Scraper
+This script is now a thin wrapper around the refactored pipeline.
+For reusable extraction logic, import from scrapers.extractors.auction_search
+For pipeline with file I/O, import from scrapers.pipelines.auction_search_pipeline
+"""
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
-}
-
-API_URL = "https://api.maxsold.com/sales/search"
-
-OUT_DIR_DEFAULT = "data/auction_search"
-
-
-def fetch_sales_search(
-    lat: float = 43.653226,
-    lng: float = -79.3831843,
-    radius_metres: int = 201168,
-    country: str = "canada",
-    page_number: int = 0,
-    limit: int = 100,
-    sale_state: str = "closed",
-    days: int = 120,
-    total: bool = True,
-    timeout: int = 30
-) -> Any:
-    """Fetch sales search data from MaxSold API"""
-    params = {
-        "lat": lat,
-        "lng": lng,
-        "radiusMetres": radius_metres,
-        "country": country,
-        "pageNumber": page_number,
-        "limit": limit,
-        "saleState": sale_state,
-        "days": days,
-        "total": str(total).lower()
-    }
-    
-    print(f"Fetching sales data: page={page_number}, limit={limit}...")
-    r = requests.get(API_URL, params=params, headers=HEADERS, timeout=timeout)
-    r.raise_for_status()
-    return r.json()
-
-
-def extract_sales_from_json(data: Any) -> List[Dict[str, Any]]:
-    """Extract sale items from JSON response"""
-    # API typically returns: { "sales": [...], "total": N }
-    sales = []
-    
-    if isinstance(data, dict):
-        sales_list = data.get("sales") or data.get("results") or data.get("data")
-        if isinstance(sales_list, list):
-            sales = sales_list
-        elif isinstance(data, dict) and any(k in data for k in ["amAuctionId", "title"]):
-            # Single sale object
-            sales = [data]
-    elif isinstance(data, list):
-        sales = data
-    
-    extracted = []
-    for sale in sales:
-        if not isinstance(sale, dict):
-            continue
-        
-        # Extract address fields
-        address = sale.get("address", {}) or {}
-        city = address.get("city", "")
-        region = address.get("region", "")
-        country = address.get("country", "")
-        
-        # Extract latLng fields
-        latlng = address.get("latLng", {}) or {}
-        lat = latlng.get("lat", None)
-        lng = latlng.get("lng", None)
-        
-        row = {
-            "amAuctionId": sale.get("amAuctionId", ""),
-            "title": sale.get("title", ""),
-            "displayRegion": sale.get("displayRegion", ""),
-            "distanceMeters": sale.get("distanceMeters", None),
-            "saleType": sale.get("saleType", ""),
-            "saleCategory": sale.get("saleCategory", ""),
-            "openTime": sale.get("openTime", ""),
-            "closeTime": sale.get("closeTime", ""),
-            "totalBids": sale.get("totalBids", None),
-            "numberLots": sale.get("numberLots", None),
-            "hasShipping": sale.get("hasShipping", None),
-            "city": city,
-            "region": region,
-            "country": country,
-            "lat": lat,
-            "lng": lng,
-        }
-        extracted.append(row)
-    
-    return extracted
-
-
-def fetch_all_pages(
-    lat: float = 43.653226,
-    lng: float = -79.3831843,
-    radius_metres: int = 201168,
-    country: str = "canada",
-    limit: int = 100,
-    sale_state: str = "closed",
-    days: int = 120,
-    max_pages: Optional[int] = None
-) -> List[Dict[str, Any]]:
-    """Fetch all pages of sales data"""
-    all_sales = []
-    page_number = 0
-    
-    while True:
-        try:
-            data = fetch_sales_search(
-                lat=lat,
-                lng=lng,
-                radius_metres=radius_metres,
-                country=country,
-                page_number=page_number,
-                limit=limit,
-                sale_state=sale_state,
-                days=days,
-                total=True
-            )
-        except Exception as e:
-            print(f"Error fetching page {page_number}: {e}", file=sys.stderr)
-            break
-        
-        sales = extract_sales_from_json(data)
-        if not sales:
-            print(f"No sales found on page {page_number}, stopping.")
-            break
-        
-        all_sales.extend(sales)
-        print(f"  Page {page_number}: extracted {len(sales)} sales (total: {len(all_sales)})")
-        
-        # Check if we have more pages
-        total_available = data.get("total") if isinstance(data, dict) else None
-        if total_available is not None:
-            print(f"  API reports {total_available} total sales available")
-            if len(all_sales) >= total_available:
-                print("All sales fetched.")
-                break
-        
-        # Check if this page had fewer results than limit (last page)
-        if len(sales) < limit:
-            print("Last page reached (partial results).")
-            break
-        
-        # Max pages safety check
-        if max_pages is not None and page_number >= max_pages - 1:
-            print(f"Max pages ({max_pages}) reached.")
-            break
-        
-        page_number += 1
-    
-    return all_sales
-
-
-def save_to_parquet(sales: List[Dict[str, Any]], output_path: str):
-    """Save sales data to parquet file"""
-    if not sales:
-        print("No sales to save.", file=sys.stderr)
-        return
-    
-    df = pd.DataFrame(sales)
-    
-    # Convert numeric columns
-    numeric_cols = ['distanceMeters', 'totalBids', 'numberLots', 'lat', 'lng']
-    for col in numeric_cols:
-        if col in df.columns:
-            df[col] = pd.to_numeric(df[col], errors='coerce')
-    
-    # Convert boolean
-    if 'hasShipping' in df.columns:
-        df['hasShipping'] = df['hasShipping'].astype('boolean')
-    
-    # Convert datetime
-    for col in ['openTime', 'closeTime']:
-        if col in df.columns:
-            df[col] = pd.to_datetime(df[col], errors='coerce')
-    
-    # Create output directory
-    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
-    
-    # Save to parquet
-    df.to_parquet(output_path, index=False, engine='pyarrow')
-    print(f"\nSaved {len(df)} sales to {output_path}")
-    print(f"Columns: {', '.join(df.columns.tolist())}")
-    print(f"File size: {Path(output_path).stat().st_size / 1024:.2f} KB")
+from typing import Optional
+from pipelines.auction_search_pipeline import run_auction_search_pipeline
 
 
 def main(
@@ -203,42 +19,15 @@ def main(
     max_pages: Optional[int] = None
 ):
     """Main function to fetch and save sales data"""
-    from datetime import datetime
-    
-    output_path = output_path or f"{OUT_DIR_DEFAULT}/auction_search_{datetime.now().strftime('%Y%m%d')}.parquet"
-    
-    print("MaxSold Auction Search Scraper")
-    print("=" * 60)
-    print(f"Location: ({lat}, {lng})")
-    print(f"Radius: {radius_metres}m ({radius_metres/1000:.1f}km)")
-    print(f"Country: {country}")
-    print(f"Days: {days}")
-    print(f"Sale state: closed")
-    print("=" * 60)
-    
-    # Fetch all sales
-    sales = fetch_all_pages(
+    run_auction_search_pipeline(
+        output_path=output_path,
         lat=lat,
         lng=lng,
         radius_metres=radius_metres,
         country=country,
-        limit=100,
-        sale_state="closed",
         days=days,
         max_pages=max_pages
     )
-    
-    if not sales:
-        print("No sales data retrieved.", file=sys.stderr)
-        return
-    
-    # Save to parquet
-    save_to_parquet(sales, output_path)
-    
-    # Print sample
-    df = pd.read_parquet(output_path)
-    print("\nSample data (first 3 rows):")
-    print(df.head(3).to_string())
 
 
 if __name__ == "__main__":
