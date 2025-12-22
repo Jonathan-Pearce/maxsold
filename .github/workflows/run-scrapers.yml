@@ -5,6 +5,9 @@ permissions:
 
 on:
   workflow_dispatch:  # Allow manual triggering
+  pull_request:
+    branches:
+      - main
 
 jobs:
   run-scrapers:
