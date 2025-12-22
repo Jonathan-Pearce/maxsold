@@ -5,6 +5,9 @@ permissions:
 
 on:
   workflow_dispatch:  # Allow manual triggering
+  pull_request:
+    branches:
+      - develop
 
 jobs:
   run-scrapers:
@@ -58,12 +61,26 @@ jobs:
           echo "items_details_file=$OUTPUT_FILE" >> $GITHUB_OUTPUT
 
       - name: Run Bid History Extractor
+        id: bid_history
         run: |
           TIMESTAMP=${{ steps.set_timestamp.outputs.timestamp }}
           OUTPUT_FILE="data/bid_history/bid_history_${TIMESTAMP}.parquet"
           python scrapers/04_extract_bid_history.py \
             --input-parquet "${{ steps.items_details.outputs.items_details_file }}" \
             --output "$OUTPUT_FILE" \
+            --workers 5
+          echo "bid_history_file=$OUTPUT_FILE" >> $GITHUB_OUTPUT
+
+      - name: Run Item Enriched Details Extractor
+        id: item_enriched
+        run: |
+          TIMESTAMP=${{ steps.set_timestamp.outputs.timestamp }}
+          OUTPUT_FILE="data/item_enriched_details/item_enriched_details_${TIMESTAMP}.parquet"
+          python scrapers/05_extract_item_enriched_details.py \
+            --input-parquet "${{ steps.items_details.outputs.items_details_file }}" \
+            --output "$OUTPUT_FILE" \
+            --workers 5
+          echo "item_enriched_file=$OUTPUT_FILE" >> $GITHUB_OUTPUT
 
       - name: Commit and push results
         if: always()
@@ -75,10 +92,11 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           # add generated files
-          git add data/auction_search/*.parquet
-          git add data/auction_details/*.parquet
-          git add data/items_details/*.parquet
-          git add data/bid_history/*.parquet
+          git add data/auction_search/*.parquet || true
+          git add data/auction_details/*.parquet || true
+          git add data/items_details/*.parquet || true
+          git add data/bid_history/*.parquet || true
+          git add data/item_enriched_details/*.parquet || true
 
           # commit if there are changes
           git commit -m "chore: add scraper outputs (run $GITHUB_RUN_NUMBER)" || echo "No changes to commit"
@@ -90,6 +108,7 @@ jobs:
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: scraper-outputs-${{ steps.set_timestamp.outputs.timestamp }}
           path: |
@@ -97,4 +116,5 @@ jobs:
             data/auction_details/*${{ steps.set_timestamp.outputs.timestamp }}*.parquet
             data/items_details/*${{ steps.set_timestamp.outputs.timestamp }}*.parquet
             data/bid_history/*${{ steps.set_timestamp.outputs.timestamp }}*.parquet
+            data/item_enriched_details/*${{ steps.set_timestamp.outputs.timestamp }}*.parquet
           retention-days: 30
