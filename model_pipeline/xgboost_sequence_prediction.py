@@ -22,6 +22,7 @@ from sklearn.preprocessing import RobustScaler
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, mean_absolute_percentage_error
 import matplotlib.pyplot as plt
 import seaborn as sns
+import pickle
 
 
 class XGBoostSequencePipeline:
@@ -349,10 +350,16 @@ class XGBoostSequencePipeline:
     
     def save_model_and_results(self, train_metrics, test_metrics):
         """Save model and results"""
-        # Save model
-        model_path = self.output_dir / 'xgboost_sequence_model.json'
-        self.model.save_model(model_path)
-        print(f"\nModel saved to: {model_path}")
+        # Save model using pickle (full sklearn wrapper)
+        model_pkl_path = self.output_dir / 'xgboost_sequence_model.pkl'
+        with open(model_pkl_path, 'wb') as f:
+            pickle.dump(self.model, f)
+        print(f"\nModel (pickle) saved to: {model_pkl_path}")
+        
+        # Also save using XGBoost's native format (booster only)
+        model_json_path = self.output_dir / 'xgboost_sequence_model.json'
+        self.model.get_booster().save_model(str(model_json_path))
+        print(f"Model (JSON) saved to: {model_json_path}")
         
         # Save metrics
         metrics_path = self.output_dir / 'metrics.json'
