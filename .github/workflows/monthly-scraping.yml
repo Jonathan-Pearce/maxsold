@@ -1,0 +1,89 @@
+name: Monthly MaxSold Scraping Pipeline
+
+permissions:
+  contents: write
+
+on:
+  # Run on the 1st of every month at 2:00 AM UTC
+  schedule:
+    - cron: '0 2 1 * *'
+  
+  # Allow manual triggering for testing
+  workflow_dispatch:
+
+jobs:
+  run-monthly-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360  # 6 hours timeout for long-running scraping
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Configure Kaggle credentials
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+        run: |
+          mkdir -p ~/.kaggle
+          echo "{\"username\":\"$KAGGLE_USERNAME\",\"key\":\"$KAGGLE_KEY\"}" > ~/.kaggle/kaggle.json
+          chmod 600 ~/.kaggle/kaggle.json
+          echo "✓ Kaggle credentials configured"
+
+      - name: Run Monthly Scraping Pipeline
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+        run: |
+          echo "Starting monthly scraping pipeline..."
+          python monthly_scraping_pipeline.py
+        continue-on-error: false
+
+      - name: Archive pipeline artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipeline-outputs-${{ github.run_number }}
+          path: |
+            data/temp/*.parquet
+            data/raw/**/*.parquet
+          retention-days: 7
+          if-no-files-found: warn
+
+      - name: Create summary
+        if: always()
+        run: |
+          echo "## Monthly Scraping Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Run Date:** $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "**Run Number:** ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -d "data/raw" ]; then
+            echo "### Generated Files:" >> $GITHUB_STEP_SUMMARY
+            find data/raw -name "*.parquet" -type f -exec ls -lh {} \; | awk '{print "- " $9 " (" $5 ")"}' >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Datasets Updated:" >> $GITHUB_STEP_SUMMARY
+          echo "- [raw-maxsold-auction](https://www.kaggle.com/datasets/pearcej/raw-maxsold-auction)" >> $GITHUB_STEP_SUMMARY
+          echo "- [raw-maxsold-item](https://www.kaggle.com/datasets/pearcej/raw-maxsold-item)" >> $GITHUB_STEP_SUMMARY
+          echo "- [raw-maxsold-bid](https://www.kaggle.com/datasets/pearcej/raw-maxsold-bid)" >> $GITHUB_STEP_SUMMARY
+          echo "- [raw-maxsold-item-enriched](https://www.kaggle.com/datasets/pearcej/raw-maxsold-item-enriched)" >> $GITHUB_STEP_SUMMARY
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Monthly scraping pipeline failed. Check logs for details."
+          echo "Failed to complete the monthly scraping pipeline" >> $GITHUB_STEP_SUMMARY
