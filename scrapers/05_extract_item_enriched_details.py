@@ -399,7 +399,7 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--output", help="Output parquet file path")
     parser.add_argument("-i", "--input-file", help="Read item IDs from text file (one per line)")
     parser.add_argument("-p", "--input-parquet", help="Read items from parquet file (id or amLotId column)")
-    parser.add_argument("-w", "--workers", type=int, default=10, help="Number of parallel workers (default: 10)")
+    parser.add_argument("-w", "--workers", type=int, default=20, help="Number of parallel workers (default: 10)")
     parser.add_argument("-l", "--limit", type=int, help="Limit number of items to process")
     parser.add_argument("--sequential", action="store_true", help="Use sequential processing instead of parallel")
     
