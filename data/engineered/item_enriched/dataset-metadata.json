@@ -1,0 +1,15 @@
+{
+  "title": "Engineered MaxSold Item Enriched Dataset",
+  "id": "pearcej/engineered-maxsold-item-enriched",
+  "subtitle": "",
+  "description": "Feature-engineered enriched item data with brand, category, and attribute features",
+  "isPrivate": false,
+  "licenses": [
+    {
+      "name": "CC0-1.0"
+    }
+  ],
+  "keywords": [],
+  "collaborators": [],
+  "data": []
+}

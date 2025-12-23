@@ -1,8 +1,0 @@
-Output columns:
-
-auction_id - Auction ID
-item_id - Item ID
-bid_number - Sequential bid number (1 = first bid)
-time_of_bid - Time of bid (datetime)
-amount - Bid amount (numeric)
-isproxy - Is proxy bid (boolean)
