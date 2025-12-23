@@ -12,12 +12,12 @@ HEADERS = {
 API_URL = "https://maxsold.maxsold.com/msapi/auctions/items"
 
 OUT_DIR_DEFAULT = "data/item_details"
-AUCTION_SEARCH_DEFAULT = f"data/auction_search/auction_search_{datetime.now().strftime('%Y%m%d')}.parquet"
+AUCTION_SEARCH_DEFAULT = f"data/raw_data/auction_search/auction_search_20251201.parquet"
 
 
 def fetch_auction_items(auction_id: str, timeout: int = 30) -> Any:
     """Fetch auction items from MaxSold API"""
-    params = {"auctionid": auction_id}
+    params = {"auctionid": auction_id, "limit": 1000}
     
     print(f"Fetching items for auction {auction_id}...")
     r = requests.get(API_URL, params=params, headers=HEADERS, timeout=timeout)
