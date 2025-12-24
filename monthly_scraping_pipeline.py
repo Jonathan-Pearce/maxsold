@@ -229,7 +229,7 @@ def append_and_upload_to_kaggle(dataset_info, new_data_path, pipeline):
             title=dataset_name,
             subtitle=f"Monthly scraping update - {datetime.now().strftime('%Y-%m-%d')}",
             description=f"MaxSold scraping data - {dataset_name}. Updated monthly with new auction data.",
-            is_public=True,
+            is_public=False,
             version_notes=f"Monthly update: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - Added {len(new_df)} new rows"
         )
         print(f"✓ Successfully uploaded to Kaggle!")

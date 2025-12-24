@@ -165,7 +165,7 @@ class KaggleDataPipeline:
         return file_path
     
     def create_dataset_metadata(self, dataset_slug, title, subtitle="", description="", 
-                                 is_public=True, licenses_name="CC0-1.0"):
+                                 is_public=False, licenses_name="CC0-1.0"):
         """
         Create metadata JSON for a new Kaggle dataset.
         
@@ -193,7 +193,7 @@ class KaggleDataPipeline:
         }
     
     def upload_dataset(self, dataset_dir, dataset_slug, title, subtitle="", description="",
-                       is_public=True, version_notes="Updated dataset"):
+                       is_public=False, version_notes="Updated dataset"):
         """
         Upload or update a dataset to Kaggle.
         
