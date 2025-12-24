@@ -3,7 +3,7 @@
   "id": "pearcej/engineered-maxsold-item",
   "subtitle": "",
   "description": "Feature-engineered item data with text embeddings and bid features",
-  "isPrivate": false,
+  "isPrivate": true,
   "licenses": [
     {
       "name": "CC0-1.0"

@@ -3,7 +3,7 @@
   "id": "pearcej/engineered-maxsold-auction",
   "subtitle": "",
   "description": "Feature-engineered auction data with temporal, location, and text features",
-  "isPrivate": false,
+  "isPrivate": true,
   "licenses": [
     {
       "name": "CC0-1.0"

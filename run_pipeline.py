@@ -28,8 +28,8 @@ from utils.kaggle_pipeline import KaggleDataPipeline
 
 def main():
     parser = argparse.ArgumentParser(description='MaxSold Feature Engineering Pipeline')
-    parser.add_argument('--kaggle-json', type=str, default='/workspaces/maxsold/.kaggle/kaggle.json',
-                        help='Path to kaggle.json credentials file')
+    parser.add_argument('--kaggle-json', type=str, default=None,
+                        help='Path to kaggle.json credentials file (optional, uses environment variables by default)')
     parser.add_argument('--data-dir', type=str, default='./data',
                         help='Directory to store data')
     parser.add_argument('--skip-download', action='store_true',
@@ -57,6 +57,7 @@ def main():
     print("MAXSOLD FEATURE ENGINEERING PIPELINE")
     print("="*80)
     
+    # Use environment variables by default, only pass path if explicitly provided
     kaggle = KaggleDataPipeline(kaggle_json_path=args.kaggle_json)
     
     # ========== STEP 1: DOWNLOAD RAW DATASETS ==========
