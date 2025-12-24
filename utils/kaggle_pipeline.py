@@ -216,6 +216,8 @@ class KaggleDataPipeline:
         
         print(f"\nPreparing to upload dataset: {dataset_slug}")
         print(f"  Directory: {dataset_dir}")
+        #print files in dataset_dir
+        print(f"  Files: {[f.name for f in dataset_dir.iterdir() if f.is_file()]}")
         
         # Create metadata file
         metadata = self.create_dataset_metadata(
@@ -234,24 +236,23 @@ class KaggleDataPipeline:
         
         # Check if dataset already exists
         try:
-            # Try to get existing dataset
-            self.api.dataset_metadata(dataset_slug, dataset_dir)
+            # Try to check if dataset exists without downloading metadata
+            dataset_exists = self.dataset_exists(dataset_slug)
             
-            # Dataset exists, create new version
-            print(f"  Dataset exists, creating new version...")
-            self.api.dataset_create_version(
-                folder=str(dataset_dir),
-                version_notes=version_notes,
-                quiet=False,
-                convert_to_csv=False,
-                delete_old_versions=False
-            )
-            print(f"✓ New version created successfully")
-            
-        except Exception as e:
-            # Dataset doesn't exist, create new
-            print(f"  Dataset doesn't exist, creating new...")
-            try:
+            if dataset_exists:
+                # Dataset exists, create new version
+                print(f"  Dataset exists, creating new version...")
+                self.api.dataset_create_version(
+                    folder=str(dataset_dir),
+                    version_notes=version_notes,
+                    quiet=False,
+                    convert_to_csv=False,
+                    delete_old_versions=False
+                )
+                print(f"✓ New version created successfully")
+            else:
+                # Dataset doesn't exist, create new
+                print(f"  Dataset doesn't exist, creating new...")
                 self.api.dataset_create_new(
                     folder=str(dataset_dir),
                     public=is_public,
@@ -260,9 +261,10 @@ class KaggleDataPipeline:
                     dir_mode='tar'
                 )
                 print(f"✓ Dataset created successfully")
-            except Exception as create_error:
-                print(f"✗ Upload failed: {create_error}")
-                raise
+                
+        except Exception as e:
+            print(f"✗ Upload failed: {e}")
+            raise
         
         return True
     

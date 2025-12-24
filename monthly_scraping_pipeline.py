@@ -70,7 +70,7 @@ def scrape_auction_search(output_path):
         sys.executable,
         'scrapers/01_extract_auction_search.py',
         '--output', output_path,
-        '--days', '30'
+        '--days', '32'
     ]
     run_command(cmd, "Scraping auction search (30 days)")
     return output_path
@@ -165,13 +165,16 @@ def append_and_upload_to_kaggle(dataset_info, new_data_path, pipeline):
         # Remove duplicates if necessary based on identifying columns
         # For auction: auction_id, for items: id+auction_id, for bids: auction_id+item_id+bid_number
         id_columns = []
-        if 'auction_id' in new_df.columns and 'id' not in new_df.columns:
+        if dataset_slug.endswith('raw-maxsold-auction'):
             # This is auction details
             id_columns = ['auction_id']
-        elif 'id' in new_df.columns and 'auction_id' in new_df.columns:
-            # This is item details or enriched
+        elif dataset_slug.endswith('raw-maxsold-item'):
+            # This is item details
             id_columns = ['id', 'auction_id']
-        elif 'auction_id' in new_df.columns and 'item_id' in new_df.columns and 'bid_number' in new_df.columns:
+        elif dataset_slug.endswith('raw-maxsold-item-enriched'):
+            # This is enriched item details
+            id_columns = ['item_id', 'amAuctionId']
+        elif dataset_slug.endswith('raw-maxsold-bid'):
             # This is bid history
             id_columns = ['auction_id', 'item_id', 'bid_number']
         
@@ -193,6 +196,12 @@ def append_and_upload_to_kaggle(dataset_info, new_data_path, pipeline):
     combined_df.to_parquet(output_path, index=False, compression='snappy')
     print(f"✓ Saved combined data to: {output_path}")
     
+    # Remove downloaded files, keep only the combined dataset
+    for file in temp_dir.glob('*.parquet'):
+        if file != output_path:
+            file.unlink()
+            print(f"  Removed downloaded file: {file.name}")
+    
     # Upload to Kaggle
     print(f"Uploading to Kaggle: {dataset_slug}")
     
@@ -204,7 +213,7 @@ def append_and_upload_to_kaggle(dataset_info, new_data_path, pipeline):
             dataset_dir=str(temp_dir),
             dataset_slug=dataset_slug,
             title=dataset_name,
-            subtitle=f"Updated {datetime.now().strftime('%Y-%m-%d')}",
+            subtitle=f"Monthly scraping update - {datetime.now().strftime('%Y-%m-%d')}",
             description=f"MaxSold scraping data - {dataset_name}. Updated monthly with new auction data.",
             is_public=True,
             version_notes=f"Monthly update: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - Added {len(new_df)} new rows"
