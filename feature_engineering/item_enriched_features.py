@@ -1,3 +1,9 @@
+"""
+Item Enriched Feature Engineering
+
+This module provides a reusable class for transforming enriched item details data.
+"""
+
 from pathlib import Path
 import pandas as pd
 import numpy as np
@@ -6,21 +12,286 @@ import re
 from datetime import datetime
 from collections import Counter
 
-"""
-This script performs feature engineering on enriched item details dataset.
 
-Features created:
-- Text length features (title, description, qualitative description)
-- Brand features (has_brand, brand one-hot encoding)
-- Category features (parsed from JSON, one-hot encoding for top categories)
-- Condition features (one-hot encoding)
-- Working status features
-- Item complexity features (single vs multiple items)
-- Attributes features (parsed from JSON, count features)
-- Text quality features (description richness, keyword presence)
-"""
+class ItemEnrichedFeatureEngineer:
+    """
+    Feature engineering for enriched item details data.
+    
+    Features created:
+    - Text length features (title, description, qualitative description)
+    - Brand features (has_brand, brand one-hot encoding)
+    - Category features (parsed from JSON, one-hot encoding for top categories)
+    - Condition features (one-hot encoding)
+    - Working status features
+    - Item complexity features (single vs multiple items)
+    - Attributes features (parsed from JSON, count features)
+    - Text quality features (description richness, keyword presence)
+    """
+    
+    def __init__(self, top_brands=20, top_categories=25, top_attributes=15):
+        """
+        Initialize the feature engineer.
+        
+        Parameters:
+        top_brands (int): Number of top brands to one-hot encode
+        top_categories (int): Number of top categories to one-hot encode
+        top_attributes (int): Number of top attributes to one-hot encode
+        """
+        self.top_brands = top_brands
+        self.top_categories = top_categories
+        self.top_attributes = top_attributes
+        self.fitted = False
+        
+        # To be learned during fit
+        self.brand_list = None
+        self.category_list = None
+        self.attribute_list = None
+        self.condition_list = None
+        self.items_categories = ['single', 'pair', 'few', 'several', 'many']
+    
+    def fit(self, df):
+        """
+        Fit the feature engineer (learn top brands, categories, attributes).
+        
+        Parameters:
+        df (pd.DataFrame): Training data
+        
+        Returns:
+        self
+        """
+        print(f"\nFitting ItemEnrichedFeatureEngineer...")
+        
+        # Learn top brands
+        self.brand_list = df['brand'].value_counts().head(self.top_brands).index.tolist()
+        print(f"  - Top {len(self.brand_list)} brands: {', '.join(self.brand_list[:5])}...")
+        
+        # Learn top categories
+        all_categories = self._extract_categories_list(df)
+        category_counts = Counter(all_categories)
+        self.category_list = [cat for cat, _ in category_counts.most_common(self.top_categories)]
+        print(f"  - Top {len(self.category_list)} categories: {', '.join(self.category_list[:5])}...")
+        
+        # Learn top attributes
+        all_attr_names = self._extract_attribute_names(df)
+        attr_counts = Counter(all_attr_names)
+        self.attribute_list = [attr for attr, _ in attr_counts.most_common(self.top_attributes)]
+        print(f"  - Top {len(self.attribute_list)} attributes: {', '.join(self.attribute_list[:5])}...")
+        
+        # Learn conditions
+        if 'condition' in df.columns:
+            self.condition_list = sorted(df['condition'].dropna().unique().tolist())
+            print(f"  - Conditions: {', '.join(self.condition_list)}")
+        
+        self.fitted = True
+        print(f"✓ Fitting complete")
+        return self
+    
+    def transform(self, df):
+        """
+        Transform enriched item data with feature engineering.
+        
+        Parameters:
+        df (pd.DataFrame): Input dataframe with enriched item data
+        
+        Returns:
+        pd.DataFrame: Dataframe with engineered features
+        """
+        if not self.fitted:
+            raise ValueError("FeatureEngineer must be fitted before transform. Call fit() first.")
+        
+        df_engineered = df.copy()
+        
+        print(f"\nTransforming {len(df)} enriched items...")
+        print("="*60)
+        
+        # 1. Text length features
+        print("1. Creating text length features...")
+        df_engineered['title_length'] = df_engineered['title'].fillna('').str.len()
+        df_engineered['description_length'] = df_engineered['description'].fillna('').str.len()
+        df_engineered['qualitative_description_length'] = df_engineered['qualitativeDescription'].fillna('').str.len()
+        df_engineered['has_description'] = (df_engineered['description_length'] > 0).astype(int)
+        df_engineered['has_qualitative_desc'] = (df_engineered['qualitative_description_length'] > 0).astype(int)
+        df_engineered['description_richness'] = (
+            df_engineered['title_length'] * 0.3 + 
+            df_engineered['description_length'] * 0.5 + 
+            df_engineered['qualitative_description_length'] * 0.2
+        )
+        
+        # 2. Brand features
+        print("2. Creating brand features...")
+        df_engineered['has_brand'] = df_engineered['brand'].notna().astype(int)
+        df_engineered['has_multiple_brands'] = (df_engineered['brands_count'] > 1).astype(int)
+        
+        for brand in self.brand_list:
+            col_name = f"brand_{re.sub(r'[^a-zA-Z0-9]', '_', brand)}"
+            df_engineered[col_name] = (df_engineered['brand'] == brand).astype(int)
+        
+        # 3. Category features
+        print("3. Creating category features...")
+        for category in self.category_list:
+            col_name = f"cat_{re.sub(r'[^a-zA-Z0-9]', '_', category)}"
+            df_engineered[col_name] = df_engineered['categories'].apply(
+                lambda x: self._has_category(x, category)
+            )
+        
+        # 4. Condition features
+        print("4. Creating condition features...")
+        if 'condition' in df_engineered.columns and self.condition_list:
+            for condition in self.condition_list:
+                col_name = f"condition_{re.sub(r'[^a-zA-Z0-9]', '_', condition)}"
+                df_engineered[col_name] = (df_engineered['condition'] == condition).astype(int)
+        
+        # 5. Working status features
+        print("5. Creating working status features...")
+        if 'working' in df_engineered.columns:
+            df_engineered['is_working'] = df_engineered['working'].apply(
+                lambda x: 1 if x is True else (0 if x is False else np.nan)
+            )
+        
+        # 6. Item complexity features
+        print("6. Creating item complexity features...")
+        if 'singleKeyItem' in df_engineered.columns:
+            df_engineered['is_single_item'] = df_engineered['singleKeyItem'].apply(
+                lambda x: 1 if x is True else (0 if x is False else np.nan)
+            )
+        
+        if 'numItems' in df_engineered.columns:
+            df_engineered['num_items_log'] = np.log1p(df_engineered['numItems'].fillna(1))
+            df_engineered['items_category'] = pd.cut(
+                df_engineered['numItems'].fillna(1),
+                bins=[0, 1, 2, 5, 10, float('inf')],
+                labels=self.items_categories
+            )
+            for cat in self.items_categories:
+                col_name = f'items_{cat}'
+                df_engineered[col_name] = (df_engineered['items_category'] == cat).astype(int)
+        
+        if 'items_count' in df_engineered.columns:
+            df_engineered['has_items_detail'] = (df_engineered['items_count'] > 0).astype(int)
+            df_engineered['items_detail_log'] = np.log1p(df_engineered['items_count'].fillna(0))
+        
+        # 7. Attributes features
+        print("7. Creating attributes features...")
+        if 'attributes_count' in df_engineered.columns:
+            df_engineered['has_attributes'] = (df_engineered['attributes_count'] > 0).astype(int)
+            df_engineered['attributes_log'] = np.log1p(df_engineered['attributes_count'].fillna(0))
+        
+        for attr_name in self.attribute_list:
+            col_name = f"attr_{re.sub(r'[^a-zA-Z0-9]', '_', attr_name)}"
+            df_engineered[col_name] = df_engineered['attributes'].apply(
+                lambda x: self._has_attribute(x, attr_name)
+            )
+        
+        # 8. Series line feature
+        print("8. Creating series line features...")
+        df_engineered['has_series_line'] = df_engineered['seriesLine'].notna().astype(int)
+        
+        # 9. Text quality features
+        print("9. Creating text quality features...")
+        quality_keywords = {
+            'luxury': ['luxury', 'premium', 'high-end', 'designer'],
+            'vintage': ['vintage', 'antique', 'retro', 'classic'],
+            'new': ['new', 'unused', 'brand new', 'mint'],
+            'damaged': ['damaged', 'broken', 'cracked', 'scratched', 'worn']
+        }
+        
+        for keyword_type, keywords in quality_keywords.items():
+            pattern = '|'.join(keywords)
+            col_name = f'desc_has_{keyword_type}'
+            df_engineered[col_name] = df_engineered['description'].fillna('').str.lower().str.contains(
+                pattern, regex=True
+            ).astype(int)
+        
+        # 10. Data completeness score
+        print("10. Creating data completeness score...")
+        completeness_fields = [
+            'has_brand', 'has_description', 'has_qualitative_desc', 
+            'has_attributes', 'categories_count', 'items_count'
+        ]
+        
+        completeness_scores = []
+        for field in completeness_fields:
+            if field in df_engineered.columns:
+                if field.endswith('_count'):
+                    normalized = np.minimum(df_engineered[field].fillna(0) / 10, 1)
+                else:
+                    normalized = df_engineered[field].fillna(0)
+                completeness_scores.append(normalized)
+        
+        if completeness_scores:
+            df_engineered['data_completeness_score'] = np.mean(completeness_scores, axis=0)
+        
+        print("="*60)
+        print(f"✓ Transformation complete - added {df_engineered.shape[1] - df.shape[1]} features")
+        
+        return df_engineered
+    
+    def fit_transform(self, df):
+        """Fit and transform in one step."""
+        self.fit(df)
+        return self.transform(df)
+    
+    def get_model_columns(self):
+        """
+        Get the list of columns to exclude from modeling (raw text/JSON fields).
+        
+        Returns:
+        list: Column names to exclude
+        """
+        columns_to_exclude = [
+            'title', 'description', 'qualitativeDescription', 'brand', 'seriesLine',
+            'condition', 'working', 'singleKeyItem', 'brands', 'categories', 
+            'items', 'attributes', 'items_category', 'amLotId'
+        ]
+        
+        return columns_to_exclude
+    
+    @staticmethod
+    def _parse_json_field(value):
+        """Safely parse JSON string field"""
+        if pd.isna(value) or value is None:
+            return []
+        if isinstance(value, list):
+            return value
+        try:
+            parsed = json.loads(value)
+            return parsed if isinstance(parsed, list) else []
+        except (json.JSONDecodeError, TypeError):
+            return []
+    
+    def _extract_categories_list(self, df):
+        """Extract all categories from JSON field into flat list"""
+        all_categories = []
+        for val in df['categories'].dropna():
+            categories = self._parse_json_field(val)
+            all_categories.extend(categories)
+        return all_categories
+    
+    def _extract_attribute_names(self, df):
+        """Extract attribute names from JSON field"""
+        all_attr_names = []
+        for val in df['attributes'].dropna():
+            attributes = self._parse_json_field(val)
+            for attr in attributes:
+                if isinstance(attr, dict) and 'name' in attr:
+                    all_attr_names.append(attr['name'])
+        return all_attr_names
+    
+    def _has_category(self, categories_json, target_category):
+        """Check if target category exists in JSON"""
+        categories = self._parse_json_field(categories_json)
+        return int(target_category in categories)
+    
+    def _has_attribute(self, attributes_json, target_attr):
+        """Check if target attribute exists in JSON"""
+        attributes = self._parse_json_field(attributes_json)
+        for attr in attributes:
+            if isinstance(attr, dict) and attr.get('name') == target_attr:
+                return 1
+        return 0
 
 
+# Legacy functions for backward compatibility
 def parse_json_field(value):
     """Safely parse JSON string field"""
     if pd.isna(value) or value is None:

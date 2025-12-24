@@ -1,0 +1,15 @@
+{
+  "title": "MaxSold Final Merged Dataset",
+  "id": "pearcej/maxsold-final-dataset",
+  "subtitle": "Complete feature-engineered dataset for ML modeling",
+  "description": "Final merged dataset combining auction, item, and enriched item features. Ready for machine learning model training and deployment.",
+  "isPrivate": true,
+  "licenses": [
+    {
+      "name": "CC0-1.0"
+    }
+  ],
+  "keywords": [],
+  "collaborators": [],
+  "data": []
+}

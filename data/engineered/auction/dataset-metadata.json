@@ -1,0 +1,15 @@
+{
+  "title": "Engineered MaxSold Auction Dataset",
+  "id": "pearcej/engineered-maxsold-auction",
+  "subtitle": "",
+  "description": "Feature-engineered auction data with temporal, location, and text features",
+  "isPrivate": true,
+  "licenses": [
+    {
+      "name": "CC0-1.0"
+    }
+  ],
+  "keywords": [],
+  "collaborators": [],
+  "data": []
+}

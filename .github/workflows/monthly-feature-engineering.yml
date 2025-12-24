@@ -1,0 +1,96 @@
+name: Monthly MaxSold Feature Engineering Pipeline
+
+permissions:
+  contents: write
+
+on:
+  # Run on the 1st of every month at 6:00 AM UTC (after scraping completes)
+  schedule:
+    - cron: '0 6 1 * *'
+  
+  # Allow manual triggering for testing
+  workflow_dispatch:
+
+jobs:
+  run-feature-engineering:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360  # 6 hours timeout for long-running feature engineering
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Configure Kaggle credentials
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+        run: |
+          mkdir -p ~/.kaggle
+          echo "{\"username\":\"$KAGGLE_USERNAME\",\"key\":\"$KAGGLE_KEY\"}" > ~/.kaggle/kaggle.json
+          chmod 600 ~/.kaggle/kaggle.json
+          echo "✓ Kaggle credentials configured"
+
+      - name: Run Feature Engineering Pipeline
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+        run: |
+          echo "Starting feature engineering pipeline..."
+          python run_pipeline.py
+        continue-on-error: false
+
+      - name: Archive pipeline artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: feature-engineering-outputs-${{ github.run_number }}
+          path: |
+            data/engineered/**/*.parquet
+            data/final/*.parquet
+            data/models/**/*
+          retention-days: 7
+          if-no-files-found: warn
+
+      - name: Create summary
+        if: always()
+        run: |
+          echo "## Feature Engineering Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Run Date:** $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "**Run Number:** ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -d "data/engineered" ]; then
+            echo "### Engineered Files:" >> $GITHUB_STEP_SUMMARY
+            find data/engineered -name "*.parquet" -type f -exec ls -lh {} \; | awk '{print "- " $9 " (" $5 ")"}' >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ -d "data/final" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Final Dataset:" >> $GITHUB_STEP_SUMMARY
+            find data/final -name "*.parquet" -type f -exec ls -lh {} \; | awk '{print "- " $9 " (" $5 ")"}' >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Datasets Updated:" >> $GITHUB_STEP_SUMMARY
+          echo "- [engineered-maxsold-auction](https://www.kaggle.com/datasets/pearcej/engineered-maxsold-auction)" >> $GITHUB_STEP_SUMMARY
+          echo "- [engineered-maxsold-item](https://www.kaggle.com/datasets/pearcej/engineered-maxsold-item)" >> $GITHUB_STEP_SUMMARY
+          echo "- [engineered-maxsold-item-enriched](https://www.kaggle.com/datasets/pearcej/engineered-maxsold-item-enriched)" >> $GITHUB_STEP_SUMMARY
+          echo "- [maxsold-final-dataset](https://www.kaggle.com/datasets/pearcej/maxsold-final-dataset)" >> $GITHUB_STEP_SUMMARY
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Feature engineering pipeline failed. Check logs for details."
+          echo "Failed to complete the feature engineering pipeline" >> $GITHUB_STEP_SUMMARY
