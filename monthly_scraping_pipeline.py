@@ -70,7 +70,7 @@ def scrape_auction_search(output_path):
         sys.executable,
         'scrapers/01_extract_auction_search.py',
         '--output', output_path,
-        '--days', '32'
+        '--days', '10'
     ]
     run_command(cmd, "Scraping auction search (30 days)")
     return output_path
@@ -178,6 +178,20 @@ def append_and_upload_to_kaggle(dataset_info, new_data_path, pipeline):
             # This is bid history
             id_columns = ['auction_id', 'item_id', 'bid_number']
         
+        # Harmonize data types between existing and new data
+        print("  Harmonizing data types...")
+        for col in new_df.columns:
+            if col in existing_df.columns:
+                # If existing column is numeric but new has strings, convert strings to NaN
+                if pd.api.types.is_numeric_dtype(existing_df[col]):
+                    new_df[col] = pd.to_numeric(new_df[col], errors='coerce')
+                # Match the exact dtype
+                elif existing_df[col].dtype != new_df[col].dtype:
+                    try:
+                        new_df[col] = new_df[col].astype(existing_df[col].dtype)
+                    except Exception as e:
+                        print(f"    Warning: Could not convert column '{col}' to {existing_df[col].dtype}: {e}")
+        
         combined_df = pd.concat([existing_df, new_df], ignore_index=True)
         
         # Remove duplicates
@@ -253,18 +267,12 @@ def main():
         sys.exit(1)
     
     # Define file paths
-    #auction_search_path = f"data/temp/auction_search_{TIMESTAMP}.parquet"
-    #auction_details_path = f"{KAGGLE_DATASETS['auction']['scraper_output']}/auction_details_{TIMESTAMP}.parquet"
-    #item_details_path = f"{KAGGLE_DATASETS['item']['scraper_output']}/items_details_{TIMESTAMP}.parquet"
-    #bid_history_path = f"{KAGGLE_DATASETS['bid']['scraper_output']}/bid_history_{TIMESTAMP}.parquet"
-    #item_enriched_path = f"{KAGGLE_DATASETS['item_enriched']['scraper_output']}/item_enriched_{TIMESTAMP}.parquet"
+    auction_search_path = f"data/temp/auction_search_{TIMESTAMP}.parquet"
+    auction_details_path = f"{KAGGLE_DATASETS['auction']['scraper_output']}/auction_details_{TIMESTAMP}.parquet"
+    item_details_path = f"{KAGGLE_DATASETS['item']['scraper_output']}/items_details_{TIMESTAMP}.parquet"
+    bid_history_path = f"{KAGGLE_DATASETS['bid']['scraper_output']}/bid_history_{TIMESTAMP}.parquet"
+    item_enriched_path = f"{KAGGLE_DATASETS['item_enriched']['scraper_output']}/item_enriched_{TIMESTAMP}.parquet"
 
-    auction_search_path = f"data/temp/auction_search_20251223_175909.parquet"
-    auction_details_path = f"{KAGGLE_DATASETS['auction']['scraper_output']}/auction_details_20251223_175909.parquet"
-    item_details_path = f"{KAGGLE_DATASETS['item']['scraper_output']}/items_details_20251223_175909.parquet"
-    bid_history_path = f"{KAGGLE_DATASETS['bid']['scraper_output']}/bid_history_20251223_175909.parquet"
-    item_enriched_path = f"{KAGGLE_DATASETS['item_enriched']['scraper_output']}/item_enriched_20251223_175909.parquet"
-    
     # Create temp directory
     Path('data/temp').mkdir(parents=True, exist_ok=True)
     
@@ -273,21 +281,21 @@ def main():
         print("\n" + "█" * 80)
         print("PHASE 1: AUCTION SEARCH")
         print("█" * 80)
-        #scrape_auction_search(auction_search_path)
+        scrape_auction_search(auction_search_path)
         
         # Step 2 & 3: Scrape auction and item details in parallel (both use auction search output)
         print("\n" + "█" * 80)
         print("PHASE 2: AUCTION & ITEM DETAILS")
         print("█" * 80)
-        #scrape_auction_details(auction_search_path, auction_details_path)
-        #scrape_item_details(auction_search_path, item_details_path)
+        scrape_auction_details(auction_search_path, auction_details_path)
+        scrape_item_details(auction_search_path, item_details_path)
         
         # Step 4 & 5: Scrape bid history and enriched details (both use item details output)
         print("\n" + "█" * 80)
         print("PHASE 3: BID HISTORY & ENRICHED DETAILS")
         print("█" * 80)
-        #scrape_bid_history(item_details_path, bid_history_path)
-        #scrape_item_enriched(item_details_path, item_enriched_path)
+        scrape_bid_history(item_details_path, bid_history_path)
+        scrape_item_enriched(item_details_path, item_enriched_path)
         
         # Phase 4: Upload to Kaggle
         print("\n" + "█" * 80)
