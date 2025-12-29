@@ -12,6 +12,7 @@ This script orchestrates the entire feature engineering pipeline:
 import argparse
 from pathlib import Path
 import sys
+import gc
 
 # Add project root to path
 project_root = Path(__file__).parent
@@ -125,7 +126,7 @@ def main():
     print("\n--- Processing Item Dataset ---")
     df_item_raw = kaggle.load_dataset(raw_files['item'])
     
-    item_engineer = ItemFeatureEngineer(n_components=64, max_features=5000)
+    item_engineer = ItemFeatureEngineer(n_components=16, max_features=1024)
     df_item_engineered = item_engineer.fit_transform(df_item_raw)
     
     # Save models for later use (e.g., deployment)
@@ -163,6 +164,13 @@ def main():
     enriched_output_dir.mkdir(exist_ok=True)
     enriched_output_file = enriched_output_dir / 'item_enriched_engineered.parquet'
     kaggle.save_dataset(df_enriched_final, enriched_output_file)
+
+    #delete raw dataframes to free memory
+    del df_auction_raw, df_item_raw, df_enriched_raw
+    #delte engineered dataframes to free memory
+    del df_auction_engineered, df_item_engineered, df_enriched_engineered
+    #run garbage collection
+    gc.collect()
     
     # ========== STEP 3: UPLOAD ENGINEERED DATASETS TO KAGGLE ==========
     if not args.skip_upload:
@@ -191,19 +199,19 @@ def main():
             }
         ]
         
-        for dataset_info in engineered_datasets:
-            print(f"\n--- Uploading {dataset_info['title']} ---")
-            try:
-                kaggle.upload_dataset(
-                    dataset_dir=dataset_info['dir'],
-                    dataset_slug=dataset_info['slug'],
-                    title=dataset_info['title'],
-                    description=dataset_info['description'],
-                    version_notes='Automated feature engineering pipeline update'
-                )
-            except Exception as e:
-                print(f"⚠ Upload warning: {e}")
-                print("Continuing with next dataset...")
+        # for dataset_info in engineered_datasets:
+        #     print(f"\n--- Uploading {dataset_info['title']} ---")
+        #     try:
+        #         kaggle.upload_dataset(
+        #             dataset_dir=dataset_info['dir'],
+        #             dataset_slug=dataset_info['slug'],
+        #             title=dataset_info['title'],
+        #             description=dataset_info['description'],
+        #             version_notes='Automated feature engineering pipeline update'
+        #         )
+        #     except Exception as e:
+        #         print(f"⚠ Upload warning: {e}")
+        #         print("Continuing with next dataset...")
     
     # ========== STEP 4: MERGE DATASETS ==========
     print("\n" + "="*80)

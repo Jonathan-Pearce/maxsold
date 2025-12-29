@@ -1,0 +1,29 @@
+================================================================================
+MAXSOLD CURRENT BID PREDICTION MODEL - EVALUATION SUMMARY
+================================================================================
+
+Model: XGBoost Regression
+Target: current_bid
+Excluded Features: bid_count
+Training Date: 2025-12-29 00:19:52
+
+TRAINING SET METRICS:
+----------------------------------------
+  RMSE: 40.0861
+  MAE: 14.1929
+  R2: 0.8712
+  MAPE: inf
+
+TEST SET METRICS:
+----------------------------------------
+  RMSE: 108.8500
+  MAE: 17.5134
+  R2: 0.3201
+  MAPE: inf
+
+DATASET INFO:
+----------------------------------------
+  Total samples: 272,149
+  Training samples: 217,719
+  Test samples: 54,430
+  Number of features: 139
