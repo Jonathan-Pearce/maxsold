@@ -137,12 +137,12 @@ def process_single_auction(auction_id: int) -> Optional[Dict]:
         TORONTO_LNG
     )
     
-    # Filter by distance
-    #if distance <= MAX_DISTANCE_METERS:
-    extracted['distance_from_toronto_meters'] = distance
-    return extracted
+    #Filter by distance
+    if distance <= MAX_DISTANCE_METERS:
+        extracted['distance_from_toronto_meters'] = distance
+        return extracted
     
-    #return None
+    return None
 
 
 def scrape_auctions(

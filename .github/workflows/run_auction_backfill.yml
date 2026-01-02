@@ -1,0 +1,101 @@
+name: Run Auction Backfill Scraper
+
+on:
+  workflow_dispatch:
+    inputs:
+      start_id:
+        description: 'Starting auction ID'
+        required: true
+        default: '1'
+        type: string
+      end_id:
+        description: 'Ending auction ID'
+        required: true
+        default: '1000'
+        type: string
+      workers:
+        description: 'Number of parallel workers'
+        required: false
+        default: '10'
+        type: string
+      delay:
+        description: 'Delay between requests in seconds (per worker)'
+        required: false
+        default: '0.05'
+        type: string
+      checkpoint:
+        description: 'Checkpoint interval (save every N records)'
+        required: false
+        default: '1000'
+        type: string
+
+jobs:
+  scrape-auctions:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Create data directory
+        run: |
+          mkdir -p data/backfilling
+      
+      - name: Run auction scraper
+        run: |
+          python backfilling/extract_auction_location_data.py \
+            --start-id ${{ inputs.start_id }} \
+            --end-id ${{ inputs.end_id }} \
+            --workers ${{ inputs.workers }} \
+            --delay ${{ inputs.delay }} \
+            --checkpoint ${{ inputs.checkpoint }} \
+            --output data/backfilling/auction_location_data.parquet
+        env:
+          PYTHONUNBUFFERED: 1
+      
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: auction-location-data-${{ inputs.start_id }}-to-${{ inputs.end_id }}
+          path: |
+            data/backfilling/*.parquet
+          retention-days: 30
+      
+      - name: Display summary
+        if: success()
+        run: |
+          echo "## Scraping Results :rocket:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Start ID**: ${{ inputs.start_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **End ID**: ${{ inputs.end_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Workers**: ${{ inputs.workers }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Delay**: ${{ inputs.delay }}s" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Scraping completed successfully!" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f data/backfilling/auction_location_data.parquet ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Output Files" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            ls -lh data/backfilling/*.parquet >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          fi
+      
+      - name: Display error
+        if: failure()
+        run: |
+          echo "## Scraping Failed :x:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The auction scraping job encountered an error. Please check the logs for details." >> $GITHUB_STEP_SUMMARY
