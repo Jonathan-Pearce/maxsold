@@ -1,0 +1,77 @@
+{
+  "entityId": "listing_01kd0m0s7benxr30rwb5zx1a9n",
+  "saleEntityId": "sale_01kc1zh3qbf3vrb1tbt8r2d6vr",
+  "amLotId": 7561262,
+  "amAuctionId": 104375,
+  "currentBidAmount": "200",
+  "currentBidCurrency": "cad",
+  "bidCount": 34,
+  "openTime": "2025-12-21T22:00:00Z",
+  "closeTime": "2026-01-03T01:00:00Z",
+  "listingEntityId": "listing_01kd0m0s7benxr30rwb5zx1a9n",
+  "generatedDescription": {
+    "title": "Tascam DA-60 Stereo DAT Recorder with Power Cable",
+    "slug": "tascam-da-60-stereo-dat-recorder",
+    "description": "Rackmount 2-channel digital audio tape recorder, model DA-60, balanced and unbalanced analog I/O, digital I/O, front LCD status display, transport controls, headphone jack, IEC power cable included, unit powers on and passes audio, tape transport untested",
+    "qualitativeDescription": "Metal 2U rackmount chassis in light grey with darker grey control panel, yellow cassette slot, red LED meters, large jog wheel, multiple push-button transport and function keys, overall clean appearance with minor wear",
+    "brand": "Tascam",
+    "seriesLine": "DA-60",
+    "condition": "lightly used",
+    "working": "untested",
+    "singleKeyItem": true,
+    "numItems": 2,
+    "brands": [],
+    "categories": [
+      "electronics",
+      "pro audio"
+    ],
+    "items": [
+      {
+        "title": "Tascam DA-60 stereo DAT recorder",
+        "category": "recorder"
+      },
+      {
+        "title": "IEC power cable",
+        "category": "cable"
+      }
+    ],
+    "attributes": [
+      {
+        "name": "model",
+        "value": "DA-60"
+      },
+      {
+        "name": "type",
+        "value": "stereo DAT recorder"
+      },
+      {
+        "name": "rack_units",
+        "value": "2U"
+      },
+      {
+        "name": "included_accessories",
+        "value": "IEC power cable"
+      }
+    ],
+    "photosTaken": [
+      {
+        "description": "Front three-quarter view of Tascam DA-60 DAT recorder on shelf",
+        "reason": "shows overall item and physical condition",
+        "imageId": "lstimg_01kd0m6t8df2vt62q9bsx0vbj8",
+        "imagePath": "auctionimages/104375/1766325644/wtascam_da-60_stereo_dat_recorder-4-1.jpeg"
+      },
+      {
+        "description": "Close-up of right side front panel with display, jog wheel and controls",
+        "reason": "shows control layout and display",
+        "imageId": "lstimg_01kd0m6t8df48ttj5jmcgf9ww1",
+        "imagePath": "auctionimages/104375/1766325644/wtascam_da-60_stereo_dat_recorder-4-2.jpeg"
+      },
+      {
+        "description": "Close-up of left side front panel showing cassette slot, power button and headphone jack",
+        "reason": "shows cassette mechanism area and branding",
+        "imageId": "lstimg_01kd0m6t8cexyvysx87zknwwnj",
+        "imagePath": "auctionimages/104375/1766325644/wtascam_da-60_stereo_dat_recorder-4-3.jpeg"
+      }
+    ]
+  }
+}

@@ -1,0 +1,236 @@
+{
+  "status": "success",
+  "message": "Found 1 item(s).",
+  "auction": {
+    "id": 104375,
+    "title": "Toronto (Ontario, Canada) SELLER MANAGED Commercial Liquidation Online Auction - Clinton Street",
+    "starts": "2025-12-21T17:00:00-0500",
+    "ends": "2026-01-02T20:00:00-0500",
+    "last_item_closes": "2026-01-02T20:18:00-0500",
+    "lic_channel": "maxsold.maxsold.com-auction-closing-104375",
+    "lic_url": "https://maxsold.maxsold.com/jsrv/auction-closing-104375",
+    "item_description_append": "",
+    "removal_info": "<h4><span style=\"color: #000000;\"><strong>Only Available Pickup Date/Time: </strong><span style=\"color: #004690;\">Sun, January 04 2026 </span></span></h4>\n<h4><span style=\"color: #000000;\"><span style=\"color: #004690;\">Category A: 09:00 AM - 05:00 PM</span></span></h4>\n<h4><span style=\"color: #000000;\"><strong>Pickup Location:  <span style=\"color: #004690;\">Clinton Street, Toronto, ON, M6J 2N9</span> <a href=\"https://www.google.com/maps/place/Clinton+Street%2C+Toronto%2C+ON%2C+M6J+2N9\" target=\"_blank\" rel=\"noopener\">View Map (opens in new window)</a></strong></span></h4>\n<h4><span id=\"docs-internal-guid-db37d122-7fff-eff5-298f-331e6a15cb9c\" style=\"font-weight: normal;\"></span></h4>",
+    "inspection_info": "<p><strong>Bidding by catalog ONLY.</strong></p>\n<p><strong>NOTE: All buyers with invoices over $300 must be prepared to show a photo ID and the credit card used on file before items will be released. Please contact <a href=\"mailto:support@maxsold.com\" target=\"_blank\" rel=\"noopener\">support@maxsold.com</a> or 1-833-MAX-SOLD(629-7653) ext.1 if you have questions about this.</strong></p>",
+    "intro": "<p>  <span style=\"color: #ecf0f1;\">-<span style=\"color: #000000;\">This online auction features speakers, stereo components, mixing board, power amp rack, road case, microphone parts, electronic drums, drum pedal, PC game, vintage film gear, home electronics, patch cables &amp; adapters, and more!\\n </span></span></p>",
+    "disclaimers": "<p><strong>WARNING - PLEASE READ THIS CAREFULLY BEFORE BIDDING!</strong></p>\n<ul>\n<li><a href=\"http://support.maxsold.com/hc/en-us/articles/203143924-Why-limitations-with-the-pickup-time-\" target=\"_blank\" rel=\"noopener\">Pickup time windows are fixed and limited</a>. You will be required to select a pickup window prior to the auction pickup. Please be sure to select a time slot that you are certain you will be able to attend.</li>\n<li><a href=\"http://support.maxsold.com/hc/en-us/articles/204820030-The-item-s-I-purchased-were-not-as-described-Can-I-get-a-refund-\" target=\"_blank\" rel=\"noopener\">Claims for refund can be made only in certain limited circumstances</a>. When an error in the lot description has occurred on an item you purchased, let our pickup lead know immediately so we may rectify it. Transparency is our aim in the sale of the \"as is where is\" used goods.</li>\n<li><a href=\"http://support.maxsold.com/hc/en-us/articles/203143794-Do-you-ship-items-\" target=\"_blank\" rel=\"noopener\">MaxSold does not arrange shipping</a>; however, you can make your own arrangements at your own risk</li>\n<li><a href=\"http://support.maxsold.com/hc/en-us/articles/203144284-Can-I-cancel-or-retract-a-bid-\" target=\"_blank\" rel=\"noopener\">Current bids cannot be changed or removed once submitted</a> and each one is a promise that you will honor the bid and <a href=\"http://www.maxsold.com/terms\" target=\"_blank\" rel=\"noopener\">all the terms</a>.</li>\n</ul>",
+    "pickup_time": "2026-01-04T06:00:00-0500",
+    "user_has_bid": false,
+    "partner_url": "",
+    "partner_logo": "",
+    "extended_bidding": true,
+    "extended_bidding_interval": -2,
+    "extended_bidding_threshold": 2,
+    "agreement_terms": "",
+    "catalog_lots": 1,
+    "items": [
+      {
+        "id": 7561262,
+        "auction_id": "104375",
+        "title": "Tascam DA-60 Stereo DAT Recorder ",
+        "description": "Powers on, audio connections work cleanly, transport not tested with DAT tape, comes with a power cable\nPickup category timeslot {A}",
+        "taxable": true,
+        "viewed": 3345,
+        "minimum_bid": 210,
+        "starting_bid": 1,
+        "current_bid": 200,
+        "proxy_bid": 0,
+        "start_time": "2025-12-21T17:00:00-0500",
+        "end_time": "2026-01-02T20:00:00-0500",
+        "lot_number": "4",
+        "bid_count": 34,
+        "bidding_extended": false,
+        "buyer_premium": 18,
+        "pickup_schedule_id": 0,
+        "pickup_schedule_title": null,
+        "images": [
+          "https://d12srav5gxm0re.cloudfront.net/auctionimages/104375/1766325644/wtascam_da-60_stereo_dat_recorder-4-1.jpeg",
+          "https://d12srav5gxm0re.cloudfront.net/auctionimages/104375/1766325644/wtascam_da-60_stereo_dat_recorder-4-2.jpeg",
+          "https://d12srav5gxm0re.cloudfront.net/auctionimages/104375/1766325644/wtascam_da-60_stereo_dat_recorder-4-3.jpeg",
+          "https://d12srav5gxm0re.cloudfront.net/auctionimages/104375/1766325644/wtascam_da-60_stereo_dat_recorder-4-4.jpeg",
+          "https://d12srav5gxm0re.cloudfront.net/auctionimages/104375/1766325644/wtascam_da-60_stereo_dat_recorder-4-5.jpeg",
+          "https://d12srav5gxm0re.cloudfront.net/auctionimages/104375/1766325644/wtascam_da-60_stereo_dat_recorder-4-6.jpeg",
+          "https://d12srav5gxm0re.cloudfront.net/auctionimages/104375/1766325644/wtascam_da-60_stereo_dat_recorder-4-7.jpeg",
+          "https://d12srav5gxm0re.cloudfront.net/auctionimages/104375/1766325644/wtascam_da-60_stereo_dat_recorder-4-8.jpeg"
+        ],
+        "is_favorite": false,
+        "winning": false,
+        "timezone": "America/New_York",
+        "pusher_channel": "maxsold.maxsold.com-item-7561262",
+        "user_has_bid_this_lot": false,
+        "bid_history": [
+          {
+            "time_of_bid": "2026-01-01T21:56:10-0500",
+            "amount": 200,
+            "isproxy": false
+          },
+          {
+            "time_of_bid": "2026-01-01T15:39:44-0500",
+            "amount": 190,
+            "isproxy": false
+          },
+          {
+            "time_of_bid": "2026-01-01T13:58:45-0500",
+            "amount": 180,
+            "isproxy": false
+          },
+          {
+            "time_of_bid": "2026-01-01T13:58:43-0500",
+            "amount": 170,
+            "isproxy": true
+          },
+          {
+            "time_of_bid": "2026-01-01T13:58:44-0500",
+            "amount": 170,
+            "isproxy": false
+          },
+          {
+            "time_of_bid": "2025-12-31T23:33:41-0500",
+            "amount": 160,
+            "isproxy": true
+          },
+          {
+            "time_of_bid": "2025-12-31T23:33:41-0500",
+            "amount": 150,
+            "isproxy": false
+          },
+          {
+            "time_of_bid": "2025-12-31T14:29:52-0500",
+            "amount": 125,
+            "isproxy": false
+          },
+          {
+            "time_of_bid": "2025-12-30T20:47:30-0500",
+            "amount": 115,
+            "isproxy": false
+          },
+          {
+            "time_of_bid": "2025-12-23T09:01:10-0500",
+            "amount": 105,
+            "isproxy": false
+          },
+          {
+            "time_of_bid": "2025-12-23T09:01:05-0500",
+            "amount": 100,
+            "isproxy": true
+          },
+          {
+            "time_of_bid": "2025-12-23T09:01:05-0500",
+            "amount": 96,
+            "isproxy": false
+          },
+          {
+            "time_of_bid": "2025-12-23T09:01:03-0500",
+            "amount": 91,
+            "isproxy": true
+          },
+          {
+            "time_of_bid": "2025-12-23T09:01:03-0500",
+            "amount": 86,
+            "isproxy": false
+          },
+          {
+            "time_of_bid": "2025-12-23T09:01:02-0500",
+            "amount": 81,
+            "isproxy": true
+          },
+          {
+            "time_of_bid": "2025-12-23T09:01:02-0500",
+            "amount": 76,
+            "isproxy": false
+          },
+          {
+            "time_of_bid": "2025-12-23T09:01:00-0500",
+            "amount": 71,
+            "isproxy": true
+          },
+          {
+            "time_of_bid": "2025-12-23T09:01:01-0500",
+            "amount": 66,
+            "isproxy": false
+          },
+          {
+            "time_of_bid": "2025-12-23T09:00:59-0500",
+            "amount": 61,
+            "isproxy": true
+          },
+          {
+            "time_of_bid": "2025-12-23T09:00:59-0500",
+            "amount": 56,
+            "isproxy": false
+          },
+          {
+            "time_of_bid": "2025-12-23T09:00:58-0500",
+            "amount": 51,
+            "isproxy": true
+          },
+          {
+            "time_of_bid": "2025-12-23T09:00:58-0500",
+            "amount": 46,
+            "isproxy": false
+          },
+          {
+            "time_of_bid": "2025-12-23T09:00:57-0500",
+            "amount": 41,
+            "isproxy": true
+          },
+          {
+            "time_of_bid": "2025-12-23T09:00:57-0500",
+            "amount": 38,
+            "isproxy": false
+          },
+          {
+            "time_of_bid": "2025-12-23T09:00:56-0500",
+            "amount": 35,
+            "isproxy": true
+          },
+          {
+            "time_of_bid": "2025-12-23T09:00:56-0500",
+            "amount": 32,
+            "isproxy": false
+          },
+          {
+            "time_of_bid": "2025-12-22T07:53:58-0500",
+            "amount": 29,
+            "isproxy": false
+          },
+          {
+            "time_of_bid": "2025-12-22T01:30:06-0500",
+            "amount": 26,
+            "isproxy": false
+          },
+          {
+            "time_of_bid": "2025-12-22T01:30:06-0500",
+            "amount": 25,
+            "isproxy": true
+          },
+          {
+            "time_of_bid": "2025-12-22T01:30:03-0500",
+            "amount": 23,
+            "isproxy": true
+          },
+          {
+            "time_of_bid": "2025-12-22T01:30:03-0500",
+            "amount": 20,
+            "isproxy": false
+          },
+          {
+            "time_of_bid": "2025-12-21T23:40:58-0500",
+            "amount": 6,
+            "isproxy": false
+          },
+          {
+            "time_of_bid": "2025-12-21T23:40:58-0500",
+            "amount": 5,
+            "isproxy": true
+          },
+          {
+            "time_of_bid": "2025-12-21T22:27:31-0500",
+            "amount": 1,
+            "isproxy": false
+          }
+        ]
+      }
+    ]
+  }
+}
