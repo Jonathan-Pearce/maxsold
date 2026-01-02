@@ -47,7 +47,7 @@ jobs:
           KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
         run: |
           echo "Starting feature engineering pipeline..."
-          python run_pipeline.py
+          python feature_engineering/run_pipeline.py
         continue-on-error: false
 
       - name: Archive pipeline artifacts

@@ -66,7 +66,7 @@ def main():
         print_header("Testing Modules")
         print("This will test all feature engineering modules")
         
-        subprocess.run([sys.executable, "test_modules.py"])
+        subprocess.run([sys.executable, "utils/test_modules.py"])
     
     elif choice == "5":
         print("Exiting...")
