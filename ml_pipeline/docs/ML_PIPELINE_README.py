@@ -7,14 +7,17 @@
 ✓ Data Downloaded: maxsold_final_dataset.parquet (272K rows)
 ✓ Scripts Created: 4 pipeline versions + utilities
 ✓ Documentation: Complete guides and README files
+✓ Organization: Reorganized into ml_pipeline/ directory
 
 =================================================================================
                          QUICK START COMMANDS
 =================================================================================
 
+📍 Run from repository root (/workspaces/maxsold) or from ml_pipeline/scripts/
+
 OPTION 1: FASTEST - Train model in 30-60 seconds
 ─────────────────────────────────────────────────
-  python train_model_minimal.py
+  python ml_pipeline/scripts/train_model_minimal.py
 
   Outputs:
     ✓ data/models/xgboost_model.pkl
@@ -24,7 +27,7 @@ OPTION 1: FASTEST - Train model in 30-60 seconds
 
 OPTION 2: FAST WITH VISUALIZATIONS - 1-2 minutes
 ─────────────────────────────────────────────────
-  python model_pipeline_fast.py
+  python ml_pipeline/scripts/model_pipeline_fast.py
 
   Outputs:
     ✓ Trained model (.pkl)
@@ -36,7 +39,7 @@ OPTION 2: FAST WITH VISUALIZATIONS - 1-2 minutes
 
 OPTION 3: FULL DATASET (NUMERIC FEATURES) - 2-3 minutes
 ─────────────────────────────────────────────────────────
-  python model_pipeline_quick.py
+  python ml_pipeline/scripts/model_pipeline_quick.py
 
   Outputs:
     ✓ All visualizations
@@ -47,7 +50,7 @@ OPTION 3: FULL DATASET (NUMERIC FEATURES) - 2-3 minutes
 
 OPTION 4: COMPLETE PIPELINE (ALL FEATURES) - 5-10 minutes
 ───────────────────────────────────────────────────────────
-  python model_pipeline.py
+  python ml_pipeline/scripts/model_pipeline.py
 
   Outputs:
     ✓ Best accuracy
@@ -60,7 +63,7 @@ OPTION 4: COMPLETE PIPELINE (ALL FEATURES) - 5-10 minutes
 =================================================================================
 
 Before training, verify setup:
-  python verify_model_setup.py
+  python ml_pipeline/utils/verify_model_setup.py
 
 This checks:
   ✓ All packages installed (xgboost, sklearn, pandas, matplotlib, etc.)
@@ -150,7 +153,7 @@ Issue: Data not found
   → kaggle datasets download -d pearcej/maxsold-final-dataset -p data/final_data/ --unzip
 
 Issue: Script too slow
-  → python train_model_minimal.py  # Fastest option
+  → python ml_pipeline/scripts/train_model_minimal.py  # Fastest option
 
 Issue: Out of memory
   → Use train_model_minimal.py or model_pipeline_fast.py (both sample data)
@@ -160,10 +163,10 @@ Issue: Out of memory
 =================================================================================
 
 1. Verify setup:
-     python verify_model_setup.py
+     python ml_pipeline/utils/verify_model_setup.py
 
 2. Train first model (30-60 seconds):
-     python train_model_minimal.py
+     python ml_pipeline/scripts/train_model_minimal.py
 
 3. Check outputs:
      ls -lh data/models/
@@ -172,7 +175,7 @@ Issue: Out of memory
 4. Review performance in terminal output
 
 5. (Optional) Generate visualizations:
-     python model_pipeline_fast.py
+     python ml_pipeline/scripts/model_pipeline_fast.py
 
 6. Load and use model in your own scripts
 
@@ -180,7 +183,7 @@ Issue: Out of memory
 
                     🚀 READY TO TRAIN YOUR MODEL! 🚀
 
-                Run: python train_model_minimal.py
+        Run: python ml_pipeline/scripts/train_model_minimal.py
 
 =================================================================================
 """

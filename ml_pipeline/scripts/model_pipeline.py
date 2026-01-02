@@ -544,16 +544,21 @@ class MaxSoldModelPipeline:
 
 def main():
     """Main execution function"""
+    from pathlib import Path
+    
+    # Get repository root
+    REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+    
     # Configuration
-    DATA_PATH = 'data/final_data/maxsold_final_dataset.parquet'
-    MODEL_DIR = 'data/models'
-    OUTPUT_DIR = 'data/models/output'
+    DATA_PATH = REPO_ROOT / 'data' / 'final_data' / 'maxsold_final_dataset.parquet'
+    MODEL_DIR = REPO_ROOT / 'data' / 'models'
+    OUTPUT_DIR = REPO_ROOT / 'data' / 'models' / 'output'
     
     # Initialize and run pipeline
     pipeline = MaxSoldModelPipeline(
-        data_path=DATA_PATH,
-        model_dir=MODEL_DIR,
-        output_dir=OUTPUT_DIR
+        data_path=str(DATA_PATH),
+        model_dir=str(MODEL_DIR),
+        output_dir=str(OUTPUT_DIR)
     )
     
     pipeline.run_full_pipeline()
