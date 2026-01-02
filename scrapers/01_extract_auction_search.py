@@ -3,6 +3,7 @@ import pandas as pd
 from typing import Any, Dict, List, Optional
 from pathlib import Path
 import sys
+import utils.json_extractors
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
@@ -44,60 +45,6 @@ def fetch_sales_search(
     return r.json()
 
 
-def extract_sales_from_json(data: Any) -> List[Dict[str, Any]]:
-    """Extract sale items from JSON response"""
-    # API typically returns: { "sales": [...], "total": N }
-    sales = []
-    
-    if isinstance(data, dict):
-        sales_list = data.get("sales") or data.get("results") or data.get("data")
-        if isinstance(sales_list, list):
-            sales = sales_list
-        elif isinstance(data, dict) and any(k in data for k in ["amAuctionId", "title"]):
-            # Single sale object
-            sales = [data]
-    elif isinstance(data, list):
-        sales = data
-    
-    extracted = []
-    for sale in sales:
-        if not isinstance(sale, dict):
-            continue
-        
-        # Extract address fields
-        address = sale.get("address", {}) or {}
-        city = address.get("city", "")
-        region = address.get("region", "")
-        country = address.get("country", "")
-        
-        # Extract latLng fields
-        latlng = address.get("latLng", {}) or {}
-        lat = latlng.get("lat", None)
-        lng = latlng.get("lng", None)
-        
-        row = {
-            "amAuctionId": sale.get("amAuctionId", ""),
-            "title": sale.get("title", ""),
-            "displayRegion": sale.get("displayRegion", ""),
-            "distanceMeters": sale.get("distanceMeters", None),
-            "saleType": sale.get("saleType", ""),
-            "saleCategory": sale.get("saleCategory", ""),
-            "openTime": sale.get("openTime", ""),
-            "closeTime": sale.get("closeTime", ""),
-            "totalBids": sale.get("totalBids", None),
-            "numberLots": sale.get("numberLots", None),
-            "hasShipping": sale.get("hasShipping", None),
-            "city": city,
-            "region": region,
-            "country": country,
-            "lat": lat,
-            "lng": lng,
-        }
-        extracted.append(row)
-    
-    return extracted
-
-
 def fetch_all_pages(
     lat: float = 43.653226,
     lng: float = -79.3831843,
@@ -129,7 +76,7 @@ def fetch_all_pages(
             print(f"Error fetching page {page_number}: {e}", file=sys.stderr)
             break
         
-        sales = extract_sales_from_json(data)
+        sales = utils.json_extractors.extract_sales_from_json(data)
         if not sales:
             print(f"No sales found on page {page_number}, stopping.")
             break

@@ -6,6 +6,7 @@ import sys
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
+import utils.json_extractors
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
@@ -38,77 +39,6 @@ def fetch_item_bid_history(auction_id: str, item_id: str, timeout: int = 30) -> 
     return r.json()
 
 
-def extract_bids_from_json(data: Any, auction_id: str, item_id: str) -> List[Dict[str, Any]]:
-    """Extract bid history from JSON response"""
-    # Navigate to bid history array
-    bids = None
-    
-    # Try to find the item and its bid history
-    if isinstance(data, dict):
-        # Try common paths for auction/items structure
-        auction_obj = None
-        if "auction" in data and isinstance(data["auction"], dict):
-            auction_obj = data["auction"]
-        
-        # Find items array
-        items_list = None
-        if auction_obj and "items" in auction_obj and isinstance(auction_obj["items"], list):
-            items_list = auction_obj["items"]
-        elif "items" in data and isinstance(data["items"], list):
-            items_list = data["items"]
-        
-        # Find the specific item
-        if items_list:
-            for item in items_list:
-                if not isinstance(item, dict):
-                    continue
-                item_id_str = str(item.get("id", ""))
-                if item_id_str == str(item_id):
-                    # Found the item, look for bid history
-                    for key in ["bid_history", "bidHistory", "bids", "bid_history_list"]:
-                        if key in item and isinstance(item[key], list):
-                            bids = item[key]
-                            break
-                    # Sometimes bid_history is nested: [[{...}, ...]]
-                    if bids and isinstance(bids[0], list):
-                        bids = bids[0]
-                    break
-    
-    if not bids:
-        return []
-    
-    extracted_bids = []
-    
-    for i, bid in enumerate(bids, start=1):
-        if not isinstance(bid, dict):
-            continue
-        
-        # Extract fields with various possible key names
-        time_of_bid = (bid.get("time_of_bid") or bid.get("timeOfBid") or 
-                       bid.get("time") or bid.get("bidTime") or 
-                       bid.get("createdAt") or "")
-        
-        amount = (bid.get("amount") or bid.get("bidAmount") or 
-                  bid.get("value") or bid.get("currentBid") or None)
-        
-        isproxy = (bid.get("isproxy") or bid.get("isProxy") or 
-                   bid.get("proxy") or bid.get("is_proxy") or 
-                   bid.get("isProxyBid") or False)
-        
-        row = {
-            "auction_id": auction_id,
-            "item_id": item_id,
-            "bid_number": i,
-            "time_of_bid": str(time_of_bid),
-            "amount": amount,
-            "isproxy": bool(isproxy),
-        }
-        
-        extracted_bids.append(row)
-    
-    return extracted_bids
-
-
 def fetch_single_item_bids(item: Dict[str, str], index: int, total: int) -> tuple[int, List[Dict[str, Any]], Optional[str]]:
     """Fetch bids for a single item (designed for parallel execution)"""
     auction_id = item.get("auction_id", "")
@@ -119,7 +49,7 @@ def fetch_single_item_bids(item: Dict[str, str], index: int, total: int) -> tupl
     
     try:
         data = fetch_item_bid_history(auction_id, item_id)
-        bids = extract_bids_from_json(data, auction_id, item_id)
+        bids = utils.json_extractors.extract_bids_from_json(data, auction_id, item_id)
         
         if bids:
             thread_safe_print(f"[{index}/{total}] ✓ Auction {auction_id}, Item {item_id}: {len(bids)} bids")
@@ -192,7 +122,7 @@ def fetch_bids_for_multiple_items(items: List[Dict[str, str]]) -> List[Dict[str,
         print(f"[{i}/{len(items)}] Processing auction {auction_id}, item {item_id}...")
         try:
             data = fetch_item_bid_history(auction_id, item_id)
-            bids = extract_bids_from_json(data, auction_id, item_id)
+            bids = utils.json_extractors.extract_bids_from_json(data, auction_id, item_id)
             if bids:
                 all_bids.extend(bids)
                 print(f"  ✓ Extracted {len(bids)} bids")

@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 from pathlib import Path
 import sys
 from datetime import datetime
+import utils.json_extractors
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
@@ -25,53 +26,6 @@ def fetch_auction_details(auction_id: str, timeout: int = 30) -> Any:
     return r.json()
 
 
-def extract_auction_from_json(data: Any, auction_id: str) -> Optional[Dict[str, Any]]:
-    """Extract auction details from JSON response"""
-    # Navigate to auction object
-    auction = None
-    
-    if isinstance(data, dict):
-        # Try common paths
-        if "auction" in data and isinstance(data["auction"], dict):
-            auction = data["auction"]
-        elif "auctions" in data:
-            auctions = data["auctions"]
-            if isinstance(auctions, list) and auctions:
-                auction = auctions[0]
-            elif isinstance(auctions, dict):
-                auction = auctions
-        elif "data" in data and isinstance(data["data"], dict):
-            auction = data["data"]
-        # Fallback: check if data itself has the expected fields
-        elif any(k in data for k in ["id", "title", "starts", "ends"]):
-            auction = data
-    
-    if not auction or not isinstance(auction, dict):
-        print(f"Could not locate auction object in response for {auction_id}", file=sys.stderr)
-        return None
-    
-    # Extract fields
-    row = {
-        "auction_id": auction_id,
-        "id": auction.get("id", ""),
-        "title": auction.get("title", ""),
-        "starts": auction.get("starts", ""),
-        "ends": auction.get("ends", ""),
-        "last_item_closes": auction.get("last_item_closes", ""),
-        "removal_info": auction.get("removal_info", ""),
-        "inspection_info": auction.get("inspection_info", ""),
-        "intro": auction.get("intro", ""),
-        "pickup_time": auction.get("pickup_time", ""),
-        "partner_url": auction.get("partner_url", ""),
-        "extended_bidding": auction.get("extended_bidding", None),
-        "extended_bidding_interval": auction.get("extended_bidding_interval", None),
-        "extended_bidding_threshold": auction.get("extended_bidding_threshold", None),
-        "catalog_lots": auction.get("catalog_lots", None),
-    }
-    
-    return row
-
-
 def fetch_multiple_auctions(auction_ids: List[str]) -> List[Dict[str, Any]]:
     """Fetch details for multiple auctions"""
     all_auctions = []
@@ -80,7 +34,7 @@ def fetch_multiple_auctions(auction_ids: List[str]) -> List[Dict[str, Any]]:
         print(f"[{i}/{len(auction_ids)}] Processing auction {auction_id}...")
         try:
             data = fetch_auction_details(auction_id)
-            auction_row = extract_auction_from_json(data, auction_id)
+            auction_row = utils.json_extractors.extract_auction_from_json(data, auction_id)
             if auction_row:
                 all_auctions.append(auction_row)
                 print(f"  ✓ Extracted: {auction_row.get('title', 'N/A')}")
