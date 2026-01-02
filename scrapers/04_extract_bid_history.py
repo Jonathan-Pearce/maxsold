@@ -7,6 +7,7 @@ from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
 import utils.json_extractors
+import utils.raw_data_format
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
@@ -192,21 +193,9 @@ def save_to_parquet(bids: List[Dict[str, Any]], output_path: str):
         return
     
     df = pd.DataFrame(bids)
-    
-    # Convert numeric columns
-    if 'amount' in df.columns:
-        df['amount'] = pd.to_numeric(df['amount'], errors='coerce')
-    
-    if 'bid_number' in df.columns:
-        df['bid_number'] = pd.to_numeric(df['bid_number'], errors='coerce').astype('Int64')
-    
-    # Convert boolean
-    if 'isproxy' in df.columns:
-        df['isproxy'] = df['isproxy'].astype('boolean')
-    
-    # Convert datetime
-    if 'time_of_bid' in df.columns:
-        df['time_of_bid'] = pd.to_datetime(df['time_of_bid'], errors='coerce')
+
+    #format data types
+    df = utils.raw_data_format.format_bid_history_data(df)
     
     # Create output directory
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)

@@ -5,6 +5,7 @@ from pathlib import Path
 import sys
 from datetime import datetime
 import utils.json_extractors
+import utils.raw_data_format
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
@@ -78,22 +79,9 @@ def save_to_parquet(auctions: List[Dict[str, Any]], output_path: str):
     
     df = pd.DataFrame(auctions)
     
-    # Convert numeric columns
-    numeric_cols = ['extended_bidding_interval', 'extended_bidding_threshold', 'catalog_lots']
-    for col in numeric_cols:
-        if col in df.columns:
-            df[col] = pd.to_numeric(df[col], errors='coerce')
-    
-    # Convert boolean
-    if 'extended_bidding' in df.columns:
-        df['extended_bidding'] = df['extended_bidding'].astype('boolean')
-    
-    # Convert datetime columns
-    datetime_cols = ['starts', 'ends', 'last_item_closes', 'pickup_time']
-    for col in datetime_cols:
-        if col in df.columns:
-            df[col] = pd.to_datetime(df[col], errors='coerce')
-    
+    # Format data types
+    df = utils.raw_data_format.format_auction_details_data(df)
+
     # Create output directory
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     
