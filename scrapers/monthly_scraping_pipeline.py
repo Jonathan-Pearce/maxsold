@@ -66,11 +66,13 @@ def run_command(cmd, description):
 
 def scrape_auction_search(output_path):
     """Step 1: Scrape auction search data"""
+    # Get the directory where this script is located
+    script_dir = Path(__file__).parent
     cmd = [
         sys.executable,
-        'scrapers/01_extract_auction_search.py',
+        str(script_dir / '01_extract_auction_search.py'),
         '--output', output_path,
-        '--days', '10'
+        '--days', '32'
     ]
     run_command(cmd, "Scraping auction search (30 days)")
     return output_path
@@ -78,9 +80,10 @@ def scrape_auction_search(output_path):
 
 def scrape_auction_details(input_parquet, output_path):
     """Step 2: Scrape auction details"""
+    script_dir = Path(__file__).parent
     cmd = [
         sys.executable,
-        'scrapers/02_extract_auction_details.py',
+        str(script_dir / '02_extract_auction_details.py'),
         '--input-parquet', input_parquet,
         '--output', output_path
     ]
@@ -90,9 +93,10 @@ def scrape_auction_details(input_parquet, output_path):
 
 def scrape_item_details(input_parquet, output_path):
     """Step 3: Scrape item details"""
+    script_dir = Path(__file__).parent
     cmd = [
         sys.executable,
-        'scrapers/03_extract_items_details.py',
+        str(script_dir / '03_extract_items_details.py'),
         '--input-parquet', input_parquet,
         '--output', output_path
     ]
@@ -102,9 +106,10 @@ def scrape_item_details(input_parquet, output_path):
 
 def scrape_bid_history(input_parquet, output_path):
     """Step 4: Scrape bid history"""
+    script_dir = Path(__file__).parent
     cmd = [
         sys.executable,
-        'scrapers/04_extract_bid_history.py',
+        str(script_dir / '04_extract_bid_history.py'),
         '--input-parquet', input_parquet,
         '--output', output_path
     ]
@@ -114,9 +119,10 @@ def scrape_bid_history(input_parquet, output_path):
 
 def scrape_item_enriched(input_parquet, output_path):
     """Step 5: Scrape enriched item details"""
+    script_dir = Path(__file__).parent
     cmd = [
         sys.executable,
-        'scrapers/05_extract_item_enriched_details.py',
+        str(script_dir / '05_extract_item_enriched_details.py'),
         '--input-parquet', input_parquet,
         '--output', output_path
     ]

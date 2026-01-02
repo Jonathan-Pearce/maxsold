@@ -199,19 +199,19 @@ def main():
             }
         ]
         
-        # for dataset_info in engineered_datasets:
-        #     print(f"\n--- Uploading {dataset_info['title']} ---")
-        #     try:
-        #         kaggle.upload_dataset(
-        #             dataset_dir=dataset_info['dir'],
-        #             dataset_slug=dataset_info['slug'],
-        #             title=dataset_info['title'],
-        #             description=dataset_info['description'],
-        #             version_notes='Automated feature engineering pipeline update'
-        #         )
-        #     except Exception as e:
-        #         print(f"⚠ Upload warning: {e}")
-        #         print("Continuing with next dataset...")
+        for dataset_info in engineered_datasets:
+            print(f"\n--- Uploading {dataset_info['title']} ---")
+            try:
+                kaggle.upload_dataset(
+                    dataset_dir=dataset_info['dir'],
+                    dataset_slug=dataset_info['slug'],
+                    title=dataset_info['title'],
+                    description=dataset_info['description'],
+                    version_notes='Automated feature engineering pipeline update'
+                )
+            except Exception as e:
+                print(f"⚠ Upload warning: {e}")
+                print("Continuing with next dataset...")
     
     # ========== STEP 4: MERGE DATASETS ==========
     print("\n" + "="*80)
