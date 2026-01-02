@@ -19,15 +19,18 @@ warnings.filterwarnings('ignore')
 print("FAST ML PIPELINE - SAMPLING 50K ROWS")
 print("="*80)
 
+# Get repository root
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+
 # Setup
-MODEL_DIR = Path('data/models')
-OUTPUT_DIR = Path('data/models/output')
+MODEL_DIR = REPO_ROOT / 'data' / 'models'
+OUTPUT_DIR = REPO_ROOT / 'data' / 'models' / 'output'
 MODEL_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # Load and sample data
 print("\n1. Loading data...")
-df = pd.read_parquet('data/final_data/maxsold_final_dataset.parquet')
+df = pd.read_parquet(REPO_ROOT / 'data' / 'final_data' / 'maxsold_final_dataset.parquet')
 print(f"   Full dataset: {df.shape}")
 
 # Sample for speed

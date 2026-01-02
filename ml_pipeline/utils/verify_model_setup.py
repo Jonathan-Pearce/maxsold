@@ -3,7 +3,10 @@ Quick test script to verify the model pipeline setup
 """
 import sys
 import pandas as pd
+from pathlib import Path
 
+# Get the repository root (2 levels up from this script)
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 print("=" * 80)
 print("VERIFYING ML PIPELINE SETUP")
 print("=" * 80)
@@ -33,7 +36,7 @@ except ImportError as e:
 # Test data loading
 print("\n2. Testing data loading...")
 try:
-    data_path = 'data/final_data/maxsold_final_dataset.parquet'
+    data_path = REPO_ROOT / 'data' / 'final_data' / 'maxsold_final_dataset.parquet'
     df = pd.read_parquet(data_path)
     print(f"   ✓ Successfully loaded dataset")
     print(f"   Shape: {df.shape}")

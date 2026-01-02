@@ -1,5 +1,9 @@
 # ML Model Pipeline - Implementation Summary
 
+> **📍 Location Note**: ML pipeline scripts have been reorganized into `ml_pipeline/` directory.  
+> Run scripts from repository root: `python ml_pipeline/scripts/train_model_minimal.py`  
+> Or navigate to scripts directory: `cd ml_pipeline/scripts && python train_model_minimal.py`
+
 ## ✓ COMPLETED: Machine Learning Pipeline for MaxSold Bid Prediction
 
 ### What Was Built
@@ -25,7 +29,11 @@ I've developed a complete machine learning pipeline with multiple versions optim
 ### 1. `train_model_minimal.py` ⭐ RECOMMENDED FOR FIRST RUN
 **Fastest execution (~30-60 seconds)**
 ```bash
-python train_model_minimal.py
+# From repository root
+python ml_pipeline/scripts/train_model_minimal.py
+
+# Or from scripts directory
+cd ml_pipeline/scripts && python train_model_minimal.py
 ```
 - Samples 30K rows for speed
 - 50 tree estimators
@@ -35,7 +43,7 @@ python train_model_minimal.py
 ### 2. `model_pipeline_fast.py`
 **Quick execution (~1-2 minutes)**
 ```bash
-python model_pipeline_fast.py
+python ml_pipeline/scripts/model_pipeline_fast.py
 ```
 - Samples 50K rows
 - 50 tree estimators
@@ -48,7 +56,7 @@ python model_pipeline_fast.py
 ### 3. `model_pipeline_quick.py`
 **Full dataset, numeric features (~2-3 minutes)**
 ```bash
-python model_pipeline_quick.py
+python ml_pipeline/scripts/model_pipeline_quick.py
 ```
 - Uses complete dataset (272K rows)
 - Numeric features only
@@ -59,7 +67,7 @@ python model_pipeline_quick.py
 ### 4. `model_pipeline.py`
 **Complete pipeline with all features (~5-10 minutes)**
 ```bash
-python model_pipeline.py
+python ml_pipeline/scripts/model_pipeline.py
 ```
 - Full dataset with ALL feature types
 - Categorical encoding

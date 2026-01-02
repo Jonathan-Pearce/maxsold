@@ -3,7 +3,7 @@
 
 echo "Starting MaxSold ML Pipeline..."
 cd /workspaces/maxsold
-python3 model_pipeline.py
+python3 ml_pipeline/scripts/model_pipeline.py
 
 echo ""
 echo "Pipeline execution complete!"

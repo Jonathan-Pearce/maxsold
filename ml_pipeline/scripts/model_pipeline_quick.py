@@ -25,15 +25,18 @@ warnings.filterwarnings('ignore')
 # Configure plotting
 sns.set_palette("husl")
 
+# Get repository root
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+
 print("="*80)
 print("MAXSOLD ML PIPELINE - CURRENT BID PREDICTION")
 print("="*80)
 print(f"Start time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
 
 # Configuration
-DATA_PATH = 'data/final_data/maxsold_final_dataset.parquet'
-MODEL_DIR = Path('data/models')
-OUTPUT_DIR = Path('data/models/output')
+DATA_PATH = REPO_ROOT / 'data' / 'final_data' / 'maxsold_final_dataset.parquet'
+MODEL_DIR = REPO_ROOT / 'data' / 'models'
+OUTPUT_DIR = REPO_ROOT / 'data' / 'models' / 'output'
 MODEL_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 

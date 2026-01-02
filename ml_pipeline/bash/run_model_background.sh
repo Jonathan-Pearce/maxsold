@@ -10,7 +10,7 @@ if [ -d ".venv" ]; then
 fi
 
 # Run the fast pipeline
-nohup python model_pipeline_fast.py > model_pipeline.log 2>&1 &
+nohup python ml_pipeline/scripts/model_pipeline_fast.py > model_pipeline.log 2>&1 &
 PID=$!
 
 echo "Pipeline started with PID: $PID"

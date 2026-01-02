@@ -15,9 +15,12 @@ from pathlib import Path
 import warnings
 warnings.filterwarnings('ignore')
 
+# Get repository root (2 levels up from this script)
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+
 # Configuration
-DATA_PATH = 'data/final_data/maxsold_final_dataset.parquet'
-MODEL_DIR = Path('data/models')
+DATA_PATH = REPO_ROOT / 'data' / 'final_data' / 'maxsold_final_dataset.parquet'
+MODEL_DIR = REPO_ROOT / 'data' / 'models'
 MODEL_DIR.mkdir(parents=True, exist_ok=True)
 
 print("="*60)

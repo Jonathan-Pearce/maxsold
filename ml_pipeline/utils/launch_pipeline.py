@@ -25,9 +25,9 @@ def run_pipeline(script_name='model_pipeline_fast.py'):
         print("SUCCESS! Pipeline completed.")
         print("="*80)
         print("\nCheck outputs:")
-        print("  - Model: data/models/xgboost_model.pkl")
-        print("  - Plots: data/models/output/")
-        print("  - Metrics: data/models/output/metrics_summary.txt")
+        print("  - Model: ../../data/models/xgboost_model.pkl")
+        print("  - Plots: ../../data/models/output/")
+        print("  - Metrics: ../../data/models/output/metrics_summary.txt")
     else:
         print("\n" + "="*80)
         print(f"ERROR: Pipeline failed with code {result.returncode}")
