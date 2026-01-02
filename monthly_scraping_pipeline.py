@@ -70,7 +70,7 @@ def scrape_auction_search(output_path):
         sys.executable,
         'scrapers/01_extract_auction_search.py',
         '--output', output_path,
-        '--days', '10'
+        '--days', '32'
     ]
     run_command(cmd, "Scraping auction search (30 days)")
     return output_path
