@@ -133,13 +133,14 @@ def download_and_save_image(
         
         # Convert to RGB for consistent output format
         # This ensures all saved images are in RGB mode regardless of source format
-        if image.mode in ('RGBA', 'LA', 'P'):
+        original_mode = image.mode
+        if original_mode in ('RGBA', 'LA', 'P'):
             background = Image.new('RGB', image.size, (255, 255, 255))
-            if image.mode == 'P':
+            if original_mode == 'P':
                 image = image.convert('RGBA')
             background.paste(image, mask=image.split()[-1] if image.mode in ('RGBA', 'LA') else None)
             image = background
-        elif image.mode != 'RGB':
+        elif original_mode != 'RGB':
             image = image.convert('RGB')
         
         # Resize image
@@ -312,7 +313,7 @@ def main(
     if output_dir:
         output_path = Path(output_dir)
     else:
-        timestamp = datetime.now().strftime('%Y%m%d')
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         output_path = Path(f"data/images/images_{timestamp}")
     
     # Load auction IDs
@@ -348,7 +349,9 @@ def main(
     # Process auctions in batches
     metadata_list = []
     total_images_saved = 0
-    metadata_path = output_path.parent / f"image_metadata_{datetime.now().strftime('%Y%m%d')}.parquet"
+    # Use same timestamp as output directory for consistency
+    metadata_timestamp = output_path.name.replace('images_', '')
+    metadata_path = output_path.parent / f"image_metadata_{metadata_timestamp}.parquet"
     
     # Split auction IDs into batches
     num_batches = (len(auction_ids) + BATCH_SIZE - 1) // BATCH_SIZE
