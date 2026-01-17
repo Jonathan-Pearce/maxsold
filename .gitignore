@@ -1,3 +1,5 @@
 data/final_data/item_details/*.parquet
 data/*.parquet
 *.parquet
+data/images/
+data/raw_data/kaggle_temp/
