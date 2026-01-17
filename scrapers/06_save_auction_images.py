@@ -348,6 +348,7 @@ def main(
     # Process auctions in batches
     metadata_list = []
     total_images_saved = 0
+    metadata_path = output_path.parent / f"image_metadata_{datetime.now().strftime('%Y%m%d')}.parquet"
     
     # Split auction IDs into batches
     num_batches = (len(auction_ids) + BATCH_SIZE - 1) // BATCH_SIZE
@@ -371,7 +372,6 @@ def main(
         
         # Save metadata after each batch
         if metadata_list:
-            metadata_path = output_path.parent / f"image_metadata_{datetime.now().strftime('%Y%m%d')}.parquet"
             save_metadata(metadata_list, metadata_path)
     
     # Final summary
@@ -380,7 +380,8 @@ def main(
     print(f"  Total auctions processed: {len(auction_ids)}")
     print(f"  Total images saved: {total_images_saved}")
     print(f"  Output directory: {output_path}")
-    print(f"  Metadata file: {metadata_path}")
+    if metadata_list:
+        print(f"  Metadata file: {metadata_path}")
     print("=" * 60)
 
 
