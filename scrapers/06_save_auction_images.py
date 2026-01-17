@@ -18,7 +18,6 @@ from datetime import datetime
 from PIL import Image
 from io import BytesIO
 import time
-from tqdm import tqdm
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
@@ -111,7 +110,7 @@ def resize_image(image: Image.Image, max_dimension: int = MAX_IMAGE_DIMENSION) -
         new_height = max_dimension
         new_width = int((max_dimension / height) * width)
     
-    return image.resize((new_width, new_height), Image.LANCZOS)
+    return image.resize((new_width, new_height), Image.Resampling.LANCZOS)
 
 
 def download_and_save_image(
@@ -132,7 +131,8 @@ def download_and_save_image(
         # Open image
         image = Image.open(BytesIO(response.content))
         
-        # Convert to RGB if necessary (WebP doesn't support RGBA well)
+        # Convert to RGB for consistent output format
+        # This ensures all saved images are in RGB mode regardless of source format
         if image.mode in ('RGBA', 'LA', 'P'):
             background = Image.new('RGB', image.size, (255, 255, 255))
             if image.mode == 'P':
