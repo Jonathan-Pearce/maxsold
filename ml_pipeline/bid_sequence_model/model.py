@@ -6,12 +6,15 @@ partial bid sequences.
 """
 
 import numpy as np
+import json
+from pathlib import Path
+from typing import Tuple, Optional, Dict
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
-from typing import Tuple, Optional, Dict
-import json
-from pathlib import Path
+
+# Small epsilon value to avoid division by zero
+EPSILON = 1e-10
 
 
 class BidSequencePredictor:
@@ -298,7 +301,7 @@ class BidSequencePredictor:
         r2 = 1 - (ss_res / ss_tot)
         
         # MAPE (avoiding division by zero)
-        mape = np.mean(np.abs((y - y_pred) / (y + 1e-10))) * 100
+        mape = np.mean(np.abs((y - y_pred) / (y + EPSILON))) * 100
         
         metrics = {
             'mse': mse,

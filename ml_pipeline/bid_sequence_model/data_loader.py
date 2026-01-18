@@ -110,6 +110,10 @@ class BidSequenceDataLoader:
         The raw data has winning bid = 1, first bid = total_bids (reversed).
         This function corrects the ordering.
         
+        Sorting strategy: We sort by amount and time because in most auctions,
+        later bids have higher amounts. However, some auctions may have
+        decreasing bids or ties, so we include time_of_bid as a secondary sort.
+        
         Parameters:
         -----------
         df : pd.DataFrame
@@ -123,8 +127,7 @@ class BidSequenceDataLoader:
         """
         print("\nReversing bid numbering (first bid = 1)...")
         
-        # Sort by item and amount to ensure correct temporal ordering
-        # Lower amounts typically come first (except in weird edge cases)
+        # Sort by item and amount (then time) to ensure correct temporal ordering
         df = df.sort_values(['auction_id', 'item_id', 'amount', 'time_of_bid']).copy()
         
         # Calculate total bids per item

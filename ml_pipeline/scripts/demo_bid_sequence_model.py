@@ -55,7 +55,7 @@ def generate_synthetic_bid_data(n_items=1000, avg_bids_per_item=15, seed=42):
         
         # Simulate bid progression
         current_price = start_price
-        base_time = pd.Timestamp('2026-01-01 10:00:00')
+        base_time = pd.Timestamp.now().replace(hour=10, minute=0, second=0, microsecond=0)
         
         for bid_num in range(1, n_bids + 1):
             # Bid increment (typically 5-20% of current price)

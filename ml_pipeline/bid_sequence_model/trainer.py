@@ -5,6 +5,7 @@ Handles the complete training pipeline including data splitting, training,
 evaluation, and visualization.
 """
 
+import json
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -12,7 +13,6 @@ import seaborn as sns
 from sklearn.model_selection import train_test_split
 from pathlib import Path
 from typing import Optional, Dict, Tuple
-import json
 
 from .data_loader import BidSequenceDataLoader
 from .model import BidSequencePredictor
