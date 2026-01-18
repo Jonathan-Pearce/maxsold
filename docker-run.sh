@@ -115,8 +115,13 @@ run_test() {
 
 clean_up() {
     echo -e "${GREEN}Cleaning up containers...${NC}"
-    docker ps -a | grep maxsold | awk '{print $1}' | xargs -r docker rm -f
-    echo -e "${GREEN}✓ Cleanup complete${NC}"
+    local containers=$(docker ps -a | grep maxsold | awk '{print $1}')
+    if [ -n "$containers" ]; then
+        echo "$containers" | xargs docker rm -f
+        echo -e "${GREEN}✓ Cleanup complete${NC}"
+    else
+        echo -e "${YELLOW}No maxsold containers to clean up${NC}"
+    fi
 }
 
 view_logs() {

@@ -99,10 +99,16 @@ goto :eof
 
 :clean
 echo Cleaning up containers...
-for /f "tokens=*" %%i in ('docker ps -a ^| findstr maxsold') do (
-    for /f "tokens=1" %%j in ("%%i") do docker rm -f %%j
+set "found=0"
+for /f "tokens=*" %%i in ('docker ps -a 2^>nul ^| findstr maxsold') do (
+    set "found=1"
+    for /f "tokens=1" %%j in ("%%i") do docker rm -f %%j 2>nul
 )
-echo Cleanup complete!
+if "%found%"=="1" (
+    echo Cleanup complete!
+) else (
+    echo No maxsold containers to clean up
+)
 goto :eof
 
 :logs
