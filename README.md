@@ -1,10 +1,48 @@
-# Maxsold Data Projecct
+# Maxsold Data Project
+
+A comprehensive data project for scraping, processing, and analyzing MaxSold auction data with machine learning capabilities.
+
+## 🐳 Docker Setup (Recommended)
+
+The easiest way to get started is using Docker. See **[DOCKER_SETUP.md](DOCKER_SETUP.md)** for detailed instructions.
+
+**Quick Start:**
+```bash
+# Build the Docker image
+docker build -t maxsold:latest .
+
+# Run with interactive shell
+docker run -it --rm -v $(pwd)/data:/app/data maxsold bash
+```
+
+## 📋 Requirements
+
+- Python 3.12+
+- Dependencies listed in `requirements.txt`
+- Chrome browser (for Selenium-based scrapers)
+
+## 🚀 Installation (Without Docker)
+
+```bash
+# Clone the repository
+git clone https://github.com/Jonathan-Pearce/maxsold.git
+cd maxsold
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+## 📚 Documentation
+
+- **[DOCKER_SETUP.md](DOCKER_SETUP.md)** - Complete Docker setup guide
+- **[ml_pipeline/README.md](ml_pipeline/README.md)** - Machine learning pipeline documentation
+
+## 🔗 MaxSold Resources
 
 https://support.maxsold.com/hc/en-us/articles/203144054-How-do-bid-increments-work
 https://support.maxsold.com/hc/en-us/articles/203144064-What-does-soft-close-mean
 
-
-Example terminal commands
+## Example terminal commands
 
 ```
 python3 /workspaces/maxsold/scrapers/maxsold_bid_history.py "https://maxsold.com/listing/7436058/" > bids.json
