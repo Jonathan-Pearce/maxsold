@@ -1,0 +1,57 @@
+# Git files
+.git
+.gitignore
+.github
+
+# Python cache
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info
+dist
+build
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Data files (should be mounted as volumes)
+data/raw_data/kaggle_temp/
+data/*.parquet
+data/final_data/item_details/*.parquet
+
+# Model files (can be large)
+*.pkl
+data/models/*.pkl
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation (included in image)
+# *.md
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Temporary files
+tmp/
+temp/
+*.tmp

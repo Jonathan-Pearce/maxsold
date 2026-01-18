@@ -1,10 +1,60 @@
-# Maxsold Data Projecct
+# Maxsold Data Project
+
+A comprehensive data project for scraping, processing, and analyzing MaxSold auction data with machine learning capabilities.
+
+## 🐳 Docker Setup (Recommended)
+
+The easiest way to get started is using Docker with the provided helper scripts.
+
+**Quick Start (Linux/Mac):**
+```bash
+git clone https://github.com/Jonathan-Pearce/maxsold.git
+cd maxsold
+chmod +x docker-run.sh
+./docker-run.sh build
+./docker-run.sh shell
+```
+
+**Quick Start (Windows):**
+```cmd
+git clone https://github.com/Jonathan-Pearce/maxsold.git
+cd maxsold
+docker-run.bat build
+docker-run.bat shell
+```
+
+**Documentation:**
+- 📖 **[DOCKER_QUICKSTART.md](DOCKER_QUICKSTART.md)** - Quick reference card
+- 📘 **[DOCKER_SETUP.md](DOCKER_SETUP.md)** - Complete setup guide with troubleshooting
+
+## 📋 Requirements
+
+- Python 3.12+
+- Dependencies listed in `requirements.txt`
+
+## 🚀 Installation (Without Docker)
+
+```bash
+# Clone the repository
+git clone https://github.com/Jonathan-Pearce/maxsold.git
+cd maxsold
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+## 📚 Documentation
+
+- 📖 **[DOCKER_QUICKSTART.md](DOCKER_QUICKSTART.md)** - Docker quick reference card
+- 📘 **[DOCKER_SETUP.md](DOCKER_SETUP.md)** - Complete Docker setup guide
+- 🤖 **[ml_pipeline/README.md](ml_pipeline/README.md)** - Machine learning pipeline documentation
+
+## 🔗 MaxSold Resources
 
 https://support.maxsold.com/hc/en-us/articles/203144054-How-do-bid-increments-work
 https://support.maxsold.com/hc/en-us/articles/203144064-What-does-soft-close-mean
 
-
-Example terminal commands
+## Example terminal commands
 
 ```
 python3 /workspaces/maxsold/scrapers/maxsold_bid_history.py "https://maxsold.com/listing/7436058/" > bids.json

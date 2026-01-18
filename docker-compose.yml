@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  maxsold:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: maxsold:latest
+    container_name: maxsold-dev
+    volumes:
+      # Mount data directory for persistence
+      - ./data:/app/data
+      # Optional: Mount source code for development
+      # - ./scrapers:/app/scrapers
+      # - ./ml_pipeline:/app/ml_pipeline
+      # - ./feature_engineering:/app/feature_engineering
+      # - ./utils:/app/utils
+    environment:
+      # Add your Kaggle credentials if needed
+      - KAGGLE_USERNAME=${KAGGLE_USERNAME}
+      - KAGGLE_KEY=${KAGGLE_KEY}
+    stdin_open: true
+    tty: true
+    # Uncomment to limit resources
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '2.0'
+    #       memory: 4G
+
+  # Example service for running a specific scraper
+  scraper:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: maxsold:latest
+    container_name: maxsold-scraper
+    volumes:
+      - ./data:/app/data
+    environment:
+      - KAGGLE_USERNAME=${KAGGLE_USERNAME}
+      - KAGGLE_KEY=${KAGGLE_KEY}
+    command: python scrapers/monthly_scraping_pipeline.py
+    # Restart on failure with max retry limit
+    restart: on-failure:3
+
+  # Example service for running ML pipeline
+  ml-training:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: maxsold:latest
+    container_name: maxsold-ml
+    volumes:
+      - ./data:/app/data
+    command: python ml_pipeline/scripts/train_model_minimal.py
