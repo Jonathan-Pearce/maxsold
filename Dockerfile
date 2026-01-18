@@ -37,11 +37,16 @@ RUN apt-get update && apt-get install -y \
     libvulkan1 \
     git \
     && rm -rf /var/lib/apt/lists/* \
-    && wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb || true \
+    && (wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+        && echo "Chrome download successful" \
+        || echo "Warning: Chrome download failed - Selenium scripts may not work") \
     && if [ -f google-chrome-stable_current_amd64.deb ]; then \
          apt-get update && \
          apt-get install -y ./google-chrome-stable_current_amd64.deb && \
-         rm -rf /var/lib/apt/lists/* google-chrome-stable_current_amd64.deb; \
+         rm -rf /var/lib/apt/lists/* google-chrome-stable_current_amd64.deb && \
+         echo "Chrome installation completed"; \
+       else \
+         echo "Chrome not installed - image will work for non-Selenium scripts"; \
        fi
 
 # Create working directory

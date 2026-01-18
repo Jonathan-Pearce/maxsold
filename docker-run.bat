@@ -99,9 +99,9 @@ goto :eof
 
 :clean
 echo Cleaning up containers...
-REM Use docker filter to get containers with maxsold in the name
+REM Use docker filter to get containers with names starting with maxsold-
 set "found=0"
-for /f "tokens=*" %%i in ('docker ps -a --filter "name=maxsold" --format "{{.ID}}" 2^>nul') do (
+for /f "tokens=*" %%i in ('docker ps -a --filter "name=maxsold-" --format "{{.ID}}" 2^>nul') do (
     set "found=1"
     docker rm -f %%i 2>nul
 )
