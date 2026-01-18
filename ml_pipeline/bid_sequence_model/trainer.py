@@ -389,7 +389,7 @@ class BidSequenceTrainer:
         print("="*80)
         print(f"\nAll outputs saved to: {self.output_dir}")
         print("\nFiles created:")
-        print(f"  - bid_sequence_model.h5 (trained model)")
+        print(f"  - bid_sequence_model.keras (trained model)")
         print(f"  - model_config.json (model configuration)")
         print(f"  - training_history.json (training history)")
         print(f"  - metrics_summary.json (evaluation metrics)")

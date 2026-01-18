@@ -324,8 +324,8 @@ class BidSequencePredictor:
         
         print(f"\nSaving model to: {save_dir}")
         
-        # Save model weights
-        model_path = save_dir / 'bid_sequence_model.h5'
+        # Save model weights (using Keras native format)
+        model_path = save_dir / 'bid_sequence_model.keras'
         self.model.save(model_path)
         print(f"  Saved model: {model_path.name}")
         
@@ -380,10 +380,18 @@ class BidSequencePredictor:
         self.feature_mean = np.array(config['feature_mean']) if config['feature_mean'] else None
         self.feature_std = np.array(config['feature_std']) if config['feature_std'] else None
         
-        # Load model
-        model_path = save_dir / 'bid_sequence_model.h5'
-        self.model = keras.models.load_model(model_path)
+        # Load model (try Keras native format first, then fall back to H5)
+        keras_path = save_dir / 'bid_sequence_model.keras'
+        h5_path = save_dir / 'bid_sequence_model.h5'
         
-        print(f"  Loaded model: {model_path.name}")
+        if keras_path.exists():
+            self.model = keras.models.load_model(keras_path)
+            print(f"  Loaded model: {keras_path.name}")
+        elif h5_path.exists():
+            self.model = keras.models.load_model(h5_path)
+            print(f"  Loaded model: {h5_path.name}")
+        else:
+            raise FileNotFoundError(f"No model file found in {save_dir}")
+        
         print(f"  Model type: {self.model_type.upper()}")
         print("Model loaded successfully!")

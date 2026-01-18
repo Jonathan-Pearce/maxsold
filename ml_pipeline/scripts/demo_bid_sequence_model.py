@@ -154,8 +154,19 @@ def demo_full_pipeline():
     model = BidSequencePredictor()
     model.load(str(output_dir))
     
+    # Note: The loaded model expects sequences of length 30, but we have partial
+    # sequences of length 5. For production use, you would either:
+    # 1. Pad partial sequences to match training length (with zeros)
+    # 2. Train a separate model for each partial sequence length
+    # 3. Use a model that handles variable lengths naturally
+    
+    # For this demo, let's pad the partial sequences to length 30
+    print("\nPadding partial sequences to match model input length...")
+    X_padded = np.zeros((len(X_partial), 30, X_partial.shape[2]))
+    X_padded[:, :X_partial.shape[1], :] = X_partial
+    
     # Make predictions
-    predictions = model.predict(X_partial)
+    predictions = model.predict(X_padded)
     
     # Show results for first 10 items
     print("\nPredictions from first 5 bids:")
