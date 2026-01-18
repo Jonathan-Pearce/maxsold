@@ -31,7 +31,6 @@ docker-run.bat shell
 
 - Python 3.12+
 - Dependencies listed in `requirements.txt`
-- Chrome browser (for Selenium-based scrapers)
 
 ## 🚀 Installation (Without Docker)
 

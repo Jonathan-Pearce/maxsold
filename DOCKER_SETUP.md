@@ -539,19 +539,6 @@ docker system prune -a
 docker volume prune
 ```
 
-### Issue: Container runs but scripts fail with "No such file or directory"
-
-**Solution:** Ensure you're running commands from the project root directory where the Dockerfile is located.
-
-### Issue: Selenium/Chrome issues in container
-
-**Solution:** The Dockerfile includes Chrome installation. If you still encounter issues:
-```bash
-docker run -it --rm maxsold bash
-# Inside container:
-google-chrome --version  # Verify Chrome is installed
-```
-
 ### Issue: Volume mount not working on Windows
 
 **Solution:** 
