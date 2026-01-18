@@ -115,8 +115,9 @@ run_test() {
 
 clean_up() {
     echo -e "${GREEN}Cleaning up containers...${NC}"
-    # Filter for containers with names starting with "maxsold-" or exactly "maxsold"
-    local containers=$(docker ps -a --filter "name=maxsold-" --filter "name=^maxsold$" --format "{{.ID}}" 2>/dev/null)
+    # Filter for containers with names containing "maxsold"
+    # This matches maxsold-container, maxsold-scraper, maxsold-ml, etc.
+    local containers=$(docker ps -a -q --filter "name=maxsold" 2>/dev/null)
     if [ -n "$containers" ]; then
         echo "$containers" | xargs docker rm -f
         echo -e "${GREEN}✓ Cleanup complete${NC}"
