@@ -1,34 +1,56 @@
 # MaxSold Machine Learning Pipeline
 
-Complete XGBoost regression pipeline for predicting current bid values.
+Complete machine learning pipelines for MaxSold auction prediction.
+
+## 📦 Available Models
+
+### 1. XGBoost Current Bid Predictor
+Traditional ML model for predicting current bid values from item features.
+
+**Use Case**: Predict item prices based on features like title, category, auction timing, etc.
+
+### 2. Bid Sequence Predictor (Deep Learning) ⭐ NEW
+LSTM/GRU-based model for predicting final auction prices from partial bid sequences.
+
+**Use Case**: Predict final winning bid amount given only the first X bids (production scenario).
 
 ## 📁 Directory Structure
 
 ```
 ml_pipeline/
-├── scripts/              # Main pipeline scripts
-│   ├── model_pipeline.py           # Full pipeline with all features
-│   ├── model_pipeline_quick.py     # Quick pipeline (numeric features)
-│   ├── model_pipeline_fast.py      # Fast pipeline (sampled data)
-│   └── train_model_minimal.py      # Minimal pipeline (fastest)
+├── scripts/                          # Main pipeline scripts
+│   ├── model_pipeline.py             # Full XGBoost pipeline
+│   ├── model_pipeline_quick.py       # Quick XGBoost pipeline
+│   ├── model_pipeline_fast.py        # Fast XGBoost pipeline (sampled)
+│   ├── train_model_minimal.py        # Minimal XGBoost pipeline
+│   ├── train_bid_sequence_model.py   # Bid sequence model trainer
+│   ├── demo_bid_sequence_model.py    # Bid sequence demo
+│   └── example_bid_prediction.py     # Production usage examples
 │
-├── utils/                # Utility scripts
-│   ├── verify_model_setup.py       # Setup verification
-│   └── launch_pipeline.py          # Pipeline launcher
+├── bid_sequence_model/               # Bid sequence model package
+│   ├── data_loader.py                # Data loading & preprocessing
+│   ├── model.py                      # LSTM/GRU architecture
+│   ├── trainer.py                    # Training pipeline
+│   ├── __init__.py                   # Package initialization
+│   └── README.md                     # Detailed documentation
 │
-├── bash/                 # Shell scripts
-│   ├── run_model.sh                # Run pipeline
-│   └── run_model_background.sh     # Run in background
+├── utils/                            # Utility scripts
+│   ├── verify_model_setup.py         # Setup verification
+│   └── launch_pipeline.py            # Pipeline launcher
 │
-└── docs/                 # Documentation
-    ├── MODEL_PIPELINE_GUIDE.md     # Complete guide
-    ├── README_MODEL_PIPELINE.md    # Detailed reference
-    └── ML_PIPELINE_README.py       # Quick reference
+├── bash/                             # Shell scripts
+│   ├── run_model.sh                  # Run pipeline
+│   └── run_model_background.sh       # Run in background
+│
+└── docs/                             # Documentation
+    ├── MODEL_PIPELINE_GUIDE.md       # Complete guide
+    ├── README_MODEL_PIPELINE.md      # Detailed reference
+    └── ML_PIPELINE_README.py         # Quick reference
 ```
 
 ## 🚀 Quick Start
 
-### From Repository Root
+### XGBoost Current Bid Predictor
 
 ```bash
 # Verify setup
@@ -45,6 +67,22 @@ python ml_pipeline/scripts/model_pipeline_quick.py
 
 # Complete pipeline with all features (5-10 minutes)
 python ml_pipeline/scripts/model_pipeline.py
+```
+
+### Bid Sequence Predictor (Deep Learning)
+
+```bash
+# Run demo with synthetic data (no Kaggle data needed)
+python ml_pipeline/scripts/demo_bid_sequence_model.py
+
+# Train on real data (requires bid history from Kaggle)
+python ml_pipeline/scripts/train_bid_sequence_model.py \
+    --bid_history data/bid_history.parquet \
+    --item_metadata data/item_metadata.parquet \
+    --epochs 50
+
+# See production usage examples
+python ml_pipeline/scripts/example_bid_prediction.py
 ```
 
 ### Using Bash Scripts
@@ -159,6 +197,23 @@ All dependencies in main `requirements.txt`:
 - seaborn >= 0.12.0
 - joblib >= 1.3.0
 - pyarrow >= 14.0.0
+- torch >= 2.0.0 (for bid sequence model - PyTorch)
+
+## 📖 Detailed Documentation
+
+### Bid Sequence Model
+See **[bid_sequence_model/README.md](bid_sequence_model/README.md)** for complete documentation including:
+- Model architecture details
+- Data requirements and format
+- Training configuration options
+- Production deployment examples
+- Handling partial bid sequences
+- Performance metrics and tuning
+
+### XGBoost Model
+- **[MODEL_PIPELINE_GUIDE.md](docs/MODEL_PIPELINE_GUIDE.md)** - Complete implementation guide
+- **[README_MODEL_PIPELINE.md](docs/README_MODEL_PIPELINE.md)** - Detailed reference
+- **[ML_PIPELINE_README.py](docs/ML_PIPELINE_README.py)** - Quick reference display
 
 ## 📝 Notes
 
@@ -182,6 +237,12 @@ kaggle datasets download -d pearcej/maxsold-final-dataset -p data/final_data/ --
 **Issue**: Script too slow
 ```bash
 python ml_pipeline/scripts/train_model_minimal.py  # Use fastest version
+```
+
+**Issue**: Bid sequence model - no Kaggle data
+```bash
+# Use the demo with synthetic data to test the model
+python ml_pipeline/scripts/demo_bid_sequence_model.py
 ```
 
 ---
