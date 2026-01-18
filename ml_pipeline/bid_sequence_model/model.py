@@ -3,18 +3,104 @@ Bid Sequence Prediction Model Architecture
 
 LSTM/GRU-based deep learning model for predicting final auction prices from
 partial bid sequences.
+
+Uses PyTorch for the deep learning implementation.
 """
 
 import numpy as np
 import json
 from pathlib import Path
 from typing import Tuple, Optional, Dict
-import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras import layers
+import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader, TensorDataset
+from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 # Small epsilon value to avoid division by zero
 EPSILON = 1e-10
+
+
+class BidSequenceNN(nn.Module):
+    """
+    PyTorch neural network module for bid sequence prediction.
+    """
+    
+    def __init__(self, n_features: int, lstm_units: int, dropout_rate: float, model_type: str = 'lstm'):
+        super(BidSequenceNN, self).__init__()
+        
+        self.model_type = model_type.lower()
+        self.lstm_units = lstm_units
+        
+        # Recurrent layers
+        if self.model_type == 'gru':
+            self.rnn1 = nn.GRU(n_features, lstm_units, batch_first=True)
+            self.rnn2 = nn.GRU(lstm_units, lstm_units // 2, batch_first=True)
+        else:
+            self.rnn1 = nn.LSTM(n_features, lstm_units, batch_first=True)
+            self.rnn2 = nn.LSTM(lstm_units, lstm_units // 2, batch_first=True)
+        
+        # Dropout layers
+        self.dropout1 = nn.Dropout(dropout_rate)
+        self.dropout2 = nn.Dropout(dropout_rate)
+        self.dropout3 = nn.Dropout(dropout_rate / 2)
+        
+        # Dense layers
+        self.fc1 = nn.Linear(lstm_units // 2, 32)
+        self.relu = nn.ReLU()
+        self.fc2 = nn.Linear(32, 1)
+    
+    def forward(self, x, lengths=None):
+        """
+        Forward pass through the network.
+        
+        Parameters:
+        -----------
+        x : torch.Tensor
+            Input tensor of shape (batch_size, seq_len, n_features)
+        lengths : torch.Tensor, optional
+            Actual lengths of sequences (before padding)
+        
+        Returns:
+        --------
+        torch.Tensor
+            Output predictions of shape (batch_size, 1)
+        """
+        # First RNN layer
+        if lengths is not None:
+            # Pack sequences for efficiency
+            x_packed = pack_padded_sequence(x, lengths.cpu(), batch_first=True, enforce_sorted=False)
+            rnn1_out, _ = self.rnn1(x_packed)
+            rnn1_out, _ = pad_packed_sequence(rnn1_out, batch_first=True)
+        else:
+            rnn1_out, _ = self.rnn1(x)
+        
+        x = self.dropout1(rnn1_out)
+        
+        # Second RNN layer
+        if lengths is not None:
+            x_packed = pack_padded_sequence(x, lengths.cpu(), batch_first=True, enforce_sorted=False)
+            rnn2_out, _ = self.rnn2(x_packed)
+            rnn2_out, _ = pad_packed_sequence(rnn2_out, batch_first=True)
+        else:
+            rnn2_out, _ = self.rnn2(x)
+        
+        # Take the last output
+        if lengths is not None:
+            # Get the last actual output for each sequence
+            idx = (lengths - 1).unsqueeze(1).unsqueeze(2).expand(-1, -1, rnn2_out.size(2))
+            x = rnn2_out.gather(1, idx).squeeze(1)
+        else:
+            x = rnn2_out[:, -1, :]
+        
+        x = self.dropout2(x)
+        
+        # Dense layers
+        x = self.fc1(x)
+        x = self.relu(x)
+        x = self.dropout3(x)
+        x = self.fc2(x)
+        
+        return x
 
 
 class BidSequencePredictor:
@@ -30,7 +116,8 @@ class BidSequencePredictor:
                  n_features: int = 6,
                  lstm_units: int = 64,
                  dropout_rate: float = 0.2,
-                 model_type: str = 'lstm'):
+                 model_type: str = 'lstm',
+                 device: Optional[str] = None):
         """
         Initialize the bid sequence predictor.
         
@@ -46,12 +133,21 @@ class BidSequencePredictor:
             Dropout rate for regularization
         model_type : str
             Type of recurrent layer: 'lstm' or 'gru'
+        device : str, optional
+            Device to use ('cuda' or 'cpu'). If None, auto-detect.
         """
         self.sequence_length = sequence_length
         self.n_features = n_features
         self.lstm_units = lstm_units
         self.dropout_rate = dropout_rate
         self.model_type = model_type.lower()
+        
+        # Set device
+        if device is None:
+            self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        else:
+            self.device = torch.device(device)
+        
         self.model = None
         self.history = None
         
@@ -59,14 +155,14 @@ class BidSequencePredictor:
         self.feature_mean = None
         self.feature_std = None
         
-    def build_model(self) -> keras.Model:
+    def build_model(self) -> nn.Module:
         """
         Build the neural network architecture.
         
         Returns:
         --------
-        keras.Model
-            Compiled model ready for training
+        nn.Module
+            PyTorch model ready for training
         """
         print("\nBuilding model architecture...")
         print(f"  Model type: {self.model_type.upper()}")
@@ -74,52 +170,30 @@ class BidSequencePredictor:
         print(f"  Features: {self.n_features}")
         print(f"  Hidden units: {self.lstm_units}")
         print(f"  Dropout: {self.dropout_rate}")
-        
-        # Input layer
-        inputs = keras.Input(shape=(self.sequence_length, self.n_features))
-        
-        # Masking layer to handle padded sequences
-        x = layers.Masking(mask_value=0.0)(inputs)
-        
-        # Choose recurrent layer type
-        if self.model_type == 'gru':
-            # GRU layers (faster, often similar performance to LSTM)
-            x = layers.GRU(self.lstm_units, return_sequences=True)(x)
-            x = layers.Dropout(self.dropout_rate)(x)
-            x = layers.GRU(self.lstm_units // 2)(x)
-        else:
-            # LSTM layers (default)
-            x = layers.LSTM(self.lstm_units, return_sequences=True)(x)
-            x = layers.Dropout(self.dropout_rate)(x)
-            x = layers.LSTM(self.lstm_units // 2)(x)
-        
-        x = layers.Dropout(self.dropout_rate)(x)
-        
-        # Dense layers
-        x = layers.Dense(32, activation='relu')(x)
-        x = layers.Dropout(self.dropout_rate / 2)(x)
-        
-        # Output layer (final price prediction)
-        outputs = layers.Dense(1, activation='linear')(x)
+        print(f"  Device: {self.device}")
         
         # Create model
-        model = keras.Model(inputs=inputs, outputs=outputs)
+        self.model = BidSequenceNN(
+            n_features=self.n_features,
+            lstm_units=self.lstm_units,
+            dropout_rate=self.dropout_rate,
+            model_type=self.model_type
+        ).to(self.device)
         
-        # Compile model
-        model.compile(
-            optimizer=keras.optimizers.Adam(learning_rate=0.001),
-            loss='mse',
-            metrics=['mae', 'mse']
-        )
-        
-        self.model = model
         print("\n" + "="*60)
         print("Model Architecture:")
         print("="*60)
-        model.summary()
+        print(self.model)
         print("="*60)
         
-        return model
+        # Count parameters
+        total_params = sum(p.numel() for p in self.model.parameters())
+        trainable_params = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
+        print(f"\nTotal parameters: {total_params:,}")
+        print(f"Trainable parameters: {trainable_params:,}")
+        print("="*60)
+        
+        return self.model
     
     def normalize_features(self, X: np.ndarray, fit: bool = True) -> np.ndarray:
         """
@@ -161,6 +235,28 @@ class BidSequencePredictor:
             
         return X_normalized
     
+    def _get_sequence_lengths(self, X: np.ndarray) -> np.ndarray:
+        """
+        Calculate actual sequence lengths (non-padded) for each sample.
+        
+        Parameters:
+        -----------
+        X : np.ndarray
+            Input sequences (n_samples, sequence_length, n_features)
+            
+        Returns:
+        --------
+        np.ndarray
+            Array of sequence lengths
+        """
+        # Find the last non-zero position in each sequence
+        # Check if any feature is non-zero
+        non_zero_mask = np.any(X != 0, axis=2)  # Shape: (n_samples, sequence_length)
+        lengths = np.sum(non_zero_mask, axis=1)
+        # Ensure at least length 1
+        lengths = np.maximum(lengths, 1)
+        return lengths
+    
     def fit(self, X_train: np.ndarray, y_train: np.ndarray,
             X_val: Optional[np.ndarray] = None,
             y_val: Optional[np.ndarray] = None,
@@ -197,12 +293,11 @@ class BidSequencePredictor:
         
         print("\nNormalizing features...")
         X_train_norm = self.normalize_features(X_train, fit=True)
+        train_lengths = self._get_sequence_lengths(X_train)
         
         if X_val is not None:
             X_val_norm = self.normalize_features(X_val, fit=False)
-            validation_data = (X_val_norm, y_val)
-        else:
-            validation_data = None
+            val_lengths = self._get_sequence_lengths(X_val)
         
         print(f"\nTraining model...")
         print(f"  Training samples: {len(X_train)}")
@@ -211,35 +306,114 @@ class BidSequencePredictor:
         print(f"  Epochs: {epochs}")
         print(f"  Batch size: {batch_size}")
         
-        # Callbacks
-        callbacks = [
-            keras.callbacks.EarlyStopping(
-                monitor='val_loss' if X_val is not None else 'loss',
-                patience=10,
-                restore_best_weights=True,
-                verbose=1
-            ),
-            keras.callbacks.ReduceLROnPlateau(
-                monitor='val_loss' if X_val is not None else 'loss',
-                factor=0.5,
-                patience=5,
-                verbose=1,
-                min_lr=1e-6
-            )
-        ]
+        # Convert to PyTorch tensors
+        X_train_tensor = torch.FloatTensor(X_train_norm).to(self.device)
+        y_train_tensor = torch.FloatTensor(y_train).unsqueeze(1).to(self.device)
+        train_lengths_tensor = torch.LongTensor(train_lengths).to(self.device)
         
-        # Train
-        history = self.model.fit(
-            X_train_norm, y_train,
-            validation_data=validation_data,
-            epochs=epochs,
-            batch_size=batch_size,
-            callbacks=callbacks,
-            verbose=verbose
+        # Create data loader
+        train_dataset = TensorDataset(X_train_tensor, y_train_tensor, train_lengths_tensor)
+        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+        
+        if X_val is not None:
+            X_val_tensor = torch.FloatTensor(X_val_norm).to(self.device)
+            y_val_tensor = torch.FloatTensor(y_val).unsqueeze(1).to(self.device)
+            val_lengths_tensor = torch.LongTensor(val_lengths).to(self.device)
+            val_dataset = TensorDataset(X_val_tensor, y_val_tensor, val_lengths_tensor)
+            val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+        
+        # Setup optimizer and loss
+        optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)
+        criterion = nn.MSELoss()
+        
+        # Learning rate scheduler
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer, mode='min', factor=0.5, patience=5, min_lr=1e-6
         )
         
-        self.history = history.history
+        # Training history
+        history = {
+            'loss': [],
+            'mae': [],
+            'val_loss': [],
+            'val_mae': []
+        }
         
+        best_val_loss = float('inf')
+        patience_counter = 0
+        patience = 10
+        
+        # Training loop
+        for epoch in range(epochs):
+            self.model.train()
+            train_loss = 0.0
+            train_mae = 0.0
+            
+            for batch_X, batch_y, batch_lengths in train_loader:
+                optimizer.zero_grad()
+                
+                # Forward pass
+                outputs = self.model(batch_X, batch_lengths)
+                loss = criterion(outputs, batch_y)
+                
+                # Backward pass
+                loss.backward()
+                optimizer.step()
+                
+                train_loss += loss.item() * batch_X.size(0)
+                train_mae += torch.mean(torch.abs(outputs - batch_y)).item() * batch_X.size(0)
+            
+            train_loss /= len(train_dataset)
+            train_mae /= len(train_dataset)
+            history['loss'].append(train_loss)
+            history['mae'].append(train_mae)
+            
+            # Validation
+            if X_val is not None:
+                self.model.eval()
+                val_loss = 0.0
+                val_mae = 0.0
+                
+                with torch.no_grad():
+                    for batch_X, batch_y, batch_lengths in val_loader:
+                        outputs = self.model(batch_X, batch_lengths)
+                        loss = criterion(outputs, batch_y)
+                        
+                        val_loss += loss.item() * batch_X.size(0)
+                        val_mae += torch.mean(torch.abs(outputs - batch_y)).item() * batch_X.size(0)
+                
+                val_loss /= len(val_dataset)
+                val_mae /= len(val_dataset)
+                history['val_loss'].append(val_loss)
+                history['val_mae'].append(val_mae)
+                
+                # Learning rate scheduling
+                scheduler.step(val_loss)
+                
+                # Early stopping
+                if val_loss < best_val_loss:
+                    best_val_loss = val_loss
+                    patience_counter = 0
+                    # Save best model weights
+                    self.best_model_state = self.model.state_dict().copy()
+                else:
+                    patience_counter += 1
+                
+                if verbose >= 1 and (epoch + 1) % max(1, epochs // 10) == 0:
+                    print(f"Epoch {epoch+1}/{epochs} - "
+                          f"loss: {train_loss:.4f} - mae: {train_mae:.4f} - "
+                          f"val_loss: {val_loss:.4f} - val_mae: {val_mae:.4f}")
+                
+                if patience_counter >= patience:
+                    print(f"\nEarly stopping at epoch {epoch+1}")
+                    print(f"Restoring best weights from epoch {epoch+1-patience}")
+                    self.model.load_state_dict(self.best_model_state)
+                    break
+            else:
+                if verbose >= 1 and (epoch + 1) % max(1, epochs // 10) == 0:
+                    print(f"Epoch {epoch+1}/{epochs} - loss: {train_loss:.4f} - mae: {train_mae:.4f}")
+        
+        self.history = history
         print("\nTraining complete!")
         return self.history
     
@@ -262,11 +436,18 @@ class BidSequencePredictor:
         
         # Normalize features
         X_norm = self.normalize_features(X, fit=False)
+        lengths = self._get_sequence_lengths(X)
+        
+        # Convert to tensor
+        X_tensor = torch.FloatTensor(X_norm).to(self.device)
+        lengths_tensor = torch.LongTensor(lengths).to(self.device)
         
         # Predict
-        predictions = self.model.predict(X_norm, verbose=0)
+        self.model.eval()
+        with torch.no_grad():
+            predictions = self.model(X_tensor, lengths_tensor)
         
-        return predictions.flatten()
+        return predictions.cpu().numpy().flatten()
     
     def evaluate(self, X: np.ndarray, y: np.ndarray) -> Dict:
         """
@@ -327,9 +508,9 @@ class BidSequencePredictor:
         
         print(f"\nSaving model to: {save_dir}")
         
-        # Save model weights (using Keras native format)
-        model_path = save_dir / 'bid_sequence_model.keras'
-        self.model.save(model_path)
+        # Save model weights (PyTorch format)
+        model_path = save_dir / 'bid_sequence_model.pt'
+        torch.save(self.model.state_dict(), model_path)
         print(f"  Saved model: {model_path.name}")
         
         # Save configuration
@@ -383,16 +564,16 @@ class BidSequencePredictor:
         self.feature_mean = np.array(config['feature_mean']) if config['feature_mean'] else None
         self.feature_std = np.array(config['feature_std']) if config['feature_std'] else None
         
-        # Load model (try Keras native format first, then fall back to H5)
-        keras_path = save_dir / 'bid_sequence_model.keras'
-        h5_path = save_dir / 'bid_sequence_model.h5'
+        # Build model architecture
+        self.build_model()
         
-        if keras_path.exists():
-            self.model = keras.models.load_model(keras_path)
-            print(f"  Loaded model: {keras_path.name}")
-        elif h5_path.exists():
-            self.model = keras.models.load_model(h5_path)
-            print(f"  Loaded model: {h5_path.name}")
+        # Load model weights (PyTorch format)
+        model_path = save_dir / 'bid_sequence_model.pt'
+        
+        if model_path.exists():
+            self.model.load_state_dict(torch.load(model_path, map_location=self.device))
+            self.model.eval()
+            print(f"  Loaded model: {model_path.name}")
         else:
             raise FileNotFoundError(f"No model file found in {save_dir}")
         

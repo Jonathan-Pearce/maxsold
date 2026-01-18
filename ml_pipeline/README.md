@@ -197,7 +197,7 @@ All dependencies in main `requirements.txt`:
 - seaborn >= 0.12.0
 - joblib >= 1.3.0
 - pyarrow >= 14.0.0
-- tensorflow >= 2.15.0 (for bid sequence model)
+- torch >= 2.0.0 (for bid sequence model - PyTorch)
 
 ## 📖 Detailed Documentation
 

@@ -44,7 +44,7 @@ pip install -r requirements.txt
 ```
 
 Key dependencies:
-- TensorFlow >= 2.15.0
+- PyTorch >= 2.0.0
 - pandas >= 2.0.0
 - numpy >= 1.24.0
 - scikit-learn >= 1.3.0
@@ -222,7 +222,7 @@ After training, the following files are saved to the output directory:
 
 ```
 data/models/bid_sequence/
-├── bid_sequence_model.keras         # Trained model weights
+├── bid_sequence_model.pt            # Trained model weights (PyTorch)
 ├── model_config.json                # Model configuration
 ├── training_history.json            # Training history
 ├── metrics_summary.json             # Evaluation metrics
