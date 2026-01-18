@@ -6,3 +6,4 @@ __pycache__/
 *.pyc
 *.pyo
 data/models/bid_sequence_demo/
+*.pkl
