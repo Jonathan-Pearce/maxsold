@@ -169,13 +169,12 @@ class ImageFeatureExtractor:
         if len(df) > 0:
             feature_matrix = np.vstack(df['features'].values)
             
-            # Create feature columns as a separate DataFrame and concatenate
-            feature_cols = {f'img_feature_{i}': feature_matrix[:, i] 
-                          for i in range(feature_matrix.shape[1])}
-            df_features = pd.DataFrame(feature_cols)
+            # Create feature DataFrame directly from matrix for better memory efficiency
+            feature_col_names = [f'img_feature_{i}' for i in range(feature_matrix.shape[1])]
+            df_features = pd.DataFrame(feature_matrix, columns=feature_col_names)
             
             # Drop the packed features column and concatenate with feature columns
-            df = pd.concat([df.drop('features', axis=1), df_features], axis=1)
+            df = pd.concat([df.drop('features', axis=1).reset_index(drop=True), df_features], axis=1)
         
         print(f"✓ Extracted features from {len(df)} images")
         print(f"✓ Feature dimensions: {self.feature_dim}")
