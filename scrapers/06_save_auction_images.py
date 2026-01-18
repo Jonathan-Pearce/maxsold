@@ -251,7 +251,15 @@ def load_auction_ids_from_kaggle(
     """
     try:
         # Import here to avoid requiring kaggle for basic functionality
-        from utils.kaggle_pipeline import KaggleDataPipeline
+        # Handle both cases: running as script and importing as module
+        try:
+            from utils.kaggle_pipeline import KaggleDataPipeline
+        except ImportError:
+            # If running as script, add parent directory to path
+            parent_dir = Path(__file__).parent.parent
+            if str(parent_dir) not in sys.path:
+                sys.path.insert(0, str(parent_dir))
+            from utils.kaggle_pipeline import KaggleDataPipeline
         
         print(f"Downloading dataset from Kaggle: {dataset_name}")
         kaggle_pipeline = KaggleDataPipeline()
@@ -283,6 +291,10 @@ def load_auction_ids_from_kaggle(
         print(f"✓ Loaded {len(auction_ids)} auction IDs")
         return auction_ids
     
+    except SystemExit as e:
+        print(f"✗ Error loading auction IDs from Kaggle: Kaggle authentication required", file=sys.stderr)
+        print(f"  Please configure Kaggle credentials. See: https://github.com/Kaggle/kaggle-api#api-credentials", file=sys.stderr)
+        return []
     except Exception as e:
         print(f"✗ Error loading auction IDs from Kaggle: {e}", file=sys.stderr)
         return []
