@@ -2,10 +2,35 @@
 
 This guide provides detailed instructions for setting up and running the MaxSold Data Project using Docker.
 
+## Quick Start
+
+**For the impatient:** The repository includes helper scripts for easy Docker management:
+
+```bash
+# Linux/Mac
+git clone https://github.com/Jonathan-Pearce/maxsold.git
+cd maxsold
+chmod +x docker-run.sh
+./docker-run.sh build
+./docker-run.sh shell
+```
+
+```cmd
+REM Windows
+git clone https://github.com/Jonathan-Pearce/maxsold.git
+cd maxsold
+docker-run.bat build
+docker-run.bat shell
+```
+
+Continue reading for detailed instructions and all available options.
+
 ## Table of Contents
+- [Quick Start](#quick-start)
 - [Prerequisites](#prerequisites)
 - [Building the Docker Image](#building-the-docker-image)
 - [Running the Container](#running-the-container)
+- [Helper Scripts Reference](#helper-scripts-reference)
 - [Common Use Cases](#common-use-cases)
 - [Data Persistence](#data-persistence)
 - [Troubleshooting](#troubleshooting)
@@ -47,6 +72,23 @@ Or download the repository as a ZIP file from GitHub and extract it.
 
 ### Step 2: Build the Docker Image
 
+### Quick Start with Helper Scripts
+
+For the easiest experience, use the provided helper scripts:
+
+**Linux/Mac:**
+```bash
+chmod +x docker-run.sh
+./docker-run.sh build
+```
+
+**Windows:**
+```cmd
+docker-run.bat build
+```
+
+### Manual Build (Alternative)
+
 Navigate to the project root directory (where the `Dockerfile` is located) and run:
 
 ```bash
@@ -80,7 +122,74 @@ maxsold      latest      abc123def456   2 minutes ago   1.2GB
 
 ## Running the Container
 
-### Basic Container Run
+### Using Helper Scripts (Easiest Method)
+
+The repository includes helper scripts that simplify common Docker operations:
+
+**Linux/Mac - `docker-run.sh`:**
+```bash
+# Interactive shell
+./docker-run.sh shell
+
+# Run scrapers
+./docker-run.sh scraper monthly_scraping_pipeline.py
+
+# Train ML models
+./docker-run.sh ml-minimal      # Fastest (30-60 seconds)
+./docker-run.sh ml-fast         # With visualizations (1-2 minutes)
+./docker-run.sh ml-quick        # Full dataset (2-3 minutes)
+./docker-run.sh ml-complete     # Complete pipeline (5-10 minutes)
+
+# Other commands
+./docker-run.sh verify          # Verify setup
+./docker-run.sh test            # Run tests
+./docker-run.sh clean           # Clean up containers
+```
+
+**Windows - `docker-run.bat`:**
+```cmd
+REM Interactive shell
+docker-run.bat shell
+
+REM Run scrapers
+docker-run.bat scraper monthly_scraping_pipeline.py
+
+REM Train ML models
+docker-run.bat ml-minimal      REM Fastest (30-60 seconds)
+docker-run.bat ml-fast         REM With visualizations (1-2 minutes)
+docker-run.bat ml-quick        REM Full dataset (2-3 minutes)
+docker-run.bat ml-complete     REM Complete pipeline (5-10 minutes)
+
+REM Other commands
+docker-run.bat verify          REM Verify setup
+docker-run.bat test            REM Run tests
+docker-run.bat clean           REM Clean up containers
+```
+
+### Using Docker Compose (Alternative)
+
+The repository includes a `docker-compose.yml` file for managing multiple services:
+
+```bash
+# Start an interactive container
+docker-compose run --rm maxsold bash
+
+# Run a specific scraper in the background
+docker-compose up -d scraper
+
+# Train ML model
+docker-compose run --rm ml-training
+
+# View logs
+docker-compose logs -f scraper
+
+# Stop all services
+docker-compose down
+```
+
+### Manual Docker Commands
+
+#### Basic Container Run
 
 To start a container with an interactive bash shell:
 
@@ -95,7 +204,7 @@ docker run -it --rm maxsold bash
 - `maxsold` - The image name
 - `bash` - Command to run inside the container
 
-### With Data Persistence (Recommended)
+#### With Data Persistence (Recommended)
 
 To mount a local directory for data persistence:
 
@@ -119,11 +228,77 @@ docker run -it --rm -v %cd%/data:/app/data maxsold bash
 
 ---
 
+## Helper Scripts Reference
+
+The repository includes convenience scripts to simplify Docker usage. These scripts handle volume mounting and common tasks automatically.
+
+### Available Commands
+
+Both `docker-run.sh` (Linux/Mac) and `docker-run.bat` (Windows) support the following commands:
+
+| Command | Description | Typical Duration |
+|---------|-------------|-----------------|
+| `build` | Build the Docker image | 5-10 minutes |
+| `shell` | Start interactive bash shell | Instant |
+| `scraper <script>` | Run a specific scraper | Varies |
+| `ml-minimal` | Train minimal ML model | 30-60 seconds |
+| `ml-fast` | Train with visualizations | 1-2 minutes |
+| `ml-quick` | Train with full dataset | 2-3 minutes |
+| `ml-complete` | Complete ML pipeline | 5-10 minutes |
+| `verify` | Verify model setup | <10 seconds |
+| `test` | Run test modules | <30 seconds |
+| `clean` | Remove all containers | <5 seconds |
+| `logs` | View container logs | Instant |
+
+### Usage Examples
+
+**Linux/Mac:**
+```bash
+# Make script executable (first time only)
+chmod +x docker-run.sh
+
+# Use any command
+./docker-run.sh <command> [args]
+```
+
+**Windows:**
+```cmd
+docker-run.bat <command> [args]
+```
+
+### Features
+
+- ✅ Automatically mounts the `data` directory for persistence
+- ✅ Uses `--rm` flag to clean up containers after use
+- ✅ Provides clear, colored output (Linux/Mac)
+- ✅ Handles all common use cases with simple commands
+- ✅ Works across Windows, Mac, and Linux
+
+---
+
 ## Common Use Cases
 
 ### 1. Running Web Scrapers
 
-#### Extract Auction Search Data
+#### Using Helper Scripts (Recommended)
+
+**Linux/Mac:**
+```bash
+./docker-run.sh scraper 01_extract_auction_search.py
+./docker-run.sh scraper 02_extract_auction_details.py
+./docker-run.sh scraper monthly_scraping_pipeline.py
+```
+
+**Windows:**
+```cmd
+docker-run.bat scraper 01_extract_auction_search.py
+docker-run.bat scraper 02_extract_auction_details.py
+docker-run.bat scraper monthly_scraping_pipeline.py
+```
+
+#### Manual Commands
+
+##### Extract Auction Search Data
 ```bash
 docker run -it --rm \
   -v $(pwd)/data:/app/data \
@@ -169,7 +344,27 @@ docker run -it --rm \
 
 ### 2. Running Machine Learning Pipeline
 
-#### Minimal Model Training (Fastest - 30-60 seconds)
+#### Using Helper Scripts (Recommended)
+
+**Linux/Mac:**
+```bash
+./docker-run.sh ml-minimal      # Fastest - 30-60 seconds
+./docker-run.sh ml-fast         # With visualizations - 1-2 minutes
+./docker-run.sh ml-quick        # Full dataset - 2-3 minutes
+./docker-run.sh ml-complete     # Complete pipeline - 5-10 minutes
+```
+
+**Windows:**
+```cmd
+docker-run.bat ml-minimal      REM Fastest - 30-60 seconds
+docker-run.bat ml-fast         REM With visualizations - 1-2 minutes
+docker-run.bat ml-quick        REM Full dataset - 2-3 minutes
+docker-run.bat ml-complete     REM Complete pipeline - 5-10 minutes
+```
+
+#### Manual Commands
+
+##### Minimal Model Training (Fastest - 30-60 seconds)
 ```bash
 docker run -it --rm \
   -v $(pwd)/data:/app/data \
@@ -203,6 +398,16 @@ docker run -it --rm \
 
 ### 3. Verify Setup
 
+**Using Helper Script:**
+```bash
+# Linux/Mac
+./docker-run.sh verify
+
+# Windows
+docker-run.bat verify
+```
+
+**Manual Command:**
 ```bash
 docker run -it --rm \
   -v $(pwd)/data:/app/data \
@@ -212,13 +417,32 @@ docker run -it --rm \
 
 ### 4. Testing Modules
 
+**Using Helper Script:**
+```bash
+# Linux/Mac
+./docker-run.sh test
+
+# Windows
+docker-run.bat test
+```
+
+**Manual Command:**
 ```bash
 docker run -it --rm maxsold python utils/test_modules.py
 ```
 
 ### 5. Interactive Development
 
-For exploratory work or debugging:
+**Using Helper Script:**
+```bash
+# Linux/Mac
+./docker-run.sh shell
+
+# Windows
+docker-run.bat shell
+```
+
+**Manual Command for exploratory work or debugging:**
 
 ```bash
 docker run -it --rm \
