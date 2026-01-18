@@ -1,3 +1,7 @@
 data/final_data/item_details/*.parquet
 data/*.parquet
 *.parquet
+data/raw_data/kaggle_temp/
+__pycache__/
+*.pyc
+*.pyo
