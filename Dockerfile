@@ -9,7 +9,7 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     DEBIAN_FRONTEND=noninteractive
 
-# Install system dependencies
+# Install system dependencies and Chrome for Selenium
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
@@ -36,11 +36,8 @@ RUN apt-get update && apt-get install -y \
     libu2f-udev \
     libvulkan1 \
     git \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Chrome for Selenium (optional - for scrapers that need a browser)
-# If Chrome installation fails, the image will still be usable for non-Selenium scripts
-RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb || true \
+    && rm -rf /var/lib/apt/lists/* \
+    && wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb || true \
     && if [ -f google-chrome-stable_current_amd64.deb ]; then \
          apt-get update && \
          apt-get install -y ./google-chrome-stable_current_amd64.deb && \

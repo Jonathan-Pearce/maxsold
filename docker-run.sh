@@ -115,7 +115,8 @@ run_test() {
 
 clean_up() {
     echo -e "${GREEN}Cleaning up containers...${NC}"
-    local containers=$(docker ps -a | grep maxsold | awk '{print $1}')
+    # More specific pattern - only remove containers with maxsold in the image name or starting with maxsold
+    local containers=$(docker ps -a --filter "name=maxsold" --format "{{.ID}}" 2>/dev/null)
     if [ -n "$containers" ]; then
         echo "$containers" | xargs docker rm -f
         echo -e "${GREEN}✓ Cleanup complete${NC}"
