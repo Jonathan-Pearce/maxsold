@@ -5,3 +5,4 @@ data/raw_data/kaggle_temp/
 __pycache__/
 *.pyc
 *.pyo
+data/models/bid_sequence_demo/
