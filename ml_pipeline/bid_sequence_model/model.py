@@ -211,27 +211,33 @@ class BidSequencePredictor:
         np.ndarray
             Normalized sequences
         """
+        # Ensure X is float64 to avoid object dtype issues
+        X = X.astype(np.float64)
+        
         if fit:
             # Compute mean and std across all non-zero values
             # (to avoid including padding in statistics)
             mask = X != 0
-            self.feature_mean = np.zeros(self.n_features)
-            self.feature_std = np.ones(self.n_features)
+            self.feature_mean = np.zeros(self.n_features, dtype=np.float64)
+            self.feature_std = np.ones(self.n_features, dtype=np.float64)
             
             for i in range(self.n_features):
                 feature_values = X[:, :, i][mask[:, :, i]]
                 if len(feature_values) > 0:
-                    self.feature_mean[i] = feature_values.mean()
-                    self.feature_std[i] = feature_values.std()
+                    self.feature_mean[i] = float(feature_values.mean())
+                    self.feature_std[i] = float(feature_values.std())
                     if self.feature_std[i] == 0:
                         self.feature_std[i] = 1.0
         
         # Apply normalization
-        X_normalized = X.copy()
+        X_normalized = X.astype(np.float64).copy()
         for i in range(self.n_features):
             X_normalized[:, :, i] = (X[:, :, i] - self.feature_mean[i]) / self.feature_std[i]
             # Reset padding to zero
             X_normalized[:, :, i][X[:, :, i] == 0] = 0
+        
+        # Ensure output is float64
+        X_normalized = X_normalized.astype(np.float64)
             
         return X_normalized
     
@@ -292,11 +298,16 @@ class BidSequencePredictor:
             self.build_model()
         
         print("\nNormalizing features...")
+        # Ensure input is float64 before normalization
+        X_train = X_train.astype(np.float64)
         X_train_norm = self.normalize_features(X_train, fit=True)
+        print(f"  X_train_norm dtype: {X_train_norm.dtype}, shape: {X_train_norm.shape}")
         train_lengths = self._get_sequence_lengths(X_train)
         
         if X_val is not None:
+            X_val = X_val.astype(np.float64)
             X_val_norm = self.normalize_features(X_val, fit=False)
+            print(f"  X_val_norm dtype: {X_val_norm.dtype}, shape: {X_val_norm.shape}")
             val_lengths = self._get_sequence_lengths(X_val)
         
         print(f"\nTraining model...")

@@ -274,18 +274,18 @@ class BidSequenceDataLoader:
             # Sort by bid number to ensure correct order
             group = group.sort_values('bid_number')
             
-            # Get feature values
-            feature_values = group[features].values
+            # Get feature values and ensure they are numeric
+            feature_values = group[features].values.astype(np.float64)
             
             # Get final (winning) bid amount
-            final_price = group['amount'].iloc[-1]
+            final_price = float(group['amount'].iloc[-1])
             
             # Pad or truncate sequence
             seq_len = min(len(feature_values), max_sequence_length)
             
             if len(feature_values) < max_sequence_length:
                 # Pad with zeros
-                padding = np.zeros((max_sequence_length - len(feature_values), len(features)))
+                padding = np.zeros((max_sequence_length - len(feature_values), len(features)), dtype=np.float64)
                 padded_seq = np.vstack([feature_values, padding])
             else:
                 # Take last max_sequence_length bids
@@ -295,8 +295,8 @@ class BidSequenceDataLoader:
             targets.append(final_price)
             item_identifiers.append(f"{auction_id}_{item_id}")
             
-        X = np.array(sequences)
-        y = np.array(targets)
+        X = np.array(sequences, dtype=np.float64)
+        y = np.array(targets, dtype=np.float64)
         item_ids = np.array(item_identifiers)
         
         print(f"Created {len(X):,} sequences")

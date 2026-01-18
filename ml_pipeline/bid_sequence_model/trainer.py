@@ -372,6 +372,9 @@ class BidSequenceTrainer:
         
         # Train model
         self.train(epochs=epochs, batch_size=batch_size)
+
+        # Save model
+        self.save_model()
         
         # Evaluate
         self.evaluate()
