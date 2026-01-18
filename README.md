@@ -4,16 +4,28 @@ A comprehensive data project for scraping, processing, and analyzing MaxSold auc
 
 ## 🐳 Docker Setup (Recommended)
 
-The easiest way to get started is using Docker. See **[DOCKER_SETUP.md](DOCKER_SETUP.md)** for detailed instructions.
+The easiest way to get started is using Docker with the provided helper scripts.
 
-**Quick Start:**
+**Quick Start (Linux/Mac):**
 ```bash
-# Build the Docker image
-docker build -t maxsold:latest .
-
-# Run with interactive shell
-docker run -it --rm -v $(pwd)/data:/app/data maxsold bash
+git clone https://github.com/Jonathan-Pearce/maxsold.git
+cd maxsold
+chmod +x docker-run.sh
+./docker-run.sh build
+./docker-run.sh shell
 ```
+
+**Quick Start (Windows):**
+```cmd
+git clone https://github.com/Jonathan-Pearce/maxsold.git
+cd maxsold
+docker-run.bat build
+docker-run.bat shell
+```
+
+**Documentation:**
+- 📖 **[DOCKER_QUICKSTART.md](DOCKER_QUICKSTART.md)** - Quick reference card
+- 📘 **[DOCKER_SETUP.md](DOCKER_SETUP.md)** - Complete setup guide with troubleshooting
 
 ## 📋 Requirements
 
@@ -34,8 +46,9 @@ pip install -r requirements.txt
 
 ## 📚 Documentation
 
-- **[DOCKER_SETUP.md](DOCKER_SETUP.md)** - Complete Docker setup guide
-- **[ml_pipeline/README.md](ml_pipeline/README.md)** - Machine learning pipeline documentation
+- 📖 **[DOCKER_QUICKSTART.md](DOCKER_QUICKSTART.md)** - Docker quick reference card
+- 📘 **[DOCKER_SETUP.md](DOCKER_SETUP.md)** - Complete Docker setup guide
+- 🤖 **[ml_pipeline/README.md](ml_pipeline/README.md)** - Machine learning pipeline documentation
 
 ## 🔗 MaxSold Resources
 
