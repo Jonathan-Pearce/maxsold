@@ -296,6 +296,23 @@ Current limitations:
 - No input validation beyond basic checks
 - No HTTPS enforcement
 
+### Known Limitations (Demo)
+
+This is a demo/prototype with the following known limitations:
+
+1. **External Image Loading**: Frontend loads images directly from MaxSold URLs
+   - Could be used for tracking or CSRF attacks
+   - Production: Proxy images through backend or validate source domains
+
+2. **No Caching**: Features are recalculated on every request
+   - Production: Add Redis/Memcached for feature caching
+
+3. **No Rate Limiting**: API can be overwhelmed with requests
+   - Production: Implement rate limiting (see slowapi examples above)
+
+4. **No Authentication**: Anyone can use the API
+   - Production: Add API keys, OAuth, or JWT authentication
+
 ### Production Recommendations
 
 **CRITICAL:** Before deploying to production, you MUST implement:
