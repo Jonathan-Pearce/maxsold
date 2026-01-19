@@ -303,6 +303,26 @@
     </div>
 
     <script>
+        // Validate API URL to prevent SSRF attacks
+        function isValidApiUrl(url) {
+            try {
+                const urlObj = new URL(url);
+                // Allow localhost for development and HTTPS for production
+                const allowedHosts = ['localhost', '127.0.0.1'];
+                const isLocalhost = allowedHosts.includes(urlObj.hostname);
+                const isHttps = urlObj.protocol === 'https:';
+                const isHttpLocalhost = urlObj.protocol === 'http:' && isLocalhost;
+                
+                if (!isHttps && !isHttpLocalhost) {
+                    return { valid: false, error: 'API URL must use HTTPS (or HTTP for localhost)' };
+                }
+                
+                return { valid: true };
+            } catch (e) {
+                return { valid: false, error: 'Invalid API URL format' };
+            }
+        }
+
         async function extractFeatures() {
             const apiUrl = document.getElementById('apiUrl').value.trim();
             const itemUrl = document.getElementById('itemUrl').value.trim();
@@ -318,6 +338,13 @@
             // Validate inputs
             if (!apiUrl) {
                 showError('Please enter the API backend URL');
+                return;
+            }
+
+            // Validate API URL
+            const apiValidation = isValidApiUrl(apiUrl);
+            if (!apiValidation.valid) {
+                showError(apiValidation.error);
                 return;
             }
 

@@ -79,10 +79,11 @@ app = FastAPI(
 allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "*")
 if allowed_origins_env == "*":
     logger.warning("⚠️  CORS configured with wildcard origin - DEMO MODE ONLY")
+    logger.warning("⚠️  Set ALLOWED_ORIGINS environment variable for production!")
     allowed_origins = ["*"]
 else:
     allowed_origins = [origin.strip() for origin in allowed_origins_env.split(",")]
-    logger.info(f"CORS configured for origins: {allowed_origins}")
+    logger.info(f"✓ CORS configured for specific origins: {allowed_origins}")
 
 app.add_middleware(
     CORSMiddleware,
