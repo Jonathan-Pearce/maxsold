@@ -7,7 +7,8 @@ using the pre-trained MobileNetV2 model.
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel, ConfigDict
+from contextlib import asynccontextmanager
 import requests
 import torch
 from torchvision import models, transforms
@@ -16,52 +17,14 @@ from io import BytesIO
 import numpy as np
 from typing import List
 
-app = FastAPI(
-    title="MaxSold Image Feature Extraction API",
-    description="Extract image features from MaxSold items using MobileNetV2",
-    version="1.0.0"
-)
-
-# Enable CORS for GitHub Pages
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # In production, specify your GitHub Pages URL
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 # Global model instance
 model = None
 transform = None
 device = None
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
-}
-
-class ItemRequest(BaseModel):
-    """Request model for item URL"""
-    item_url: str
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "item_url": "https://maxsold.com/listing/7433850/"
-            }
-        }
-
-class FeatureResponse(BaseModel):
-    """Response model with extracted features"""
-    item_id: str
-    image_url: str
-    features: List[float]
-    feature_dimension: int
-    model_name: str
-
-@app.on_event("startup")
-async def load_model():
-    """Load MobileNetV2 model on startup"""
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan event handler for model loading"""
     global model, transform, device
     
     print("Loading MobileNetV2 model...")
@@ -88,6 +51,49 @@ async def load_model():
     ])
     
     print(f"✓ Model loaded on {device}")
+    yield
+    # Cleanup if needed
+    print("Shutting down...")
+
+app = FastAPI(
+    title="MaxSold Image Feature Extraction API",
+    description="Extract image features from MaxSold items using MobileNetV2",
+    version="1.0.0",
+    lifespan=lifespan
+)
+
+# Enable CORS for GitHub Pages
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, specify your GitHub Pages URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
+}
+
+class ItemRequest(BaseModel):
+    """Request model for item URL"""
+    item_url: str
+    
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "item_url": "https://maxsold.com/listing/7433850/"
+            }
+        }
+    )
+
+class FeatureResponse(BaseModel):
+    """Response model with extracted features"""
+    item_id: str
+    image_url: str
+    features: List[float]
+    feature_dimension: int
+    model_name: str
 
 def extract_item_id_from_url(url: str) -> str:
     """Extract item ID from MaxSold URL"""
