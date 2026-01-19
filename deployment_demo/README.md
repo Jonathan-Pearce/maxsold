@@ -284,22 +284,49 @@ curl http://localhost:8000/health
 
 Current limitations:
 - No authentication/authorization
-- Open CORS policy (`allow_origins=["*"]`)
+- **Open CORS policy (`allow_origins=["*"]`)** - Allows requests from any origin
 - No rate limiting
 - No input validation beyond basic checks
+- No HTTPS enforcement
 
 ### Production Recommendations
 
-For production deployment, add:
+**CRITICAL:** Before deploying to production, you MUST implement:
 
-1. **Authentication**: API keys, OAuth, or JWT tokens
-2. **Rate Limiting**: Prevent abuse (e.g., using `slowapi`)
-3. **Input Validation**: Strict URL validation, sanitization
-4. **CORS**: Restrict to specific origins
-5. **Monitoring**: Log requests, track errors
-6. **Caching**: Cache extracted features to reduce API calls
-7. **HTTPS**: Always use TLS/SSL in production
-8. **Resource Limits**: Timeout limits, max file sizes
+1. **CORS Restrictions**: 
+   ```python
+   # Replace this in main.py:
+   allow_origins=["https://yourusername.github.io"]  # Specific origin only
+   ```
+
+2. **Authentication**: API keys, OAuth, or JWT tokens
+3. **Rate Limiting**: Prevent abuse (e.g., using `slowapi`)
+   ```python
+   from slowapi import Limiter
+   limiter = Limiter(key_func=get_remote_address)
+   @app.post("/extract-features")
+   @limiter.limit("10/minute")
+   async def extract_features_endpoint(...):
+   ```
+
+4. **Input Validation**: Strict URL validation, sanitization
+5. **HTTPS**: Always use TLS/SSL in production
+6. **Monitoring**: Log requests, track errors, set up alerts
+7. **Resource Limits**: Timeout limits, max file sizes
+8. **Secrets Management**: Use environment variables, never commit secrets
+
+### Security Checklist for Production
+
+- [ ] Restrict CORS to specific frontend origin(s)
+- [ ] Add authentication (API keys minimum)
+- [ ] Implement rate limiting
+- [ ] Enable HTTPS/TLS
+- [ ] Set up logging and monitoring
+- [ ] Add input sanitization
+- [ ] Configure timeouts and resource limits
+- [ ] Use environment variables for configuration
+- [ ] Add request validation with Pydantic
+- [ ] Set up WAF (Web Application Firewall) if using cloud services
 
 ## Future Enhancements
 

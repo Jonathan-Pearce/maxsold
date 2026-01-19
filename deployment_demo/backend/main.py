@@ -63,9 +63,13 @@ app = FastAPI(
 )
 
 # Enable CORS for GitHub Pages
+# WARNING: This configuration allows all origins and is NOT production-ready!
+# For production, replace ["*"] with specific allowed origins, e.g.:
+# allow_origins=["https://yourusername.github.io"]
+# See: https://fastapi.tiangolo.com/tutorial/cors/
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify your GitHub Pages URL
+    allow_origins=["*"],  # ⚠️ DEMO ONLY - Restrict in production!
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
