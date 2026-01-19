@@ -5,6 +5,7 @@ This API provides a simple endpoint to extract image features from MaxSold items
 using the pre-trained MobileNetV2 model.
 """
 
+import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict
@@ -16,6 +17,12 @@ from PIL import Image
 from io import BytesIO
 import numpy as np
 from typing import List
+import logging
+import re
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Global model instance
 model = None
@@ -64,12 +71,22 @@ app = FastAPI(
 
 # Enable CORS for GitHub Pages
 # WARNING: This configuration allows all origins and is NOT production-ready!
-# For production, replace ["*"] with specific allowed origins, e.g.:
-# allow_origins=["https://yourusername.github.io"]
+# For production, set ALLOWED_ORIGINS environment variable, e.g.:
+# ALLOWED_ORIGINS="https://yourusername.github.io,https://example.com"
 # See: https://fastapi.tiangolo.com/tutorial/cors/
+
+# Get allowed origins from environment variable or use wildcard for demo
+allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "*")
+if allowed_origins_env == "*":
+    logger.warning("⚠️  CORS configured with wildcard origin - DEMO MODE ONLY")
+    allowed_origins = ["*"]
+else:
+    allowed_origins = [origin.strip() for origin in allowed_origins_env.split(",")]
+    logger.info(f"CORS configured for origins: {allowed_origins}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # ⚠️ DEMO ONLY - Restrict in production!
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -106,11 +123,23 @@ def extract_item_id_from_url(url: str) -> str:
     if 'listing' in parts:
         idx = parts.index('listing')
         if idx + 1 < len(parts):
-            return parts[idx + 1]
-    raise ValueError("Could not extract item ID from URL")
+            item_id = parts[idx + 1]
+            # Validate item_id is numeric to prevent URL injection
+            if re.match(r'^\d+$', item_id):
+                return item_id
+    raise ValueError("Could not extract valid item ID from URL")
+
+def validate_and_sanitize_id(id_value: str) -> str:
+    """Validate and sanitize ID to prevent URL injection"""
+    if not re.match(r'^\d+$', str(id_value)):
+        raise ValueError(f"Invalid ID format: {id_value}")
+    return str(id_value)
 
 def fetch_first_image_url(item_id: str) -> str:
     """Fetch the first image URL for an item from MaxSold API"""
+    # Sanitize item_id to prevent URL injection
+    item_id = validate_and_sanitize_id(item_id)
+    
     api_url = f"https://api.maxsold.com/listings/am/{item_id}/enriched"
     
     try:
@@ -126,6 +155,10 @@ def fetch_first_image_url(item_id: str) -> str:
         # Try auction item API as fallback
         auction_id = data.get('amAuctionId')
         if auction_id:
+            # Sanitize auction_id to prevent URL injection
+            auction_id = validate_and_sanitize_id(auction_id)
+            item_id = validate_and_sanitize_id(item_id)
+            
             auction_api_url = f"https://maxsold.maxsold.com/msapi/auctions/items?auctionid={auction_id}&itemid={item_id}"
             response = requests.get(auction_api_url, headers=HEADERS, timeout=30)
             response.raise_for_status()
@@ -144,9 +177,11 @@ def fetch_first_image_url(item_id: str) -> str:
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 404:
             raise HTTPException(status_code=404, detail=f"Item {item_id} not found")
-        raise HTTPException(status_code=500, detail=f"Error fetching item data: {str(e)}")
+        logger.error(f"HTTP error fetching item {item_id}: {e}")
+        raise HTTPException(status_code=500, detail="Error fetching item data from MaxSold API")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching image: {str(e)}")
+        logger.error(f"Unexpected error fetching image for item {item_id}: {e}")
+        raise HTTPException(status_code=500, detail="Error fetching image data")
 
 def download_and_preprocess_image(image_url: str) -> torch.Tensor:
     """Download image from URL and preprocess it"""
@@ -164,7 +199,8 @@ def download_and_preprocess_image(image_url: str) -> torch.Tensor:
         return image_tensor
     
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error processing image: {str(e)}")
+        logger.error(f"Error processing image from {image_url}: {e}")
+        raise HTTPException(status_code=500, detail="Error processing image")
 
 def extract_features(image_tensor: torch.Tensor) -> np.ndarray:
     """Extract features using MobileNetV2"""
@@ -232,11 +268,13 @@ async def extract_features_endpoint(request: ItemRequest):
         )
     
     except ValueError as e:
+        logger.warning(f"Invalid input: {e}")
         raise HTTPException(status_code=400, detail=str(e))
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+        logger.error(f"Unexpected error in extract_features_endpoint: {e}")
+        raise HTTPException(status_code=500, detail="An unexpected error occurred")
 
 @app.get("/health")
 async def health_check():

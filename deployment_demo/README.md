@@ -120,6 +120,13 @@ Or using uvicorn directly:
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
+**Optional - Configure CORS for production:**
+```bash
+# Set allowed origins via environment variable
+export ALLOWED_ORIGINS="https://yourusername.github.io,https://example.com"
+python main.py
+```
+
 The API will be available at `http://localhost:8000`
 
 4. View API documentation:
@@ -294,9 +301,13 @@ Current limitations:
 **CRITICAL:** Before deploying to production, you MUST implement:
 
 1. **CORS Restrictions**: 
-   ```python
-   # Replace this in main.py:
-   allow_origins=["https://yourusername.github.io"]  # Specific origin only
+   ```bash
+   # Method 1: Environment variable (recommended)
+   export ALLOWED_ORIGINS="https://yourusername.github.io"
+   
+   # Method 2: Update code directly in main.py
+   # Replace the allow_origins line with:
+   allow_origins=["https://yourusername.github.io"]
    ```
 
 2. **Authentication**: API keys, OAuth, or JWT tokens
@@ -317,16 +328,22 @@ Current limitations:
 
 ### Security Checklist for Production
 
-- [ ] Restrict CORS to specific frontend origin(s)
+- [ ] Restrict CORS to specific frontend origin(s) via `ALLOWED_ORIGINS` env var
 - [ ] Add authentication (API keys minimum)
 - [ ] Implement rate limiting
 - [ ] Enable HTTPS/TLS
 - [ ] Set up logging and monitoring
-- [ ] Add input sanitization
+- [ ] Add input sanitization (✓ basic validation included)
 - [ ] Configure timeouts and resource limits
 - [ ] Use environment variables for configuration
-- [ ] Add request validation with Pydantic
+- [ ] Add request validation with Pydantic (✓ included)
 - [ ] Set up WAF (Web Application Firewall) if using cloud services
+
+### Environment Variables
+
+| Variable | Description | Default | Example |
+|----------|-------------|---------|---------|
+| `ALLOWED_ORIGINS` | Comma-separated list of allowed CORS origins | `*` (demo) | `https://user.github.io,https://example.com` |
 
 ## Future Enhancements
 
