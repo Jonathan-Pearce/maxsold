@@ -18,6 +18,8 @@ from datetime import datetime
 from PIL import Image
 from io import BytesIO
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import threading
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
@@ -25,11 +27,21 @@ HEADERS = {
 
 API_URL = "https://maxsold.maxsold.com/msapi/auctions/items"
 MAX_IMAGE_DIMENSION = 256
-MAX_IMAGES_PER_ITEM = 3
+MAX_IMAGES_PER_ITEM = 1
 IMAGE_FORMAT = "webp"
 IMAGE_QUALITY = 85
 REQUEST_TIMEOUT = 30
 BATCH_SIZE = 10  # Process auctions in batches
+MAX_WORKERS = 10  # Number of parallel workers
+
+# Thread-safe lock for printing
+print_lock = threading.Lock()
+
+
+def thread_safe_print(*args, **kwargs):
+    """Thread-safe print function"""
+    with print_lock:
+        print(*args, **kwargs)
 
 
 def fetch_auction_items(auction_id: str, timeout: int = REQUEST_TIMEOUT) -> Optional[Dict[str, Any]]:
@@ -157,31 +169,34 @@ def download_and_save_image(
         return False
 
 
-def process_auction_batch(
-    auction_ids: List[str],
+def process_single_auction(
+    auction_id: str,
     output_dir: Path,
-    metadata_list: List[Dict[str, Any]]
-) -> int:
+    index: int,
+    total: int
+) -> tuple[int, List[Dict[str, Any]], Optional[str]]:
     """
-    Process a batch of auctions and save their images.
-    Returns count of successfully saved images.
+    Process a single auction and save its images (designed for parallel execution).
+    Returns tuple of (index, metadata_list, error_message).
     """
-    images_saved = 0
+    metadata_list = []
     
-    for auction_id in auction_ids:
+    try:
         # Fetch auction items
         data = fetch_auction_items(auction_id)
         if not data:
-            continue
+            return index, [], f"Failed to fetch data for auction {auction_id}"
         
         # Extract image URLs
         image_entries = extract_image_urls(data, auction_id)
         
         if not image_entries:
-            continue
+            thread_safe_print(f"[{index}/{total}] ℹ Auction {auction_id}: No images found")
+            return index, [], None
         
-        print(f"  Processing {len(image_entries)} images from auction {auction_id}...")
+        thread_safe_print(f"[{index}/{total}] Processing {len(image_entries)} images from auction {auction_id}...")
         
+        images_saved = 0
         # Download and save each image
         for entry in image_entries:
             image_url = entry["image_url"]
@@ -195,6 +210,15 @@ def process_auction_batch(
             
             # Skip if already exists
             if output_path.exists():
+                # Still add to metadata if it exists
+                metadata_list.append({
+                    "auction_id": auction_id,
+                    "item_id": item_id,
+                    "image_index": image_index,
+                    "image_url": image_url,
+                    "saved_path": str(output_path.relative_to(output_dir.parent)),
+                    "timestamp": datetime.now().isoformat()
+                })
                 continue
             
             # Download and save
@@ -210,9 +234,63 @@ def process_auction_batch(
                     "saved_path": str(output_path.relative_to(output_dir.parent)),
                     "timestamp": datetime.now().isoformat()
                 })
-            
-            # Small delay to avoid overwhelming the server
-            time.sleep(0.1)
+        
+        thread_safe_print(f"[{index}/{total}] ✓ Auction {auction_id}: {images_saved} images saved")
+        return index, metadata_list, None
+        
+    except Exception as e:
+        error_msg = f"Auction {auction_id}: {str(e)}"
+        thread_safe_print(f"[{index}/{total}] ✗ {error_msg}", file=sys.stderr)
+        return index, [], error_msg
+
+
+def process_auction_batch_parallel(
+    auction_ids: List[str],
+    output_dir: Path,
+    metadata_list: List[Dict[str, Any]],
+    max_workers: int = MAX_WORKERS
+) -> int:
+    """
+    Process a batch of auctions in parallel and save their images.
+    Returns count of successfully saved images.
+    """
+    images_saved = 0
+    errors = []
+    total = len(auction_ids)
+    
+    thread_safe_print(f"\nStarting parallel processing with {max_workers} workers...")
+    
+    # Use ThreadPoolExecutor for parallel API calls
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        # Submit all tasks
+        future_to_auction = {
+            executor.submit(process_single_auction, auction_id, output_dir, i+1, total): auction_id
+            for i, auction_id in enumerate(auction_ids)
+        }
+        
+        # Process completed tasks as they finish
+        for future in as_completed(future_to_auction):
+            try:
+                index, metadata, error = future.result()
+                if error:
+                    errors.append(error)
+                if metadata:
+                    metadata_list.extend(metadata)
+                    images_saved += len(metadata)
+            except Exception as e:
+                thread_safe_print(f"✗ Unexpected error: {e}", file=sys.stderr)
+                errors.append(str(e))
+    
+    # Print error summary
+    if errors:
+        thread_safe_print(f"\n⚠ Encountered {len(errors)} errors during processing")
+        if len(errors) <= 10:
+            for err in errors:
+                thread_safe_print(f"  - {err}", file=sys.stderr)
+        else:
+            for err in errors[:10]:
+                thread_safe_print(f"  - {err}", file=sys.stderr)
+            thread_safe_print(f"  ... and {len(errors) - 10} more errors", file=sys.stderr)
     
     return images_saved
 
@@ -305,7 +383,9 @@ def main(
     output_dir: Optional[str] = None,
     kaggle_dataset: Optional[str] = None,
     kaggle_file: Optional[str] = None,
-    limit_auctions: int = 100
+    limit_auctions: int = 100,
+    upload_to_kaggle: bool = False,
+    max_workers: int = MAX_WORKERS
 ):
     """
     Main function to run the image saving pipeline.
@@ -356,6 +436,8 @@ def main(
     print(f"  Image format: {IMAGE_FORMAT}")
     print(f"  Output directory: {output_path}")
     print(f"  Batch size: {BATCH_SIZE}")
+    print(f"  Parallel workers: {max_workers}")
+    print(f"  Upload to Kaggle: {upload_to_kaggle}")
     print("=" * 60)
     
     # Process auctions in batches
@@ -375,11 +457,12 @@ def main(
         
         print(f"\n[Batch {batch_idx + 1}/{num_batches}] Processing auctions {start_idx + 1}-{end_idx}...")
         
-        # Process batch
-        images_saved = process_auction_batch(
+        # Process batch in parallel
+        images_saved = process_auction_batch_parallel(
             auction_ids=batch_auction_ids,
             output_dir=output_path,
-            metadata_list=metadata_list
+            metadata_list=metadata_list,
+            max_workers=max_workers
         )
         
         total_images_saved += images_saved
@@ -398,6 +481,46 @@ def main(
     if metadata_list:
         print(f"  Metadata file: {metadata_path}")
     print("=" * 60)
+    
+    # Upload to Kaggle if requested
+    if upload_to_kaggle:
+        print("\n" + "=" * 60)
+        print("Uploading to Kaggle...")
+        print("=" * 60)
+        try:
+            # Import here to avoid requiring kaggle for basic functionality
+            try:
+                from utils.kaggle_pipeline import KaggleDataPipeline
+            except ImportError:
+                # If running as script, add parent directory to path
+                parent_dir = Path(__file__).parent.parent
+                if str(parent_dir) not in sys.path:
+                    sys.path.insert(0, str(parent_dir))
+                from utils.kaggle_pipeline import KaggleDataPipeline
+            
+            kaggle_pipeline = KaggleDataPipeline()
+            
+            # Get username from API
+            username = kaggle_pipeline.api.get_config_value('username')
+            dataset_slug = f"{username}/raw-maxsold-images"
+            
+            kaggle_pipeline.upload_dataset(
+                dataset_dir=output_path,
+                dataset_slug=dataset_slug,
+                title="MaxSold Raw Images",
+                subtitle="Image data from MaxSold auctions",
+                description=f"Raw image data scraped from MaxSold auctions. Contains {total_images_saved} images from {len(auction_ids)} auctions.",
+                is_public=False,
+                version_notes=f"Updated with {total_images_saved} images from {len(auction_ids)} auctions on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+            )
+            
+            print("\n✓ Successfully uploaded to Kaggle!")
+            print(f"  Dataset: {dataset_slug}")
+            print("=" * 60)
+        except Exception as e:
+            print(f"\n✗ Failed to upload to Kaggle: {e}", file=sys.stderr)
+            print("  Images are still saved locally in:", output_path)
+            print("=" * 60)
 
 
 if __name__ == "__main__":
@@ -429,6 +552,17 @@ if __name__ == "__main__":
         default=100,
         help="Maximum number of auctions to process (default: 100)"
     )
+    parser.add_argument(
+        "--upload-to-kaggle",
+        action="store_true",
+        help="Upload results to Kaggle dataset 'raw_maxsold_images'"
+    )
+    parser.add_argument(
+        "--max-workers",
+        type=int,
+        default=MAX_WORKERS,
+        help=f"Number of parallel workers (default: {MAX_WORKERS})"
+    )
     
     args = parser.parse_args()
     
@@ -437,5 +571,7 @@ if __name__ == "__main__":
         output_dir=args.output_dir,
         kaggle_dataset=args.kaggle_dataset,
         kaggle_file=args.kaggle_file,
-        limit_auctions=args.limit
+        limit_auctions=args.limit,
+        upload_to_kaggle=args.upload_to_kaggle,
+        max_workers=args.max_workers
     )
