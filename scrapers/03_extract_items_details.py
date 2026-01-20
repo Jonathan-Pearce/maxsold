@@ -17,7 +17,7 @@ AUCTION_SEARCH_DEFAULT = f"data/raw_data/auction_search/auction_search_20251201.
 
 def fetch_auction_items(auction_id: str, timeout: int = 30) -> Any:
     """Fetch auction items from MaxSold API"""
-    params = {"auctionid": auction_id, "limit": 1000}
+    params = {"auctionid": auction_id, "limit": 2500}
     
     print(f"Fetching items for auction {auction_id}...")
     r = requests.get(API_URL, params=params, headers=HEADERS, timeout=timeout)

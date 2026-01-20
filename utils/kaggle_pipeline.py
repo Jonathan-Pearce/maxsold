@@ -247,7 +247,8 @@ class KaggleDataPipeline:
                     version_notes=version_notes,
                     quiet=False,
                     convert_to_csv=False,
-                    delete_old_versions=False
+                    delete_old_versions=False,
+                    dir_mode='tar'
                 )
                 print(f"✓ New version created successfully")
             else:

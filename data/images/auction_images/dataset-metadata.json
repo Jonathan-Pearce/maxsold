@@ -1,0 +1,20 @@
+{
+  "title": "MaxSold Raw Auction Images",
+  "id": "pearcej/raw-maxsold-images",
+  "subtitle": "Image data from MaxSold auctions",
+  "description": "Raw image data scraped from MaxSold auctions. Contains 15,713 images from 100 auctions. Images are organized by auction ID in subfolders, with filenames in format: auctionID_itemID_imageID.webp. All images are resized to 256px max dimension and saved in WebP format for efficient storage.",
+  "isPrivate": true,
+  "licenses": [
+    {
+      "name": "CC0-1.0"
+    }
+  ],
+  "keywords": [
+    "maxsold",
+    "auction",
+    "images",
+    "computer vision"
+  ],
+  "collaborators": [],
+  "data": []
+}

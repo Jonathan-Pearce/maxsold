@@ -29,7 +29,7 @@ API_URL = "https://maxsold.maxsold.com/msapi/auctions/items"
 MAX_IMAGE_DIMENSION = 256
 MAX_IMAGES_PER_ITEM = 1
 IMAGE_FORMAT = "webp"
-IMAGE_QUALITY = 85
+IMAGE_QUALITY = 60
 REQUEST_TIMEOUT = 30
 BATCH_SIZE = 10  # Process auctions in batches
 MAX_WORKERS = 10  # Number of parallel workers
@@ -46,7 +46,7 @@ def thread_safe_print(*args, **kwargs):
 
 def fetch_auction_items(auction_id: str, timeout: int = REQUEST_TIMEOUT) -> Optional[Dict[str, Any]]:
     """Fetch auction items from MaxSold API"""
-    params = {"auctionid": auction_id, "limit": 1000}
+    params = {"auctionid": auction_id, "limit": 2500}
     
     try:
         r = requests.get(API_URL, params=params, headers=HEADERS, timeout=timeout)
@@ -203,9 +203,9 @@ def process_single_auction(
             item_id = entry["item_id"]
             image_index = entry["image_index"]
             
-            # Create filename: auction_id/item_id_image_index.webp
+            # Create filename: auction_id/auctionID_itemID_imageID.webp
             auction_dir = output_dir / auction_id
-            filename = f"{item_id}_{image_index}.{IMAGE_FORMAT}"
+            filename = f"{auction_id}_{item_id}_{image_index}.{IMAGE_FORMAT}"
             output_path = auction_dir / filename
             
             # Skip if already exists
@@ -383,6 +383,7 @@ def main(
     output_dir: Optional[str] = None,
     kaggle_dataset: Optional[str] = None,
     kaggle_file: Optional[str] = None,
+    local_file: Optional[str] = None,
     limit_auctions: int = 100,
     upload_to_kaggle: bool = False,
     max_workers: int = MAX_WORKERS
@@ -395,6 +396,7 @@ def main(
     output_dir: Directory to save images
     kaggle_dataset: Kaggle dataset identifier (e.g., 'username/dataset-name')
     kaggle_file: File name in Kaggle dataset
+    local_file: Local parquet/csv file containing auction IDs
     limit_auctions: Maximum number of auctions to process
     """
     print("=" * 60)
@@ -405,11 +407,41 @@ def main(
     if output_dir:
         output_path = Path(output_dir)
     else:
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        output_path = Path(f"data/images/images_{timestamp}")
+        # Use 'auction_images' as the root folder for Kaggle uploads
+        output_path = Path("data/images/auction_images")
     
     # Load auction IDs
-    if kaggle_dataset and kaggle_file:
+    if local_file:
+        # Load from local file
+        local_path = Path(local_file)
+        if not local_path.exists():
+            print(f"Local file not found: {local_file}", file=sys.stderr)
+            return
+        
+        print(f"Loading auction IDs from local file: {local_file}")
+        df = pd.read_parquet(local_path) if local_path.suffix == '.parquet' else pd.read_csv(local_path)
+        
+        # Try different column names for auction ID
+        auction_col = None
+        for col in ['auction_id', 'amAuctionId', 'auctionId', 'auction']:
+            if col in df.columns:
+                auction_col = col
+                break
+        
+        if not auction_col:
+            print(f"Could not find auction ID column in {local_file}", file=sys.stderr)
+            print(f"Available columns: {', '.join(df.columns.tolist())}", file=sys.stderr)
+            return
+        
+        auction_ids = df[auction_col].dropna().unique().astype(str).tolist()
+        print(f"✓ Loaded {len(auction_ids)} unique auction IDs from {local_file}")
+        
+    elif kaggle_dataset:
+        # Default to item_enriched_details.parquet if no file specified
+        if not kaggle_file:
+            kaggle_file = "item_enriched_details.parquet"
+            print(f"Using default file: {kaggle_file}")
+        
         download_path = Path("data/raw_data/kaggle_temp")
         auction_ids = load_auction_ids_from_kaggle(
             dataset_name=kaggle_dataset,
@@ -418,7 +450,7 @@ def main(
             limit=limit_auctions
         )
     elif not auction_ids:
-        print("No auction IDs provided. Use --kaggle-dataset and --kaggle-file or provide auction IDs.", file=sys.stderr)
+        print("No auction IDs provided. Provide auction IDs directly, use --local-file, or use --kaggle-dataset.", file=sys.stderr)
         return
     
     if not auction_ids:
@@ -443,8 +475,8 @@ def main(
     # Process auctions in batches
     metadata_list = []
     total_images_saved = 0
-    # Use same timestamp as output directory for consistency
-    metadata_timestamp = output_path.name.replace('images_', '')
+    # Use timestamp for metadata filename
+    metadata_timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     metadata_path = output_path.parent / f"image_metadata_{metadata_timestamp}.parquet"
     
     # Split auction IDs into batches
@@ -516,6 +548,14 @@ def main(
             
             print("\n✓ Successfully uploaded to Kaggle!")
             print(f"  Dataset: {dataset_slug}")
+            
+            # Clean up local images after successful upload
+            print("\nCleaning up local images...")
+            import shutil
+            if output_path.exists():
+                shutil.rmtree(output_path)
+                print(f"✓ Deleted local images from: {output_path}")
+            
             print("=" * 60)
         except Exception as e:
             print(f"\n✗ Failed to upload to Kaggle: {e}", file=sys.stderr)
@@ -547,6 +587,10 @@ if __name__ == "__main__":
         help="File name in Kaggle dataset containing auction IDs"
     )
     parser.add_argument(
+        "--local-file",
+        help="Local parquet or CSV file containing auction IDs (e.g., data/bid_history.parquet)"
+    )
+    parser.add_argument(
         "--limit",
         type=int,
         default=100,
@@ -571,6 +615,7 @@ if __name__ == "__main__":
         output_dir=args.output_dir,
         kaggle_dataset=args.kaggle_dataset,
         kaggle_file=args.kaggle_file,
+        local_file=args.local_file,
         limit_auctions=args.limit,
         upload_to_kaggle=args.upload_to_kaggle,
         max_workers=args.max_workers

@@ -7,3 +7,4 @@ __pycache__/
 *.pyo
 data/models/bid_sequence_demo/
 *.pkl
+*.webp
