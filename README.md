@@ -48,6 +48,8 @@ pip install -r requirements.txt
 ## 📚 Documentation
 
 - 📁 **[PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)** - Project organization and Cookiecutter Data Science structure
+- 📁 **[STRUCTURE_GUIDE.md](STRUCTURE_GUIDE.md)** - Visual reference guide for the new structure
+- 🔄 **[docs/GITHUB_ACTIONS_MIGRATION.md](docs/GITHUB_ACTIONS_MIGRATION.md)** - Guide for updating GitHub Actions workflows
 - 📖 **[DOCKER_QUICKSTART.md](DOCKER_QUICKSTART.md)** - Docker quick reference card
 - 📘 **[DOCKER_SETUP.md](DOCKER_SETUP.md)** - Complete Docker setup guide
 - 🤖 **[src/models/README.md](src/models/README.md)** - Machine learning pipeline documentation

@@ -132,15 +132,19 @@ from src.models.scripts import train_model_minimal
 
 The old directories (`scrapers/`, `feature_engineering/`, `ml_pipeline/`) are maintained during the transition period for backward compatibility. Once all scripts and documentation are updated to use the new structure, these directories can be removed.
 
+**Important Note for GitHub Actions:**
+The repository has GitHub Actions workflows that reference old paths. See [docs/GITHUB_ACTIONS_MIGRATION.md](docs/GITHUB_ACTIONS_MIGRATION.md) for guidance on updating these workflows.
+
 ## Next Steps
 
 1. ✅ Create new directory structure
 2. ✅ Copy files to new locations
 3. ✅ Update documentation
 4. ⏳ Update import paths in Python files
-5. ⏳ Update Docker configuration if needed
-6. ⏳ Test all scripts with new structure
-7. ⏳ Remove old directories after verification
+5. ⏳ Update GitHub Actions workflows (see [docs/GITHUB_ACTIONS_MIGRATION.md](docs/GITHUB_ACTIONS_MIGRATION.md))
+6. ⏳ Update Docker configuration if needed
+7. ⏳ Test all scripts with new structure
+8. ⏳ Remove old directories after verification
 
 ## References
 
