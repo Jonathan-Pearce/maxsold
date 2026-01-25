@@ -93,7 +93,11 @@ def extract_auction_fields(data: Dict) -> Optional[Dict[str, any]]:
         postal_code = approx_location.get('postalCode')
         
         # Check if required fields exist
-        if am_auction_id is None or lat is None or lng is None:
+        if am_auction_id is None or lat is None or lng is None or postal_code is None:
+            return None
+        
+        # Enforce Canadian postal code (6 characters, excluding spaces)
+        if len(postal_code.replace(' ', '')) != 6:
             return None
         
         return {
