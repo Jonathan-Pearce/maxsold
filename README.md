@@ -2,6 +2,8 @@
 
 A comprehensive data project for scraping, processing, and analyzing MaxSold auction data with machine learning capabilities.
 
+**📁 This project follows the [Cookiecutter Data Science](https://drivendata.github.io/cookiecutter-data-science/) structure. See [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) for details.**
+
 ## 🐳 Docker Setup (Recommended)
 
 The easiest way to get started is using Docker with the provided helper scripts.
@@ -45,31 +47,53 @@ pip install -r requirements.txt
 
 ## 📚 Documentation
 
+- 📁 **[PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)** - Project organization and Cookiecutter Data Science structure
+- 📁 **[STRUCTURE_GUIDE.md](STRUCTURE_GUIDE.md)** - Visual reference guide for the new structure
+- 🔄 **[docs/GITHUB_ACTIONS_MIGRATION.md](docs/GITHUB_ACTIONS_MIGRATION.md)** - Guide for updating GitHub Actions workflows
 - 📖 **[DOCKER_QUICKSTART.md](DOCKER_QUICKSTART.md)** - Docker quick reference card
 - 📘 **[DOCKER_SETUP.md](DOCKER_SETUP.md)** - Complete Docker setup guide
-- 🤖 **[ml_pipeline/README.md](ml_pipeline/README.md)** - Machine learning pipeline documentation
+- 🤖 **[src/models/README.md](src/models/README.md)** - Machine learning pipeline documentation
+- 📊 **[src/README.md](src/README.md)** - Source code overview
 
 ## 🔗 MaxSold Resources
 
 https://support.maxsold.com/hc/en-us/articles/203144054-How-do-bid-increments-work
 https://support.maxsold.com/hc/en-us/articles/203144064-What-does-soft-close-mean
 
+## 📂 Project Structure
+
+This project follows the Cookiecutter Data Science structure:
+
+```
+├── data/               <- Data directory (raw, interim, processed, external)
+├── models/             <- Trained models
+├── notebooks/          <- Jupyter notebooks for exploration
+├── references/         <- Reference materials and data dictionaries
+├── reports/            <- Generated analysis and figures
+├── src/                <- Source code
+│   ├── data/          <- Data collection scripts (scrapers)
+│   ├── features/      <- Feature engineering
+│   ├── models/        <- Model training and prediction
+│   └── visualization/ <- Visualization scripts
+└── docs/              <- Documentation
+```
+
+See [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) for complete details and migration guide.
+
 ## Example terminal commands
 
-```
-python3 /workspaces/maxsold/scrapers/maxsold_bid_history.py "https://maxsold.com/listing/7436058/" > bids.json
-```
+```bash
+# Data collection
+python src/data/01_extract_auction_search.py
+python src/data/02_extract_auction_details.py
+python src/data/monthly_scraping_pipeline.py
 
-```
-python3 /workspaces/maxsold/scrapers/maxsold_auction_metadata.py "https://maxsold.com/auction/103482/date-times" ./auction_103482.json
-```
+# Feature engineering
+python src/features/auction_features.py
+python src/features/final_dataset_builder.py
 
-```
-python3 /workspaces/maxsold/scrapers/extract_bidgallery_links.py "https://maxsold.com/auction/103482/bidgallery" ./auction_103482_links.json
-```
-
-```
-python3 /workspaces/maxsold/scrapers/extract_toronto_past_auctions.py "https://maxsold.com/canada/ontario/toronto/past" ./toronto_past_auctions.json
+# Model training
+python src/models/scripts/train_model_minimal.py
 ```
 
 

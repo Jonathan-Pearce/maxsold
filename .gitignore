@@ -1,9 +1,46 @@
+# Data files (following Cookiecutter DS best practices - don't commit data)
+data/raw/*
+data/interim/*
+data/processed/*
+data/external/*
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+!data/processed/.gitkeep
+!data/external/.gitkeep
+
+# Legacy data paths
 data/final_data/item_details/*.parquet
 data/*.parquet
 *.parquet
 data/raw_data/kaggle_temp/
+
+# Python cache
 __pycache__/
 *.pyc
 *.pyo
+
+# Models (large files)
+models/*
+!models/.gitkeep
 data/models/bid_sequence_demo/
 *.pkl
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Reports and figures (generated content)
+reports/figures/*
+!reports/figures/.gitkeep
+
+# Environment files
+.env
+.venv
+venv/
+ENV/
+
+# IDE settings
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
